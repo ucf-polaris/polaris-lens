@@ -66,11 +66,11 @@ namespace Mapbox.Unity.Location
 #endif
 			Accuracy = 10,
 #if !ENABLE_WINMD_SUPPORT
-			[Description("user heading [°]")]
+			[Description("user heading [Â°]")]
 #endif
 			UserHeading = 11,
 #if !ENABLE_WINMD_SUPPORT
-			[Description("device orientation [°]")]
+			[Description("device orientation [Â°]")]
 #endif
 			DeviceOrientation = 12,
 #if !ENABLE_WINMD_SUPPORT

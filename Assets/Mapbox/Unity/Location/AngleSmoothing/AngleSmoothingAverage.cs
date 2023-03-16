@@ -16,7 +16,7 @@ namespace Mapbox.Unity.Location
 		public override double Calculate()
 		{
 
-			// calc mean heading taking into account that eg 355° and 5° should result in 0° and not 180°
+			// calc mean heading taking into account that eg 355Â° and 5Â° should result in 0Â° and not 180Â°
 			// refs:
 			// https://en.wikipedia.org/wiki/Mean_of_circular_quantities
 			// https://rosettacode.org/wiki/Averages/Mean_angle

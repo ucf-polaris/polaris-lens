@@ -1,0 +1,4 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" xsi="http://www.w3.org/2001/XMLSchema-instance" engine="UnityEngine.UIElements" editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+    <Style src="project://database/Assets/POLARIS/MainUSS.uss?fileID=7433441132597879392&amp;guid=c0cbfe978347ae54f841f39e05b3b78e&amp;type=3#MainUSS" />
+    <ui:Button text="Go into AR" display-tooltip-when-elided="true" name="SwitchButton" class="switchButton" style="right: 5%; top: 0; overflow: hidden; min-height: auto; padding-top: 40px; padding-bottom: 40px; padding-left: 40px; padding-right: 40px; font-size: 40px; width: 25%; height: 15%;" />
+</ui:UXML>
