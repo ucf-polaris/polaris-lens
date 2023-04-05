@@ -1,0 +1,7 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" xsi="http://www.w3.org/2001/XMLSchema-instance" engine="UnityEngine.UIElements" editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+    <Style src="project://database/Assets/POLARIS/MainUSS.uss?fileID=7433441132597879392&amp;guid=c0cbfe978347ae54f841f39e05b3b78e&amp;type=3#MainUSS" />
+    <ui:VisualElement style="top: 300px; left: 5%; background-color: rgba(187, 187, 187, 0); align-items: flex-start; justify-content: flex-start; flex-direction: column; flex-wrap: nowrap; flex-basis: auto; color: rgb(255, 255, 255); position: absolute;">
+        <ui:Label text="Routing to Unknown" display-tooltip-when-elided="true" name="RoutingDest" class="RoutingDest" />
+        <ui:Label text="n/a min, n/a miles" display-tooltip-when-elided="true" enable-rich-text="true" name="RoutingInfos" class="RoutingInfos" />
+    </ui:VisualElement>
+</ui:UXML>

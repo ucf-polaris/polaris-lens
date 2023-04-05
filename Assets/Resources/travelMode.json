@@ -1,0 +1,46 @@
+{
+      "attributeParameterValues": [
+        {
+          "attributeName": "Avoid Private Roads",
+          "parameterName": "Restriction Usage",
+          "value": "AVOID_MEDIUM"
+        },
+        {
+          "attributeName": "Walking",
+          "parameterName": "Restriction Usage",
+          "value": "PROHIBITED"
+        },
+        {
+          "attributeName": "Preferred for Pedestrians",
+          "parameterName": "Restriction Usage",
+          "value": "PREFER_LOW"
+        },
+        {
+          "attributeName": "WalkTime",
+          "parameterName": "Walking Speed (km/h)",
+          "value": 5
+        },
+        {
+          "attributeName": "Avoid Roads Unsuitable for Pedestrians",
+          "parameterName": "Restriction Usage",
+          "value": "AVOID_HIGH"
+        }
+      ],
+      "description": "Follows paths and roads that allow pedestrian traffic and finds solutions that optimize travel distance.",
+      "distanceAttributeName": "Kilometers",
+      "id": "yFuMFwIYblqKEefX",
+      "impedanceAttributeName": "Kilometers",
+      "name": "Walking Distance",
+      "restrictionAttributeNames": [
+        "Avoid Private Roads",
+        "Avoid Roads Unsuitable for Pedestrians",
+        "Preferred for Pedestrians",
+        "Walking"
+      ],
+      "simplificationTolerance": 2,
+      "simplificationToleranceUnits": "esriMeters",
+      "timeAttributeName": "WalkTime",
+      "type": "WALK",
+      "useHierarchy": false,
+      "uturnAtJunctions": "esriNFSBAllowBacktrack"
+    }

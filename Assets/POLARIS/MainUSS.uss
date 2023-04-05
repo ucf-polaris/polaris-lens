@@ -23,5 +23,82 @@
 }
 
 .BuildingTopLabel {
-    translate: -50% 0;
+    translate: -50% -100%;
+}
+
+.SearchBox {
+    -unity-font: resource('FlatSkin/Font/Roboto-Light');
+    background-color: rgba(32, 32, 32, 255);
+    border-left-color: rgba(33, 66, 131, 255);
+    border-right-color: rgba(33, 66, 131, 255);
+    border-top-color: rgba(33, 66, 131, 255);
+    border-bottom-color: rgba(33, 66, 131, 255);
+    border-left-width: 5px;
+    border-right-width: 5px;
+    border-top-width: 5px;
+    border-bottom-width: 5px;
+    border-top-left-radius: 10px;
+    border-bottom-left-radius: 10px;
+    border-top-right-radius: 10px;
+    border-bottom-right-radius: 10px;
+    align-items: center;
+    justify-content: center;
+    flex-basis: 80%;
+    display: flex;
+    font-size: 20px;
+}
+
+.SearchDiv {
+    border-left-color: rgba(33, 66, 131, 255);
+    border-right-color: rgba(33, 66, 131, 255);
+    border-top-color: rgba(33, 66, 131, 255);
+    border-bottom-color: rgba(33, 66, 131, 255);
+    border-left-width: 5px;
+    border-right-width: 5px;
+    border-top-width: 5px;
+    border-bottom-width: 5px;
+    border-top-left-radius: 10px;
+    border-bottom-left-radius: 10px;
+    border-top-right-radius: 10px;
+    border-bottom-right-radius: 10px;
+    background-color: rgba(33, 66, 131, 255);
+    padding-left: 0;
+    padding-right: 0;
+    padding-top: 0;
+    padding-bottom: 0;
+    margin-left: 0;
+    margin-right: 0;
+    margin-top: 0;
+    margin-bottom: 0;
+    width: 60%;
+    left: 50px;
+    top: 80px;
+    height: 100%;
+}
+
+.SearchButton {
+    background-color: rgba(56, 56, 56, 255);
+    -unity-font: resource('FlatSkin/Font/Roboto-LightItalic');
+    font-size: 24px;
+    flex-basis: 17%;
+    color: rgba(255, 255, 255, 255);
+    margin-left: 4px;
+    margin-right: 4px;
+    margin-top: 4px;
+    margin-bottom: 4px;
+    padding-left: 0;
+    padding-right: 0;
+    padding-top: 0;
+    padding-bottom: 0;
+}
+
+.RoutingDest {
+    -unity-font: resource('FlatSkin/Font/Roboto-LightItalic');
+    font-size: 50px;
+}
+
+.RoutingInfos {
+    font-size: 40px;
+    -unity-font: resource('FlatSkin/Font/Roboto-Bold');
+    -unity-font-style: normal;
 }

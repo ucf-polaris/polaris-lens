@@ -1,0 +1,7 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" xsi="http://www.w3.org/2001/XMLSchema-instance" engine="UnityEngine.UIElements" editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+    <Style src="project://database/Assets/POLARIS/MainUSS.uss?fileID=7433441132597879392&amp;guid=c0cbfe978347ae54f841f39e05b3b78e&amp;type=3#MainUSS" />
+    <ui:VisualElement class="SearchDiv" style="flex-wrap: nowrap; flex-direction: row;">
+        <ui:TextField picking-mode="Ignore" text="Where do you want to go?" name="SearchBox" password="false" focusable="true" class="SearchBox" style="flex-basis: 85%;" />
+        <ui:Button text="Find" display-tooltip-when-elided="true" name="SearchButton" class="SearchButton" style="flex-basis: 12%;" />
+    </ui:VisualElement>
+</ui:UXML>

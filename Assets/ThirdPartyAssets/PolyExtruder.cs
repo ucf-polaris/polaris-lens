@@ -358,10 +358,10 @@ public class PolyExtruder : MonoBehaviour
             //
 			
 			// create surrounding GameObject with required components
-			GameObject goS = new GameObject();
+			GameObject goS = new GameObject("sur_" + this.prismName);
 			goS.transform.parent = this.transform;
-			goS.name = "surround_" + this.prismName;
 			MeshFilter mfS = goS.AddComponent<MeshFilter>();
+			if(this.isUsingColliders) goS.AddComponent<MeshCollider>();
 			surroundMeshRenderer = goS.AddComponent<MeshRenderer>();
 			surroundMeshRenderer.material = new Material(Shader.Find("Standard"));
 			
@@ -429,10 +429,10 @@ public class PolyExtruder : MonoBehaviour
 			// assign indices and vertices and create mesh
 			redrawMesh(this.surroundMesh, verticesS, indicesS);
 
-            /*
+            
             // reset mesh collider after (re-)creation (not needed right now since no mesh collider is attached)
 			goS.GetComponent<MeshCollider>().sharedMesh = this.surroundMesh;
-            */
+            
 
             /*
 			// generate a simple UV map
@@ -449,6 +449,7 @@ public class PolyExtruder : MonoBehaviour
             {
                 goB.GetComponent<MeshCollider>().enabled = false;
                 goT.GetComponent<MeshCollider>().enabled = true;
+                goS.GetComponent<MeshCollider>().enabled = true;
             }
         }
 

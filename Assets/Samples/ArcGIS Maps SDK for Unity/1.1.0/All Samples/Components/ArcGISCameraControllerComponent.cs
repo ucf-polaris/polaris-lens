@@ -31,71 +31,71 @@ namespace Esri.ArcGISMapsSDK.Samples.Components
 	[AddComponentMenu("ArcGIS Maps SDK/Samples/ArcGIS Camera Controller")]
 	public class ArcGISCameraControllerComponent : MonoBehaviour
 	{
-		private ArcGISMapComponent arcGISMapComponent;
-		private HPTransform hpTransform;
+		private ArcGISMapComponent _arcGisMapComponent;
+		private HPTransform _hpTransform;
 
 #if ENABLE_INPUT_SYSTEM
 		public ArcGISCameraControllerComponentActions CameraActions;
-		private InputAction UpControls;
-		private InputAction ForwardControls;
-		private InputAction RightControls;
+		private InputAction _upControls;
+		private InputAction _forwardControls;
+		private InputAction _rightControls;
 #endif
 
-		private float TranslationSpeed = 0.0f;
-		private float RotationSpeed = 100.0f;
-		private double MouseScrollSpeed = 0.1f;
+		private float _translationSpeed = 0.0f;
+		private const float RotationSpeed = 100.0f;
+		private const double MouseScrollSpeed = 0.1f;
 
-		private static double MaxCameraHeight = 11000000.0;
-		private static double MinCameraHeight = 1.8;
-		private static double MaxCameraLatitude = 85.0;
+		private const double MaxCameraHeight = 2000.0;
+		private const double MinCameraHeight = 1.8;
+		private const double MaxCameraLatitude = 85.0;
 
-		private double3 lastCartesianPoint = double3.zero;
-		private ArcGISPoint lastArcGISPoint = new ArcGISPoint(0, 0, 0, ArcGISSpatialReference.WGS84());
-		private double lastDotVC = 0.0f;
-		private bool firstDragStep = true;
+		private double3 _lastCartesianPoint = double3.zero;
+		private ArcGISPoint _lastArcGisPoint = new ArcGISPoint(0, 0, 0, ArcGISSpatialReference.WGS84());
+		private double _lastDotVc = 0.0f;
+		private bool _firstDragStep = true;
 
-		private Vector3 lastMouseScreenPosition;
-		private bool firstOnFocus = true;
+		private Vector3 _lastMouseScreenPosition;
+		private bool _firstOnFocus = true;
 
 		public double MaxSpeed = 2000000.0;
 		public double MinSpeed = 1000.0;
 
 		private void Awake()
 		{
-			lastMouseScreenPosition = GetMousePosition();
+			_lastMouseScreenPosition = GetMousePosition();
 
 			Application.focusChanged += FocusChanged;
 
 #if ENABLE_INPUT_SYSTEM
 			CameraActions = new ArcGISCameraControllerComponentActions();
-			UpControls = CameraActions.Move.Up;
-			ForwardControls = CameraActions.Move.Forward;
-			RightControls = CameraActions.Move.Right;
+			_upControls = CameraActions.Move.Up;
+			_forwardControls = CameraActions.Move.Forward;
+			_rightControls = CameraActions.Move.Right;
 #endif
 		}
 
-		void OnEnable()
+		private void OnEnable()
 		{
-			arcGISMapComponent = gameObject.GetComponentInParent<ArcGISMapComponent>();
-			hpTransform = GetComponent<HPTransform>();
+			_arcGisMapComponent = gameObject.GetComponentInParent<ArcGISMapComponent>();
+			_hpTransform = GetComponent<HPTransform>();
 
 #if ENABLE_INPUT_SYSTEM
-			UpControls.Enable();
-			ForwardControls.Enable();
-			RightControls.Enable();
+			_upControls.Enable();
+			_forwardControls.Enable();
+			_rightControls.Enable();
 #endif
 		}
 
 		private void OnDisable()
 		{
 #if ENABLE_INPUT_SYSTEM
-			UpControls.Disable();
-			ForwardControls.Disable();
-			RightControls.Disable();
+			_upControls.Disable();
+			_forwardControls.Disable();
+			_rightControls.Disable();
 #endif
 		}
 
-		private Vector3 GetMousePosition()
+		private static Vector3 GetMousePosition()
 		{
 #if ENABLE_INPUT_SYSTEM
 			return Mouse.current.position.ReadValue();
@@ -106,16 +106,16 @@ namespace Esri.ArcGISMapsSDK.Samples.Components
 
 		private double3 GetTotalTranslation()
 		{
-			var forward = hpTransform.Forward.ToDouble3();
-			var right = hpTransform.Right.ToDouble3();
-			var up = hpTransform.Up.ToDouble3();
+			var forward = _hpTransform.Forward.ToDouble3();
+			var right = _hpTransform.Right.ToDouble3();
+			var up = _hpTransform.Up.ToDouble3();
 
 			var totalTranslation = double3.zero;
 
 #if ENABLE_INPUT_SYSTEM
-			up *= UpControls.ReadValue<float>() * TranslationSpeed * Time.deltaTime;
-			right *= RightControls.ReadValue<float>() * TranslationSpeed * Time.deltaTime;
-			forward *= ForwardControls.ReadValue<float>() * TranslationSpeed * Time.deltaTime;
+			up *= _upControls.ReadValue<float>() * _translationSpeed * Time.deltaTime;
+			right *= _rightControls.ReadValue<float>() * _translationSpeed * Time.deltaTime;
+			forward *= _forwardControls.ReadValue<float>() * _translationSpeed * Time.deltaTime;
 			totalTranslation += up + right + forward;
 #else
 
@@ -136,7 +136,7 @@ namespace Esri.ArcGISMapsSDK.Samples.Components
 			return totalTranslation;
 		}
 
-		private float GetMouseScollValue()
+		private static float GetMouseScrollValue()
 		{
 #if ENABLE_INPUT_SYSTEM
 			return Mouse.current.scroll.ReadValue().y;
@@ -145,7 +145,7 @@ namespace Esri.ArcGISMapsSDK.Samples.Components
 #endif
 		}
 
-		private bool IsMouseLeftClicked()
+		private static bool IsMouseLeftClicked()
 		{
 #if ENABLE_INPUT_SYSTEM
 			return Mouse.current.leftButton.ReadValue() == 1;
@@ -154,7 +154,7 @@ namespace Esri.ArcGISMapsSDK.Samples.Components
 #endif
 		}
 
-		private bool IsMouseRightClicked()
+		private static bool IsMouseRightClicked()
 		{
 #if ENABLE_INPUT_SYSTEM
 			return Mouse.current.rightButton.ReadValue() == 1;
@@ -163,25 +163,23 @@ namespace Esri.ArcGISMapsSDK.Samples.Components
 #endif
 		}
 
-		void Start()
+		private void Start()
 		{
-			if (arcGISMapComponent == null)
-			{
-				Debug.LogError("An ArcGISMapComponent could not be found. Please make sure this GameObject is a child of a GameObject with an ArcGISMapComponent attached");
+			if (_arcGisMapComponent != null) return;
 
-				enabled = false;
-				return;
-			}
+			Debug.LogError("An ArcGISMapComponent could not be found. Please make sure this GameObject is a child of a GameObject with an ArcGISMapComponent attached");
+
+			enabled = false;
 		}
 
-		void Update()
+		private void Update()
 		{
-			if (arcGISMapComponent == null)
+			if (_arcGisMapComponent == null)
 			{
 				return;
 			}
 
-			if (arcGISMapComponent.View.SpatialReference == null)
+			if (_arcGisMapComponent.View.SpatialReference == null)
 			{
 				// Not functional until we have a spatial reference
 				return;
@@ -197,16 +195,23 @@ namespace Esri.ArcGISMapsSDK.Samples.Components
 		/// </summary>
 		private void UpdateNavigation()
 		{
-			var altitude = arcGISMapComponent.View.AltitudeAtCartesianPosition(Position);
+			var altitude = _arcGisMapComponent.View.AltitudeAtCartesianPosition(Position);
 			UpdateSpeed(altitude);
 
 			var totalTranslation = GetTotalTranslation();
 
-			if (GetMouseScollValue() != 0.0)
+			var scrollValue = GetMouseScrollValue();
+			if (scrollValue != 0.0)
 			{
 				var towardsMouse = GetMouseRayCastDirection();
-				var delta = Math.Max(1.0, (altitude - MinCameraHeight)) * MouseScrollSpeed * GetMouseScollValue();
+				var delta = MouseScrollSpeed * scrollValue;
 				totalTranslation += towardsMouse * delta;
+
+				if (altitude + totalTranslation.y < MinCameraHeight
+						|| altitude + totalTranslation.y > MaxCameraHeight)
+					totalTranslation.y = 0;
+
+				print("ZOOM DELTA: " + delta);
 			}
 
 			if (!totalTranslation.Equals(double3.zero))
@@ -226,28 +231,28 @@ namespace Esri.ArcGISMapsSDK.Samples.Components
 			var cameraPosition = Position;
 			var cameraRotation = Rotation;
 
-			if (arcGISMapComponent.MapType == GameEngine.Map.ArcGISMapType.Global)
+			if (_arcGisMapComponent.MapType == GameEngine.Map.ArcGISMapType.Global)
 			{
-				var spheroidData = arcGISMapComponent.View.SpatialReference.SpheroidData;
-				var nextArcGISPoint = arcGISMapComponent.View.WorldToGeographic(movDir + cameraPosition);
+				var spheroidData = _arcGisMapComponent.View.SpatialReference.SpheroidData;
+				var nextArcGISPoint = _arcGisMapComponent.View.WorldToGeographic(movDir + cameraPosition);
 
 				if (nextArcGISPoint.Z > MaxCameraHeight)
 				{
 					var point = new ArcGISPoint(nextArcGISPoint.X, nextArcGISPoint.Y, MaxCameraHeight, nextArcGISPoint.SpatialReference);
-					cameraPosition = arcGISMapComponent.View.GeographicToWorld(point);
+					cameraPosition = _arcGisMapComponent.View.GeographicToWorld(point);
 				}
 				else if (nextArcGISPoint.Z < MinCameraHeight)
 				{
 					var point = new ArcGISPoint(nextArcGISPoint.X, nextArcGISPoint.Y, MinCameraHeight, nextArcGISPoint.SpatialReference);
-					cameraPosition = arcGISMapComponent.View.GeographicToWorld(point);
+					cameraPosition = _arcGisMapComponent.View.GeographicToWorld(point);
 				}
 				else
 				{
 					cameraPosition += movDir * distance;
 				}
 
-				var newENUReference = arcGISMapComponent.View.GetENUReference(cameraPosition);
-				var oldENUReference = arcGISMapComponent.View.GetENUReference(Position);
+				var newENUReference = _arcGisMapComponent.View.GetENUReference(cameraPosition);
+				var oldENUReference = _arcGisMapComponent.View.GetENUReference(Position);
 
 				cameraRotation = math.mul(math.inverse(oldENUReference.GetRotation()), cameraRotation);
 				cameraRotation = math.mul(newENUReference.GetRotation(), cameraRotation);
@@ -261,7 +266,7 @@ namespace Esri.ArcGISMapsSDK.Samples.Components
 			Rotation = cameraRotation;
 		}
 
-		void OnTransformParentChanged()
+		private void OnTransformParentChanged()
 		{
 			OnEnable();
 		}
@@ -271,21 +276,24 @@ namespace Esri.ArcGISMapsSDK.Samples.Components
 			var cartesianPosition = Position;
 			var cartesianRotation = Rotation;
 
-			var deltaMouse = GetMousePosition() - lastMouseScreenPosition;
+			var deltaMouse = GetMousePosition() - _lastMouseScreenPosition;
 
-			if (!firstOnFocus)
+			if (!_firstOnFocus)
 			{
 				if (IsMouseLeftClicked())
 				{
 					if (deltaMouse != Vector3.zero)
 					{
-						if (arcGISMapComponent.MapType == GameEngine.Map.ArcGISMapType.Global)
+						switch (_arcGisMapComponent.MapType)
 						{
-							GlobalDragging(ref cartesianPosition, ref cartesianRotation);
-						}
-						else if (arcGISMapComponent.MapType == GameEngine.Map.ArcGISMapType.Local)
-						{
-							LocalDragging(ref cartesianPosition);
+							case GameEngine.Map.ArcGISMapType.Global:
+								GlobalDragging(ref cartesianPosition, ref cartesianRotation);
+								break;
+							case GameEngine.Map.ArcGISMapType.Local:
+								LocalDragging(ref cartesianPosition);
+								break;
+							default:
+								throw new ArgumentOutOfRangeException();
 						}
 					}
 				}
@@ -298,18 +306,18 @@ namespace Esri.ArcGISMapsSDK.Samples.Components
 				}
 				else
 				{
-					firstDragStep = true;
+					_firstDragStep = true;
 				}
 			}
 			else
 			{
-				firstOnFocus = false;
+				_firstOnFocus = false;
 			}
 
 			Position = cartesianPosition;
 			Rotation = cartesianRotation;
 
-			lastMouseScreenPosition = GetMousePosition();
+			_lastMouseScreenPosition = GetMousePosition();
 		}
 
 		private void LocalDragging(ref double3 cartesianPosition)
@@ -317,66 +325,64 @@ namespace Esri.ArcGISMapsSDK.Samples.Components
 			var worldRayDir = GetMouseRayCastDirection();
 			var isIntersected = Geometry.RayPlaneIntersection(cartesianPosition, worldRayDir, double3.zero, math.up(), out var intersection);
 
-			if (isIntersected && intersection >= 0)
-			{
-				double3 cartesianCoord = cartesianPosition + worldRayDir * intersection;
+			if (!isIntersected || !(intersection >= 0)) return;
+			
+			var cartesianCoord = cartesianPosition + worldRayDir * intersection;
 
-				var delta = firstDragStep ? double3.zero : lastCartesianPoint - cartesianCoord;
+			var delta = _firstDragStep ? double3.zero : _lastCartesianPoint - cartesianCoord;
 
-				lastCartesianPoint = cartesianCoord + delta;
-				cartesianPosition += delta;
-				firstDragStep = false;
-			}
+			_lastCartesianPoint = cartesianCoord + delta;
+			cartesianPosition += delta;
+			_firstDragStep = false;
 		}
 
 		private void GlobalDragging(ref double3 cartesianPosition, ref quaternion cartesianRotation)
 		{
-			var spheroidData = arcGISMapComponent.View.SpatialReference.SpheroidData;
+			var spheroidData = _arcGisMapComponent.View.SpatialReference.SpheroidData;
 			var worldRayDir = GetMouseRayCastDirection();
 			var isIntersected = Geometry.RayEllipsoidIntersection(spheroidData, cartesianPosition, worldRayDir, 0, out var intersection);
 
-			if (isIntersected && intersection >= 0)
-			{
-				var oldENUReference = arcGISMapComponent.View.GetENUReference(cartesianPosition);
+			if (!isIntersected || !(intersection >= 0)) return;
+			
+			var oldENUReference = _arcGisMapComponent.View.GetENUReference(cartesianPosition);
 
-				var geoPosition = arcGISMapComponent.View.WorldToGeographic(cartesianPosition);
+			var geoPosition = _arcGisMapComponent.View.WorldToGeographic(cartesianPosition);
 
-				double3 cartesianCoord = cartesianPosition + worldRayDir * intersection;
-				var currentGeoPosition = arcGISMapComponent.View.WorldToGeographic(cartesianCoord);
+			var cartesianCoord = cartesianPosition + worldRayDir * intersection;
+			var currentGeoPosition = _arcGisMapComponent.View.WorldToGeographic(cartesianCoord);
 
-				var visibleHemisphereDir = math.normalize(arcGISMapComponent.View.GeographicToWorld(new ArcGISPoint(geoPosition.X, 0, 0, geoPosition.SpatialReference)));
+			var visibleHemisphereDir = math.normalize(_arcGisMapComponent.View.GeographicToWorld(new ArcGISPoint(geoPosition.X, 0, 0, geoPosition.SpatialReference)));
 
-				double dotVC = math.dot(cartesianCoord, visibleHemisphereDir);
-				lastDotVC = firstDragStep ? dotVC : lastDotVC;
+			var dotVC = math.dot(cartesianCoord, visibleHemisphereDir);
+			_lastDotVc = _firstDragStep ? dotVC : _lastDotVc;
 
-				double deltaX = firstDragStep ? 0 : lastArcGISPoint.X - currentGeoPosition.X;
-				double deltaY = firstDragStep ? 0 : lastArcGISPoint.Y - currentGeoPosition.Y;
+			var deltaX = _firstDragStep ? 0 : _lastArcGisPoint.X - currentGeoPosition.X;
+			var deltaY = _firstDragStep ? 0 : _lastArcGisPoint.Y - currentGeoPosition.Y;
 
-				deltaY = Math.Sign(dotVC) != Math.Sign(lastDotVC) ? 0 : deltaY;
-
-
-				lastArcGISPoint = new ArcGISPoint(currentGeoPosition.X + deltaX, currentGeoPosition.Y + deltaY, lastArcGISPoint.Z, lastArcGISPoint.SpatialReference);
+			deltaY = Math.Sign(dotVC) != Math.Sign(_lastDotVc) ? 0 : deltaY;
 
 
-				var YVal = geoPosition.Y + (dotVC <= 0 ? -deltaY : deltaY);
-				YVal = Math.Abs(YVal) < MaxCameraLatitude ? YVal : (YVal > 0 ? MaxCameraLatitude : -MaxCameraLatitude);
+			_lastArcGisPoint = new ArcGISPoint(currentGeoPosition.X + deltaX, currentGeoPosition.Y + deltaY, _lastArcGisPoint.Z, _lastArcGisPoint.SpatialReference);
 
-				geoPosition = new ArcGISPoint(geoPosition.X + deltaX, YVal, geoPosition.Z, geoPosition.SpatialReference);
 
-				cartesianPosition = arcGISMapComponent.View.GeographicToWorld(geoPosition);
+			var YVal = geoPosition.Y + (dotVC <= 0 ? -deltaY : deltaY);
+			YVal = Math.Abs(YVal) < MaxCameraLatitude ? YVal : (YVal > 0 ? MaxCameraLatitude : -MaxCameraLatitude);
 
-				var newENUReference = arcGISMapComponent.View.GetENUReference(cartesianPosition);
-				cartesianRotation = math.mul(math.inverse(oldENUReference.GetRotation()), cartesianRotation);
-				cartesianRotation = math.mul(newENUReference.GetRotation(), cartesianRotation);
+			geoPosition = new ArcGISPoint(geoPosition.X + deltaX, YVal, geoPosition.Z, geoPosition.SpatialReference);
 
-				firstDragStep = false;
-				lastDotVC = dotVC;
-			}
+			cartesianPosition = _arcGisMapComponent.View.GeographicToWorld(geoPosition);
+
+			var newENUReference = _arcGisMapComponent.View.GetENUReference(cartesianPosition);
+			cartesianRotation = math.mul(math.inverse(oldENUReference.GetRotation()), cartesianRotation);
+			cartesianRotation = math.mul(newENUReference.GetRotation(), cartesianRotation);
+
+			_firstDragStep = false;
+			_lastDotVc = dotVC;
 		}
 
 		private void RotateAround(ref double3 cartesianPosition, ref quaternion cartesianRotation, Vector3 deltaMouse)
 		{
-			var ENUReference = arcGISMapComponent.View.GetENUReference(cartesianPosition).ToMatrix4x4();
+			var ENUReference = _arcGisMapComponent.View.GetENUReference(cartesianPosition).ToMatrix4x4();
 
 			Vector2 angles;
 
@@ -395,9 +401,9 @@ namespace Esri.ArcGISMapsSDK.Samples.Components
 
 		private double3 GetMouseRayCastDirection()
 		{
-			var forward = hpTransform.Forward.ToDouble3();
-			var right = hpTransform.Right.ToDouble3();
-			var up = hpTransform.Up.ToDouble3();
+			var forward = _hpTransform.Forward.ToDouble3();
+			var right = _hpTransform.Right.ToDouble3();
+			var up = _hpTransform.Up.ToDouble3();
 
 			var camera = gameObject.GetComponent<Camera>();
 
@@ -422,14 +428,14 @@ namespace Esri.ArcGISMapsSDK.Samples.Components
 
 		private void FocusChanged(bool isFocus)
 		{
-			firstOnFocus = true;
+			_firstOnFocus = true;
 		}
 
 		private void UpdateSpeed(double height)
 		{
 			var msMaxSpeed = (MaxSpeed * 1000) / 3600;
 			var msMinSpeed = (MinSpeed * 1000) / 3600;
-			TranslationSpeed = (float)(Math.Pow(Math.Min((height / 100000.0), 1), 2.0) * (msMaxSpeed - msMinSpeed) + msMinSpeed);
+			_translationSpeed = (float)(Math.Pow(Math.Min((height / 100000.0), 1), 2.0) * (msMaxSpeed - msMinSpeed) + msMinSpeed);
 		}
 
 		#region Properties
@@ -440,11 +446,11 @@ namespace Esri.ArcGISMapsSDK.Samples.Components
 		{
 			get
 			{
-				return hpTransform.UniversePosition;
+				return _hpTransform.UniversePosition;
 			}
 			set
 			{
-				hpTransform.UniversePosition = value;
+				_hpTransform.UniversePosition = value;
 			}
 		}
 
@@ -455,11 +461,11 @@ namespace Esri.ArcGISMapsSDK.Samples.Components
 		{
 			get
 			{
-				return hpTransform.UniverseRotation;
+				return _hpTransform.UniverseRotation;
 			}
 			set
 			{
-				hpTransform.UniverseRotation = value;
+				_hpTransform.UniverseRotation = value;
 			}
 		}
 

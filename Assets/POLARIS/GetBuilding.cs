@@ -40,7 +40,7 @@ namespace POLARIS
             _uiDocLabel.ToggleInClassList("BuildingTopLabel");
         }
 
-        private static string ToTitleCase(string stringToConvert)
+        public static string ToTitleCase(string stringToConvert)
         {
             return new string(ToTitleCaseEnumerable(stringToConvert).ToArray());
         }
