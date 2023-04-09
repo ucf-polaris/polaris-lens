@@ -23,7 +23,6 @@ using Esri.HPFramework;
 using Newtonsoft.Json.Linq;
 using TMPro;
 using Unity.Mathematics;
-using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UIElements;
@@ -45,6 +44,11 @@ namespace POLARIS
 
         private Camera _mainCamera;
         private ArcGISLocationComponent _cameraLocation;
+        private double3 _oldCameraPosition;
+        private double3 _newCameraPosition;
+        private double3 _oldCameraRotation;
+        private double3 _newCameraRotation;
+        
         private GameObject _queryLocationGo;
         private ArcGISLocationComponent _queryLocationLocation;
         private ArcGISMapComponent _arcGisMapComponent;
@@ -52,7 +56,7 @@ namespace POLARIS
         private bool _shouldPlaceMarker = false;
         private bool _waitingForResponse = false;
         private float _timer = 0;
-        private const float MapLoadWaitTime = 1;
+        private const float SlowLoadFactor = 1;
         private const string AddressQueryURL = "https://geocode-api.arcgis.com/arcgis/rest/services/World/GeocodeServer/findAddressCandidates";
         private const string LocationQueryURL = "https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/reverseGeocode";
 
@@ -75,46 +79,36 @@ namespace POLARIS
         private void Update()
         {
             // Create a marker and address card after an address lookup
-            if (_shouldPlaceMarker)
+            if (!_shouldPlaceMarker) return;
+            
+            // Wait for a fixed time for the map to load
+            if (_timer < 1)
             {
-                // Wait for a fixed time for the map to load
-                if (_timer < MapLoadWaitTime)
-                {
-                    _timer += Time.deltaTime;
-                }
-                else
-                {
-                    PlaceOnGround(_queryLocationLocation);
-                    CreateAddressCard(true);
-
-                    // Place the camera above the marker and start rendering again
-                    var markerPosition = _queryLocationLocation.Position;
-                    _cameraLocation.Position = new ArcGISPoint(
-                        markerPosition.X,
-                        markerPosition.Y,
-                        markerPosition.Z + _cameraLocation.GetComponent<HPTransform>().UniversePosition.y,
-                        markerPosition.SpatialReference);
-                    _mainCamera.GetComponent<Camera>().cullingMask = -1;
-                }
+                _timer += Time.deltaTime * SlowLoadFactor;
+                var t = _timer * _timer * (3.0 - 2.0 * _timer);
+                var curPos = _oldCameraPosition + (_newCameraPosition - _oldCameraPosition) * t;
+                var curRot = _oldCameraRotation + (_newCameraRotation - _oldCameraRotation) * _timer;
+                _cameraLocation.Position = new ArcGISPoint(curPos.x, curPos.y, curPos.z, new ArcGISSpatialReference(4326));
+                _cameraLocation.Rotation = new ArcGISRotation(curRot.x, curRot.y, curRot.z);
             }
+            else
+            {
+                PlaceOnGround(_queryLocationLocation);
+                CreateAddressCard(true);
 
-            // Determine the location that was clicked on and perform a location lookup
-            // if (!Input.GetKey(KeyCode.LeftShift) || !Input.GetMouseButtonDown(0)) return;
-            //
-            // var ray = _mainCamera.ScreenPointToRay(Input.mousePosition);
-            // if (!Physics.Raycast(ray, out var hit)) return;
-            //
-            // var position = _mainCamera.transform.position;
-            // // var direction = (hit.point - position);
-            // var distanceFromCamera = Vector3.Distance(position, hit.point);
-            // var scale = distanceFromCamera * LocationMarkerScale / 5000; // Scale the marker based on its distance from camera 
-            // SetupQueryLocationGameObject(LocationMarkerTemplate, hit.point, _mainCamera.transform.rotation, new Vector3(scale, scale, scale));
-            // ReverseGeocode(HitToGeoPosition(hit));
+                // Place the camera above the marker and start rendering again
+                var markerPosition = _queryLocationLocation.Position;
+                _cameraLocation.Position = new ArcGISPoint(
+                    markerPosition.X,
+                    markerPosition.Y,
+                    markerPosition.Z + _cameraLocation.GetComponent<HPTransform>().UniversePosition.y,
+                    markerPosition.SpatialReference);
+                _mainCamera.GetComponent<Camera>().cullingMask = -1;
+            }
         }
         
         private void OnButtonClick(ClickEvent clickEvent)
         {
-            print("Clicked search button");
             HandleTextInput(_searchField.value);
         }
 
@@ -145,13 +139,11 @@ namespace POLARIS
         /// <param name="address"></param>
         private async void Geocode(string address)
         {
-            if (_waitingForResponse)
-            {
-                return;
-            }
+            if (_waitingForResponse) return;
 
             _waitingForResponse = true;
-            var results = await SendAddressQuery(address);
+            var results = await SendAddressQuery("University of Central Florida " + address);
+            print(results);
 
             if (results.Contains("error")) // Server returned an error
             {
@@ -161,8 +153,6 @@ namespace POLARIS
             }
             else
             {
-                const int cameraStartHeight = 3000; // Use a high elevation to do a raycast from
-
                 // Parse the query response
                 var response = JObject.Parse(results);
                 var candidates = response.SelectToken("candidates");
@@ -176,10 +166,11 @@ namespace POLARIS
                         _responseAddress = (string)array[0].SelectToken("address");
 
                         // Move the camera to the queried address
-                        _mainCamera.GetComponent<Camera>().cullingMask = 0; // blacken the camera view until the scene is updated
+                        _oldCameraPosition = new double3(_cameraLocation.Position.X, _cameraLocation.Position.Y, _cameraLocation.Position.Z);
+                        _oldCameraRotation = new double3(_cameraLocation.Rotation.Heading, _cameraLocation.Rotation.Pitch, _cameraLocation.Rotation.Roll);
 
-                        _cameraLocation.Rotation = new ArcGISRotation(0, 0, 0);
-                        _cameraLocation.Position = new ArcGISPoint((double)lon, (double)lat, _cameraLocation.Position.Z, new ArcGISSpatialReference(4326));
+                        _newCameraRotation = new double3(0, 0, 0);
+                        _newCameraPosition = new double3((double)lon, (double)lat, _cameraLocation.Position.Z);
 
                         _shouldPlaceMarker = true;
                         _timer = 0;
@@ -203,47 +194,6 @@ namespace POLARIS
         }
 
         /// <summary>
-        /// Perform a reverse geocoding query (location lookup) and parse the response. If the server returned an error, the message is shown to the user.
-        /// The function is called when a location on the map is selected.
-        /// </summary>
-        /// <param name="location"></param>
-        private async void ReverseGeocode(ArcGISPoint location)
-        {
-            if (_waitingForResponse)
-            {
-                return;
-            }
-
-            _waitingForResponse = true;
-            var results = await SendLocationQuery(location.X.ToString() + "," + location.Y.ToString());
-
-            if (results.Contains("error")) // Server returned an error
-            {
-                var response = JObject.Parse(results);
-                var error = response.SelectToken("error");
-                Debug.Log(error.SelectToken("message"));
-            }
-            else
-            {
-                var response = JObject.Parse(results);
-                var address = response.SelectToken("address");
-                var label = address.SelectToken("LongLabel");
-                _responseAddress = (string)label;
-
-                if (string.IsNullOrEmpty(_responseAddress))
-                {
-                    print("Query did not return a valid response.");
-                }
-                else
-                {
-                    print("Enter an address above to move there or shift+click on a location to see the address / description.");
-                    CreateAddressCard(false);
-                }
-            }
-            _waitingForResponse = false;
-        }
-
-        /// <summary>
         /// Create and send an HTTP request for a geocoding query and return the received response.
         /// </summary>
         /// <param name="address"></param>
@@ -255,35 +205,13 @@ namespace POLARIS
             {
                 new KeyValuePair<string, string>("address", address),
                 new KeyValuePair<string, string>("token", _arcGisMapComponent.APIKey),
+                new KeyValuePair<string, string>("searchExtent", "-81.209995,28.580255,-81.181589,28.613986"),
                 new KeyValuePair<string, string>("f", "json"),
             };
 
             var client = new HttpClient();
             HttpContent content = new FormUrlEncodedContent(payload);
             var response = await client.PostAsync(AddressQueryURL, content);
-
-            response.EnsureSuccessStatusCode();
-            var results = await response.Content.ReadAsStringAsync();
-            return results;
-        }
-
-        /// <summary>
-        ///  Create and send an HTTP request for a reverse geocoding query and return the received response.
-        /// </summary>
-        /// <param name="location"></param>
-        /// <returns></returns>
-        private static async Task<string> SendLocationQuery(string location)
-        {
-            IEnumerable<KeyValuePair<string, string>> payload = new List<KeyValuePair<string, string>>()
-            {
-                new KeyValuePair<string, string>("location", location),
-                new KeyValuePair<string, string>("langCode", "en"),
-                new KeyValuePair<string, string>("f", "json"),
-            };
-
-            var client = new HttpClient();
-            HttpContent content = new FormUrlEncodedContent(payload);
-            var response = await client.PostAsync(LocationQueryURL, content);
 
             response.EnsureSuccessStatusCode();
             var results = await response.Content.ReadAsStringAsync();
@@ -371,7 +299,7 @@ namespace POLARIS
             {
                 var localScale = 1.5f / AddressMarkerScale;
                 card.transform.localPosition = new Vector3(0, 150f / AddressMarkerScale, 100f / AddressMarkerScale);
-                card.transform.localRotation = Quaternion.Euler(90, 0, 0);
+                card.transform.localRotation = Quaternion.Euler(270, 0, 180);
                 card.transform.localScale = new Vector3(localScale, localScale, localScale);
             }
             else

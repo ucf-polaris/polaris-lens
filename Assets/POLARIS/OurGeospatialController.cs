@@ -39,7 +39,7 @@ namespace Google.XR.ARCoreExtensions.Samples.Geospatial
     /// </summary>
     [SuppressMessage("StyleCop.CSharp.ReadabilityRules", "SA1118:ParameterMustNotSpanMultipleLines",
         Justification = "Bypass source check.")]
-    public class GeospatialController : MonoBehaviour
+    public class OurGeospatialController : MonoBehaviour
     {
         [Header("AR Components")]
 
@@ -435,6 +435,8 @@ namespace Google.XR.ARCoreExtensions.Samples.Geospatial
                     }
 
                     break;
+                default:
+                    throw new ArgumentOutOfRangeException();
             }
 
             // Waiting for new configuration taking effect.
