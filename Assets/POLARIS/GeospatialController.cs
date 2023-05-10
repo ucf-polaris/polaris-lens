@@ -122,7 +122,7 @@ namespace POLARIS
         /// </summary>
         public GameObject InfoPanel;
 
-        /// <summary>
+        /// <summary>sd
         /// Text displaying <see cref="GeospatialPose"/> information at runtime.
         /// </summary>
         public Text InfoText;
@@ -291,7 +291,22 @@ namespace POLARIS
             var history = new GeospatialAnchorHistory(
                 pose.Latitude, pose.Longitude, pose.Altitude, eunRotation);
 
-            var anchor = PlaceGeospatialAnchor(history, _usingTerrainAnchor);
+            //var anchor = PlaceGeospatialAnchor(history, _usingTerrainAnchor);
+            
+            // BEGIN TEST
+            var textPanel = new TextPanel(
+                @"<style=Title>Polaris Panel</style>
+
+                        <style=Body>Hello everyone welcome to our app :)
+
+                        <indent=5%>• Hello</indent>
+
+                        Welcome to the <color=green>Fun Zone</color>",
+                history);
+
+            var anchor = textPanel.PlacePanelGeospatialAnchor(_anchorObjects, AnchorManager);
+            
+            // END TEST
             if (anchor != null)
             {
                 _historyCollection.Collection.Add(history);
@@ -605,10 +620,29 @@ namespace POLARIS
             var history = new GeospatialAnchorHistory(
                 geospatialPose.Latitude, geospatialPose.Longitude, geospatialPose.Altitude,
                 geospatialPose.EunRotation);
-            var anchor = PlaceGeospatialAnchor(history, _usingTerrainAnchor);
+            // var anchor = PlaceGeospatialAnchor(history, _usingTerrainAnchor);
+            // BEGIN TEST
+            var textPanel = new TextPanel(
+                @"<style=Title>Polaris Panel</style>
+
+                        <style=Body>Hello everyone welcome to our app :)
+
+                        <indent=5%>• Hello</indent>
+
+                        Welcome to the <color=green>Fun Zone</color>",
+                history);
+
+            var anchor = textPanel.PlacePanelGeospatialAnchor(_anchorObjects, AnchorManager);
+            
+            // END TEST
             if (anchor != null)
             {
                 _historyCollection.Collection.Add(history);
+                SnackBarText.text = $"{_anchorObjects.Count} Anchor(s) Set!";
+            }
+            else
+            {
+                SnackBarText.text = $"Anchor not set :(";
             }
 
             ClearAllButton.gameObject.SetActive(_anchorObjects.Count > 0);
