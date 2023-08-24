@@ -24,16 +24,17 @@ using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using Google.XR.ARCoreExtensions;
 using Google.XR.ARCoreExtensions.Samples.Geospatial;
+using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.Android;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 using UnityEngine.XR.ARFoundation;
 using UnityEngine.XR.ARSubsystems;
 
-namespace POLARIS
+namespace POLARIS.GeospatialScene
 {
 #if UNITY_ANDROID
-    using UnityEngine.Android;
 #endif
 
     /// <summary>
@@ -294,7 +295,9 @@ namespace POLARIS
             //var anchor = PlaceGeospatialAnchor(history, _usingTerrainAnchor);
             
             // BEGIN TEST
-            var textPanel = new TextPanel(
+            var textPanel = AnchorManager.AddComponent<TextPanel>();
+            
+            textPanel.Instantiate(
                 @"<style=Title>Polaris Panel</style>
 
                         <style=Body>Hello everyone welcome to our app :)
@@ -622,7 +625,9 @@ namespace POLARIS
                 geospatialPose.EunRotation);
             // var anchor = PlaceGeospatialAnchor(history, _usingTerrainAnchor);
             // BEGIN TEST
-            var textPanel = new TextPanel(
+            var textPanel = AnchorManager.AddComponent<TextPanel>();
+            
+            textPanel.Instantiate(
                 @"<style=Title>Polaris Panel</style>
 
                         <style=Body>Hello everyone welcome to our app :)
