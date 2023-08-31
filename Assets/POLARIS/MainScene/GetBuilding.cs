@@ -49,9 +49,19 @@ namespace POLARIS
             var newWord = true;
             foreach (var c in stringToConvert)
             {
-                if(newWord) { yield return ToUpper(c); newWord = false; }
-                else yield return ToLower(c);
-                if(c==' ') newWord = true;
+                if (newWord)
+                {
+                    yield return ToUpper(c);
+                    newWord = false;
+                }
+                else
+                {
+                    yield return ToLower(c);
+                }
+                if (c == ' ')
+                {
+                    newWord = true;
+                }
             }
         }
     }

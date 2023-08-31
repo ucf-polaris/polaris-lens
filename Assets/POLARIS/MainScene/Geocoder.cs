@@ -13,7 +13,9 @@
  * limitations under the License.
  */
 
+using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
 using Esri.ArcGISMapsSDK.Components;
@@ -27,8 +29,14 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UIElements;
 
+using Newtonsoft.Json;
+
 namespace POLARIS
 {
+    public class AutoSuggestion
+    {
+        public string Text { get; set; }
+    }
     public class Geocoder : MonoBehaviour
     {
         public GameObject AddressMarkerTemplate;
@@ -60,6 +68,8 @@ namespace POLARIS
         private const string AddressQueryURL = "https://geocode-api.arcgis.com/arcgis/rest/services/World/GeocodeServer/findAddressCandidates";
         private const string LocationQueryURL = "https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/reverseGeocode";
 
+        // private Dropdown _dropdown;
+        private Label AutoSuggestionText;
 
         private void Start()
         {
@@ -72,8 +82,12 @@ namespace POLARIS
             
             var rootVisual = SearchBar.GetComponent<UIDocument>().rootVisualElement;
             _searchField = rootVisual.Q<TextField>("SearchBox");
-            _searchButton = rootVisual.Q<Button>("SearchButton");
+            _searchField.RegisterValueChangedCallback(OnSearchValueChanged);
+            _searchButton = rootVisual.Q<UnityEngine.UIElements.Button>("SearchButton");
             _searchButton.RegisterCallback<ClickEvent>(OnButtonClick);
+            AutoSuggestionText = rootVisual.Q<Label>("AutoSuggestionText");
+            // _dropdown = rootVisual.Q<Dropdown>("AutocompleteDropdown");
+            // _dropdown.onValueChanged.AddListener(OnDropdownValueChanged);
         }
 
         private void Update()
@@ -106,7 +120,57 @@ namespace POLARIS
                 _mainCamera.GetComponent<Camera>().cullingMask = -1;
             }
         }
-        
+
+        private async void OnSearchValueChanged(ChangeEvent<string> evt)
+        {
+            string newText = evt.newValue;
+            if (!string.IsNullOrWhiteSpace(newText))
+            {
+                List<string> suggestions = await FetchAutoSuggestions(newText);
+                UpdateAutoSuggestionsUI(suggestions);
+            }
+            else
+            {
+                ClearAutoSuggestionsUI();
+            }
+        }
+
+        private async Task<List<string>> FetchAutoSuggestions(string query)
+        {
+            // // Perform a request to get autocomplete suggestions based on the query
+            // // Parse the response and return a list of suggestion strings
+            // var locatorTask = new LocatorTask(new Uri("https://geocode-api.arcgis.com/arcgis/rest/services/World/GeocodeServer"));
+            List<string> suggestions = new List<string>();
+            suggestions.Add("bunger");
+            suggestions.Add("bunger2");
+            // var suggestions2 = await locatorTask.SuggestAsync(query);
+            // if (suggestions2?.Any() ?? false)
+            // {
+            //     foreach (var suggestion in suggestions2)
+            //     {
+            //         suggestions.Add(suggestion.Label);
+            //     }
+            // }
+            return suggestions;
+        }
+
+        private void UpdateAutoSuggestionsUI(List<string> suggestions)
+        {
+            // Clear previous suggestions
+            AutoSuggestionText.text = "";
+
+            // Display the new suggestions in the AutoSuggestionText
+            foreach (string suggestion in suggestions)
+            {
+                AutoSuggestionText.text += suggestion + "\n";
+            }
+        }
+
+        private void ClearAutoSuggestionsUI()
+        {
+            AutoSuggestionText.text = "";
+        }
+
         private void OnButtonClick(ClickEvent clickEvent)
         {
             HandleTextInput(_searchField.value);
@@ -160,6 +224,11 @@ namespace POLARIS
                 {
                     if (array.Count > 0) // Check if the response included any result  
                     {
+                        // print("multiple results: ");
+                        // for (int i = 0; i < array.count; i++) { 
+                            // print((string)array[i].selecttoken("address")); 
+                        // }
+
                         var location = array[0].SelectToken("location");
                         var lon = location.SelectToken("x");
                         var lat = location.SelectToken("y");

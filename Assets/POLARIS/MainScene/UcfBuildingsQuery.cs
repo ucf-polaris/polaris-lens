@@ -16,6 +16,10 @@ using UnityEngine.Networking;
 using Newtonsoft.Json;
 using Unity.Mathematics;
 
+using TMPro;
+using UnityEngine.EventSystems;
+using Esri.ArcGISMapsSDK.Samples.Components;
+
 namespace POLARIS
 { 
     // The follow System.Serializable classes are used to define the REST API response
@@ -50,14 +54,14 @@ namespace POLARIS
         public List<List<List<double>>> rings;
     }
 
-// This class issues a query request to a Feature Layer which it then parses to create GameObjects at accurate locations
-// with correct property values. This is a good starting point if you are looking to parse your own feature layer into Unity.
+    // This class issues a query request to a Feature Layer which it then parses to create GameObjects at accurate locations
+    // with correct property values. This is a good starting point if you are looking to parse your own feature layer into Unity.
     public class UcfBuildingsQuery : MonoBehaviour
     {
         // The feature layer we are going to query
         public string FeatureLayerURL = "https://services.arcgis.com/dVL5xxth19juhrDY/ArcGIS/rest/services/MainCampus_RPbldgs/FeatureServer/0";
 
-        // The height where we spawn the stadium before finding the ground height
+        // The height where we spawn the building before finding the ground height
         private const int BuildingSpawnHeight = 10000;
 
         // This will hold a reference to each feature we created
@@ -67,11 +71,12 @@ namespace POLARIS
         // It is important that we create the GameObjects with the same Spatial Reference
         private const int FeatureSRWKID = 4326;
 
-        // public Dropdown StadiumSelector;
-
         private ArcGISMapComponent _arcGisMapComponent;
         private ArcGISLocationComponent _locationComponent;
         private double3 _rootPos;
+
+        private ArcGISCameraComponent ArcGISCamera;
+        private TMP_Dropdown buildingSelector;
 
         private PolyExtruder _polyExtruder;
 
@@ -82,14 +87,26 @@ namespace POLARIS
             var loader = FindChildWithTag(_arcGisMapComponent.gameObject, "Location");
             _locationComponent = loader.GetComponent<ArcGISLocationComponent>();
             _rootPos = loader.GetComponent<HPTransform>().UniversePosition;
-            
+
             StartCoroutine(GetFeatures());
 
-            // StadiumSelector.onValueChanged.AddListener(delegate
-            // {
-            //     StadiumSelected();
-            // });
+            //    buildingSelector.onValueChanged.AddListener(delegate
+            //    {
+            //        buildingSelected();
+            //    });
         }
+
+        //private void Update()
+        //{
+        //    if (MouseOverUI())
+        //    {
+        //        ArcGISCamera.GetComponent<ArcGISCameraControllerComponent>().enabled = false;
+        //    }
+        //    else
+        //    {
+        //        ArcGISCamera.GetComponent<ArcGISCameraControllerComponent>().enabled = true;
+        //    }
+        //}
 
         // Sends the Request to get features from the service
         private IEnumerator GetFeatures()
@@ -109,16 +126,11 @@ namespace POLARIS
             else
             {
                 CreateGameObjectsFromResponse(request.downloadHandler.text);
-                // PopulateStadiumDropdown();
+                // populateBuildingsDropdown();
             }
         }
 
         // Creates the Request Headers to be used in our HTTP Request
-        // f=json is the output format
-        // where=1=1 gets every feature. geometry based or more intelligent where clauses should be used
-        //     with larger datasets
-        // outSR=4326 gets the return geometries in the SR 4326
-        // outFields=LEAGUE,TEAM,NAME specifies the fields we want in the response
         private static string MakeRequestHeaders()
         {
             string[] outFields =
@@ -132,12 +144,16 @@ namespace POLARIS
             {
                 outFieldHeader += outFields[i];
             
-                if(i < outFields.Length - 1)
+                if (i < outFields.Length - 1)
                 {
                     outFieldHeader += ",";
                 }
             }
 
+            // f=json is the output format
+            // where=1=1 gets every feature. geometry based or more intelligent where clauses should be used
+            //     with larger datasets
+            // outSR=4326 gets the return geometries in the SR 4326
             string[] requestHeaders =
             {
                 "f=json",
@@ -199,45 +215,46 @@ namespace POLARIS
         {
             return (from Transform transform in parent.transform where transform.CompareTag(tag) select transform.gameObject).FirstOrDefault();
         }
-        
-        // ADDITIONAL REFERENCE STUFF:
-        
-        // Populates the stadium drown down with all the stadium names from the Stadiums list
-        // private void PopulateStadiumDropdown()
-        // {
-        //     //Populate Stadium name drop down
-        //     List<string> StadiumNames = new List<string>();
-        //     foreach (GameObject Stadium in Stadiums)
-        //     {
-        //         StadiumNames.Add(Stadium.name);
-        //     }
-        //     StadiumNames.Sort();
-        //     StadiumSelector.AddOptions(StadiumNames);
-        // }
 
-        // When a new entry is selected in the stadium dropdown move the camera to the new position
-        // private void StadiumSelected()
-        // {
-        //     var StadiumName = StadiumSelector.options[StadiumSelector.value].text;
-        //     foreach (GameObject Stadium in Stadiums)
-        //     {
-        //         if(StadiumName == Stadium.name)
-        //         {
-        //             var StadiumLocation = Stadium.GetComponent<ArcGISLocationComponent>();
-        //             if (StadiumLocation == null)
-        //             {
-        //                 return;
-        //             }
-        //             var CameraLocation = ArcGISCamera.GetComponent<ArcGISLocationComponent>();
-        //             double Longitude = StadiumLocation.Position.X;
-        //             double Latitude  = StadiumLocation.Position.Y;
-        //
-        //             ArcGISPoint NewPosition = new ArcGISPoint(Longitude, Latitude, StadiumSpawnHeight, StadiumLocation.Position.SpatialReference);
-        //
-        //             CameraLocation.Position = NewPosition;
-        //             CameraLocation.Rotation = StadiumLocation.Rotation;
-        //         }
-        //     }
-        // }
+        //private void populateBuildingsDropdown()
+        //{
+        //    // Add from Transform transform in parent.transform where transform.CompareTag(tag) select transform.gameObject results
+        //    List<string> buildingNames = new List<string>();
+        //    foreach (GameObject building in Buildings)
+        //    {
+        //        buildingNames.Add(building.name);
+        //    }
+        //    buildingNames.Sort();
+        //    buildingSelector.AddOptions(buildingNames);
+        //}
+
+        //private void buildingSelected()
+        //{
+        //    var buildingName = buildingSelector.options[buildingSelector.value].text;
+        //    foreach (GameObject building in Buildings)
+        //    {
+        //        if (buildingName == building.name)
+        //        {
+        //            var buildingLocation = building.GetComponent<ArcGISLocationComponent>();
+        //            if (buildingLocation == null)
+        //            {
+        //                return;
+        //            }
+        //            var CameraLocation = ArcGISCamera.GetComponent<ArcGISLocationComponent>();
+        //            double Longitude = buildingLocation.Position.X;
+        //            double Latitude = buildingLocation.Position.Y;
+
+        //            ArcGISPoint NewPosition = new ArcGISPoint(Longitude, Latitude, BuildingSpawnHeight, buildingLocation.Position.SpatialReference);
+
+        //            CameraLocation.Position = NewPosition;
+        //            CameraLocation.Rotation = buildingLocation.Rotation;
+        //        }
+        //    }
+        //}
+
+        //private bool MouseOverUI()
+        //{
+        //    return EventSystem.current.IsPointerOverGameObject();
+        //}
     }
 }
