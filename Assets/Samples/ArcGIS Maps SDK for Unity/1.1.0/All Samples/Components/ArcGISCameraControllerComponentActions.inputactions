@@ -11,7 +11,8 @@
                     "id": "3761cf8f-23f1-44ca-820e-28b47b3be36f",
                     "expectedControlType": "Button",
                     "processors": "",
-                    "interactions": ""
+                    "interactions": "",
+                    "initialStateCheck": false
                 },
                 {
                     "name": "Forward",
@@ -19,7 +20,8 @@
                     "id": "0d592f84-62a7-45eb-9648-8fc7d5dc1d10",
                     "expectedControlType": "Button",
                     "processors": "",
-                    "interactions": ""
+                    "interactions": "",
+                    "initialStateCheck": false
                 },
                 {
                     "name": "Right",
@@ -27,7 +29,8 @@
                     "id": "f2a0ae8a-49b8-40ef-8d59-493e82dab5e0",
                     "expectedControlType": "Button",
                     "processors": "",
-                    "interactions": ""
+                    "interactions": "",
+                    "initialStateCheck": false
                 }
             ],
             "bindings": [
@@ -111,7 +114,7 @@
                 {
                     "name": "negative",
                     "id": "9a773c59-f1e2-48cc-a8fb-621375631d19",
-                    "path": "<Keyboard>/s",
+                    "path": "<Mouse>/scroll/down",
                     "interactions": "",
                     "processors": "",
                     "groups": "",
@@ -122,7 +125,7 @@
                 {
                     "name": "positive",
                     "id": "b6829142-784a-4480-99c2-d132fec6405c",
-                    "path": "<Keyboard>/w",
+                    "path": "<Mouse>/scroll/up",
                     "interactions": "",
                     "processors": "",
                     "groups": "",

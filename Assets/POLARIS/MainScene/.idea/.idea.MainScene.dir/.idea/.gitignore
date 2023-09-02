@@ -1,15 +1,11 @@
-<<<<<<< Updated upstream
-﻿# Default ignored files
-=======
 # Default ignored files
->>>>>>> Stashed changes
 /shelf/
 /workspace.xml
 # Rider ignored files
 /contentModel.xml
-/.idea.polaris-lens.iml
-/modules.xml
 /projectSettingsUpdater.xml
+/modules.xml
+/.idea.MainScene.iml
 # Editor-based HTTP Client requests
 /httpRequests/
 # Datasource local storage ignored files

@@ -138,7 +138,7 @@ namespace Esri.ArcGISMapsSDK.Samples.Components
                 {
                     ""name"": ""negative"",
                     ""id"": ""9a773c59-f1e2-48cc-a8fb-621375631d19"",
-                    ""path"": ""<Keyboard>/s"",
+                    ""path"": ""<Mouse>/scroll/down"",
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": """",
@@ -149,7 +149,7 @@ namespace Esri.ArcGISMapsSDK.Samples.Components
                 {
                     ""name"": ""positive"",
                     ""id"": ""b6829142-784a-4480-99c2-d132fec6405c"",
-                    ""path"": ""<Keyboard>/w"",
+                    ""path"": ""<Mouse>/scroll/up"",
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": """",

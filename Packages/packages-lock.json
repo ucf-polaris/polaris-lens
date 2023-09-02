@@ -1,7 +1,11 @@
 {
   "dependencies": {
     "com.esri.arcgis-maps-sdk": {
+<<<<<<< Updated upstream
       "version": "file:C:/Users/Adm/Downloads/arcgis-maps-sdk-unity-1.3.0.tgz",
+=======
+      "version": "file:C:/Users/kevfo/Downloads/arcgis-maps-sdk-unity-1.3.0.tgz",
+>>>>>>> Stashed changes
       "depth": 0,
       "source": "local-tarball",
       "dependencies": {

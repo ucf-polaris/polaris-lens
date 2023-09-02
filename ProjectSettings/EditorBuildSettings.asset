@@ -20,7 +20,11 @@ EditorBuildSettings:
       type: 2}
     com.unity.xr.arcore.PlayerSettings: {fileID: 11400000, guid: c2f7b8d7c0bff4d10874cbcf3f24af78,
       type: 2}
+<<<<<<< Updated upstream
     com.unity.xr.arfoundation.simulation_settings: {fileID: 11400000, guid: b2235c86f6b043441ba3ac5051142d73,
+=======
+    com.unity.xr.arfoundation.simulation_settings: {fileID: 11400000, guid: 7a8b80a186a288e44ab7f29ee0414fb6,
+>>>>>>> Stashed changes
       type: 2}
     com.unity.xr.arkit.PlayerSettings: {fileID: 11400000, guid: b27ec7d82a91a48e69fd689ad6808e5e,
       type: 2}
