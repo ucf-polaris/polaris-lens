@@ -211,7 +211,7 @@ namespace Esri.ArcGISMapsSDK.Samples.Components
 						|| altitude + totalTranslation.y > MaxCameraHeight)
 					totalTranslation.y = 0;
 
-				print("ZOOM DELTA: " + delta);
+				// print("ZOOM DELTA: " + delta);
 			}
 
 			if (!totalTranslation.Equals(double3.zero))

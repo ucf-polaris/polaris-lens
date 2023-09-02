@@ -30,22 +30,24 @@ using UnityEngine.EventSystems;
 using UnityEngine.UIElements;
 
 using Newtonsoft.Json;
+using UnityEngine.Serialization;
 
 namespace POLARIS
 {
     public class AutoSuggestion
     {
         public string Text { get; set; }
+        public string MagicKey { get; set; }
+        public bool IsCollection { get; set; }
     }
     public class Geocoder : MonoBehaviour
     {
-        public GameObject AddressMarkerTemplate;
-        public float AddressMarkerScale = 1;
-        public GameObject LocationMarkerTemplate;
-        public float LocationMarkerScale = 1;
-        public GameObject AddressCardTemplate;
-        public TextMeshProUGUI InfoField;
-        public GameObject SearchBar;
+        [FormerlySerializedAs("AddressMarkerTemplate")] public GameObject addressMarkerTemplate;
+        [FormerlySerializedAs("AddressMarkerScale")] public float addressMarkerScale = 1;
+        [FormerlySerializedAs("LocationMarkerTemplate")] public GameObject locationMarkerTemplate;
+        [FormerlySerializedAs("LocationMarkerScale")] public float locationMarkerScale = 1;
+        [FormerlySerializedAs("AddressCardTemplate")] public GameObject addressCardTemplate;
+        [FormerlySerializedAs("SearchBar")] public GameObject searchBar;
         
         private TextField _searchField;
         private Button _searchButton;
@@ -67,9 +69,10 @@ namespace POLARIS
         private const float SlowLoadFactor = 1;
         private const string AddressQueryURL = "https://geocode-api.arcgis.com/arcgis/rest/services/World/GeocodeServer/findAddressCandidates";
         private const string LocationQueryURL = "https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/reverseGeocode";
+        private const string SuggestQueryURL = "https://geocode-api.arcgis.com/arcgis/rest/services/World/GeocodeServer/suggest";
 
         // private Dropdown _dropdown;
-        private Label AutoSuggestionText;
+        private Label _autoSuggestionText;
 
         private void Start()
         {
@@ -77,17 +80,15 @@ namespace POLARIS
             _mainCamera = Camera.main;
             _cameraLocation = _mainCamera.GetComponent<ArcGISLocationComponent>();
             
-            SetupQueryLocationGameObject(AddressMarkerTemplate, scale: new Vector3(AddressMarkerScale, AddressMarkerScale, AddressMarkerScale));
+            SetupQueryLocationGameObject(addressMarkerTemplate, scale: new Vector3(addressMarkerScale, addressMarkerScale, addressMarkerScale));
             _queryLocationLocation = _queryLocationGo.GetComponent<ArcGISLocationComponent>();
             
-            var rootVisual = SearchBar.GetComponent<UIDocument>().rootVisualElement;
+            var rootVisual = searchBar.GetComponent<UIDocument>().rootVisualElement;
             _searchField = rootVisual.Q<TextField>("SearchBox");
             _searchField.RegisterValueChangedCallback(OnSearchValueChanged);
             _searchButton = rootVisual.Q<UnityEngine.UIElements.Button>("SearchButton");
             _searchButton.RegisterCallback<ClickEvent>(OnButtonClick);
-            AutoSuggestionText = rootVisual.Q<Label>("AutoSuggestionText");
-            // _dropdown = rootVisual.Q<Dropdown>("AutocompleteDropdown");
-            // _dropdown.onValueChanged.AddListener(OnDropdownValueChanged);
+            _autoSuggestionText = rootVisual.Q<Label>("AutoSuggestionText");
         }
 
         private void Update()
@@ -126,7 +127,7 @@ namespace POLARIS
             string newText = evt.newValue;
             if (!string.IsNullOrWhiteSpace(newText))
             {
-                List<string> suggestions = await FetchAutoSuggestions(newText);
+                List<AutoSuggestion> suggestions = await FetchAutoSuggestions(newText);
                 UpdateAutoSuggestionsUI(suggestions);
             }
             else
@@ -135,40 +136,104 @@ namespace POLARIS
             }
         }
 
-        private async Task<List<string>> FetchAutoSuggestions(string query)
+        private async Task<List<AutoSuggestion>> FetchAutoSuggestions(string query)
         {
-            // // Perform a request to get autocomplete suggestions based on the query
-            // // Parse the response and return a list of suggestion strings
-            // var locatorTask = new LocatorTask(new Uri("https://geocode-api.arcgis.com/arcgis/rest/services/World/GeocodeServer"));
-            List<string> suggestions = new List<string>();
-            suggestions.Add("bunger");
-            suggestions.Add("bunger2");
-            // var suggestions2 = await locatorTask.SuggestAsync(query);
-            // if (suggestions2?.Any() ?? false)
-            // {
-            //     foreach (var suggestion in suggestions2)
-            //     {
-            //         suggestions.Add(suggestion.Label);
-            //     }
-            // }
+            IEnumerable<KeyValuePair<string, string>> payload = new List<KeyValuePair<string, string>>()
+            {
+                new KeyValuePair<string, string>("text", "University of Central Florida " + query),
+                new KeyValuePair<string, string>("token", _arcGisMapComponent.APIKey),
+                new KeyValuePair<string, string>("searchExtent", "-81.209995,28.580255,-81.181589,28.613986"),
+                new KeyValuePair<string, string>("f", "json"),
+            };
+            
+            var client = new HttpClient();
+            HttpContent content = new FormUrlEncodedContent(payload);
+            HttpResponseMessage response = await client.PostAsync(SuggestQueryURL, content);
+            
+            if (response.IsSuccessStatusCode)
+            {
+                string responseContent = await response.Content.ReadAsStringAsync();
+                List<AutoSuggestion> suggestions = ParseSuggestions(responseContent);
+                return suggestions;
+            }
+            else
+            {
+                print($"Error fetching suggestions: {response.StatusCode}");
+                return new List<AutoSuggestion>();
+            }
+        }
+        
+        private List<AutoSuggestion> ParseSuggestions(string jsonResponse)
+        {
+            List<AutoSuggestion> suggestions = new List<AutoSuggestion>();
+            
+            try
+            {
+                JObject response = JObject.Parse(jsonResponse);
+                print(response);
+                if (response.TryGetValue("suggestions", out JToken suggestionsToken) &&
+                    suggestionsToken is JArray suggestionArray)
+                {
+                    foreach (JToken suggestionToken in suggestionArray)
+                    {
+                        AutoSuggestion suggestion = new AutoSuggestion
+                        {
+                            Text = suggestionToken["text"].ToString(),
+                            MagicKey = suggestionToken["magicKey"].ToString(),
+                            IsCollection = (bool)suggestionToken["isCollection"]
+                        };
+                        suggestions.Add(suggestion);
+                    }
+                }
+                else
+                {
+                    print("No suggestions found in the JSON response.");
+                }
+            }
+            catch (JsonException ex)
+            {
+                print($"Error parsing JSON response: {ex.Message}");
+            }
+
             return suggestions;
         }
 
-        private void UpdateAutoSuggestionsUI(List<string> suggestions)
+        private void UpdateAutoSuggestionsUI(List<AutoSuggestion> suggestions)
         {
             // Clear previous suggestions
-            AutoSuggestionText.text = "";
+            ClearAutoSuggestionsUI();
 
             // Display the new suggestions in the AutoSuggestionText
-            foreach (string suggestion in suggestions)
+            foreach (var suggestion in suggestions)
             {
-                AutoSuggestionText.text += suggestion + "\n";
+                // Just get place name (no city / state), and no UCF since that is added in find button anyways
+                var splitSuggestion = suggestion.Text.Split(",");
+                var suggestionLocationName = splitSuggestion[0];
+                suggestionLocationName = suggestionLocationName.Replace("University of Central Florida Orlando Campus", "");
+                var suggestionLabel = new Label
+                {
+                    text = suggestionLocationName
+                };
+                suggestionLabel.RegisterCallback<ClickEvent>(_ => OnSuggestionClick(suggestionLabel.text, suggestion.MagicKey));
+                _autoSuggestionText.Add(suggestionLabel);
             }
+        }
+
+        private void OnSuggestionClick(string suggestionText, string magicKey)
+        {
+            FillInputField(suggestionText);
+            Geocode(suggestionText, magicKey);
+        }
+        
+        private void FillInputField(string suggestionText)
+        {
+            _searchField.value = suggestionText;
+            ClearAutoSuggestionsUI();
         }
 
         private void ClearAutoSuggestionsUI()
         {
-            AutoSuggestionText.text = "";
+            _autoSuggestionText.Clear();
         }
 
         private void OnButtonClick(ClickEvent clickEvent)
@@ -196,17 +261,17 @@ namespace POLARIS
             }
         }
 
-
         /// <summary>
         /// Perform a geocoding query (address lookup) and parse the response. If the server returned an error, the message is shown to the user.
         /// </summary>
         /// <param name="address"></param>
-        private async void Geocode(string address)
+        /// <param name="magicKey"></param>
+        private async void Geocode(string address, string magicKey = "")
         {
             if (_waitingForResponse) return;
 
             _waitingForResponse = true;
-            var results = await SendAddressQuery("University of Central Florida " + address);
+            var results = await SendAddressQuery("University of Central Florida " + address, magicKey);
             print(results);
 
             if (results.Contains("error")) // Server returned an error
@@ -224,11 +289,15 @@ namespace POLARIS
                 {
                     if (array.Count > 0) // Check if the response included any result  
                     {
-                        // print("multiple results: ");
-                        // for (int i = 0; i < array.count; i++) { 
-                            // print((string)array[i].selecttoken("address")); 
-                        // }
-
+                        if (array.Count > 1)
+                        {
+                            print("multiple results: ");
+                            foreach (var token in array)
+                            {
+                                print((string)token.SelectToken("address"));
+                            }
+                        }
+                        
                         var location = array[0].SelectToken("location");
                         var lon = location.SelectToken("x");
                         var lat = location.SelectToken("y");
@@ -266,16 +335,17 @@ namespace POLARIS
         /// Create and send an HTTP request for a geocoding query and return the received response.
         /// </summary>
         /// <param name="address"></param>
+        /// <param name="magicKey"></param>
         /// <returns></returns>
-        private async Task<string> SendAddressQuery(string address)
+        private async Task<string> SendAddressQuery(string address, string magicKey = "")
         {
-
             IEnumerable<KeyValuePair<string, string>> payload = new List<KeyValuePair<string, string>>()
             {
-                new KeyValuePair<string, string>("address", address),
+                new KeyValuePair<string, string>("SingleLine", address),
                 new KeyValuePair<string, string>("token", _arcGisMapComponent.APIKey),
                 new KeyValuePair<string, string>("searchExtent", "-81.209995,28.580255,-81.181589,28.613986"),
                 new KeyValuePair<string, string>("f", "json"),
+                new KeyValuePair<string, string>("magicKey", magicKey),
             };
 
             var client = new HttpClient();
@@ -361,20 +431,20 @@ namespace POLARIS
         /// <param name="isAddressQuery"></param>
         private void CreateAddressCard(bool isAddressQuery)
         {
-            var card = Instantiate(AddressCardTemplate, _queryLocationGo.transform);
+            var card = Instantiate(addressCardTemplate, _queryLocationGo.transform);
             var t = card.GetComponentInChildren<TextMeshProUGUI>();
             // Based on the type of the query set the location, rotation and scale of the text relative to the query location game object  
             if (isAddressQuery)
             {
-                var localScale = 1.5f / AddressMarkerScale;
-                card.transform.localPosition = new Vector3(0, 150f / AddressMarkerScale, 100f / AddressMarkerScale);
+                var localScale = 1.5f / addressMarkerScale;
+                card.transform.localPosition = new Vector3(0, 150f / addressMarkerScale, 100f / addressMarkerScale);
                 card.transform.localRotation = Quaternion.Euler(270, 0, 180);
                 card.transform.localScale = new Vector3(localScale, localScale, localScale);
             }
             else
             {
-                var localScale = 3.5f / LocationMarkerScale;
-                card.transform.localPosition = new Vector3(0, 300f / LocationMarkerScale, -300f / LocationMarkerScale);
+                var localScale = 3.5f / locationMarkerScale;
+                card.transform.localPosition = new Vector3(0, 300f / locationMarkerScale, -300f / locationMarkerScale);
                 card.transform.localScale = new Vector3(localScale, localScale, localScale);
             }
 
