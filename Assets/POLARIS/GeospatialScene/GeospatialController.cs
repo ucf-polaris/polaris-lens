@@ -295,24 +295,32 @@ namespace POLARIS.GeospatialScene
             //var anchor = PlaceGeospatialAnchor(history, _usingTerrainAnchor);
             
             // BEGIN TEST
-            var textPanel = AnchorManager.AddComponent<TextPanel>();
-            
-            textPanel.Instantiate(
-                @"<style=Title>Polaris Panel</style>
-
-                        <style=Body>Hello everyone welcome to our app :)
-
-                        <indent=5%>• Hello</indent>
-
-                        Welcome to the <color=green>Fun Zone</color>",
-                history);
-
-            var anchor = textPanel.PlacePanelGeospatialAnchor(_anchorObjects, AnchorManager);
+//             var textPanel = AnchorManager.AddComponent<TextPanel>();
+//             
+//             textPanel.Instantiate(
+//                 @"<style=Title>Polaris Panel</style>
+//
+//                         <style=Body>Hello everyone welcome to our app :)
+//
+//                         <indent=5%>• Hello</indent>
+//
+//                         Welcome to the <color=green>Fun Zone</color>",
+//                 history);
+//
+//             var anchor = textPanel.PlacePanelGeospatialAnchor(_anchorObjects, AnchorManager);
             
             // END TEST
-            if (anchor != null)
+            // if (anchor != null)
+            // {
+            //     _historyCollection.Collection.Add(history);
+            // }
+            var results = LoadPanels.LoadNearby(_anchorObjects, AnchorManager);
+            if (results.Length > 0)
             {
-                _historyCollection.Collection.Add(history);
+                foreach (var result in results)
+                {
+                    _historyCollection.Collection.Add(result.History);
+                }
             }
 
             ClearAllButton.gameObject.SetActive(_anchorObjects.Count > 0);
@@ -627,7 +635,7 @@ namespace POLARIS.GeospatialScene
             // BEGIN TEST
             var textPanel = AnchorManager.AddComponent<TextPanel>();
             
-            textPanel.Instantiate(
+            textPanel.Instantiate(new GeospatialAnchorContent(
                 @"<style=Title>Polaris Panel</style>
 
                         <style=Body>Hello everyone welcome to our app :)
@@ -635,7 +643,7 @@ namespace POLARIS.GeospatialScene
                         <indent=5%>• Hello</indent>
 
                         Welcome to the <color=green>Fun Zone</color>",
-                history);
+                history));
 
             var anchor = textPanel.PlacePanelGeospatialAnchor(_anchorObjects, AnchorManager);
             

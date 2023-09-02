@@ -1,6 +1,5 @@
 using System.Collections.Generic;
 using Google.XR.ARCoreExtensions;
-using Google.XR.ARCoreExtensions.Samples.Geospatial;
 using TMPro;
 using UnityEngine;
 using UnityEngine.XR.ARFoundation;
@@ -10,24 +9,24 @@ namespace POLARIS.GeospatialScene
     public class TextPanel : MonoBehaviour
     {
         public GameObject PanelPrefab;
+        
+        private GeospatialAnchorContent _content;
 
-        private string _content;
-        private GeospatialAnchorHistory _info;
-
-        public void Instantiate(string content, GeospatialAnchorHistory anchorInfo)
+        public void Instantiate(GeospatialAnchorContent content)
         {
             this._content = content;
-            this._info = anchorInfo;
-            // PanelPrefab = Resources.Load("Polaris/Panel") as GameObject;
         }
 
         public ARGeospatialAnchor PlacePanelGeospatialAnchor(
             List<GameObject> anchorObjects, ARAnchorManager anchorManager)
         {
             var anchor = anchorManager.AddAnchor(
-                _info.Latitude, _info.Longitude, _info.Altitude, _info.EunRotation);
+                _content.History.Latitude,
+                _content.History.Longitude,
+                _content.History.Altitude,
+                _content.History.EunRotation);
             
-            PanelPrefab = Resources.Load("Polaris/Panel") as GameObject;
+            PanelPrefab = Resources.Load("Polaris/PanelParent") as GameObject;
 
             if (anchor != null)
             {
@@ -37,13 +36,13 @@ namespace POLARIS.GeospatialScene
                 }
 
                 var anchorGo = Instantiate(PanelPrefab, anchor.transform);
-                anchorGo.GetComponentInChildren<TextMeshPro>().SetText(_content);
+                anchorGo.GetComponentInChildren<TextMeshPro>().SetText(_content.Text);
 
                 anchorObjects.Add(anchor.gameObject);
-                
-                Debug.LogWarning(anchorObjects[0]);
 
                 print("Anchor Set!");
+                
+                Debug.LogWarning(_content.Text);
             }
             else
             {
