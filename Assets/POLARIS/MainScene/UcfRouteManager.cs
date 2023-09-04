@@ -14,6 +14,7 @@ using Esri.ArcGISMapsSDK.Utils.GeoCoord;
 using Esri.GameEngine.Geometry;
 using Esri.HPFramework;
 using Newtonsoft.Json.Linq;
+using POLARIS.MainScene;
 using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.UIElements;
@@ -138,6 +139,9 @@ namespace POLARIS
             var geoPosition = _arcGisMapComponent.View.WorldToGeographic(worldPosition);
             var offsetPosition = new ArcGISPoint(geoPosition.X, geoPosition.Y, geoPosition.Z + yOffset, geoPosition.SpatialReference);
 
+            var spatialRef = GeoUtils.ProjectToSpatialReference(offsetPosition, new ArcGISSpatialReference(4326));
+            SwapData.DestinationPoint = spatialRef;
+                
             return GeoUtils.ProjectToSpatialReference(offsetPosition, new ArcGISSpatialReference(4326));
         }
 

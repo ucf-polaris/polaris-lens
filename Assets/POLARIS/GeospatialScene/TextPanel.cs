@@ -26,7 +26,7 @@ namespace POLARIS.GeospatialScene
                 _content.History.Altitude,
                 _content.History.EunRotation);
             
-            PanelPrefab = Resources.Load("Polaris/PanelParent") as GameObject;
+            PanelPrefab = Resources.Load("Polaris/PanelMarker") as GameObject;
 
             if (anchor != null)
             {
