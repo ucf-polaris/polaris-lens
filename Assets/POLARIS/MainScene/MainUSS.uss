@@ -102,3 +102,7 @@
     -unity-font: resource('FlatSkin/Font/Roboto-Bold');
     -unity-font-style: normal;
 }
+
+.sublabel {
+    font-size: 10px;
+}

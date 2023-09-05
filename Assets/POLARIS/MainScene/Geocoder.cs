@@ -72,7 +72,8 @@ namespace POLARIS
         private const string SuggestQueryURL = "https://geocode-api.arcgis.com/arcgis/rest/services/World/GeocodeServer/suggest";
 
         // private Dropdown _dropdown;
-        private Label _autoSuggestionText;
+        private Label _autoSuggestionBigLabel;
+        private bool justClicked = false;
 
         private void Start()
         {
@@ -88,7 +89,7 @@ namespace POLARIS
             _searchField.RegisterValueChangedCallback(OnSearchValueChanged);
             _searchButton = rootVisual.Q<UnityEngine.UIElements.Button>("SearchButton");
             _searchButton.RegisterCallback<ClickEvent>(OnButtonClick);
-            _autoSuggestionText = rootVisual.Q<Label>("AutoSuggestionText");
+            _autoSuggestionBigLabel = rootVisual.Q<Label>("AutoSuggestionBigLabel");
         }
 
         private void Update()
@@ -125,7 +126,7 @@ namespace POLARIS
         private async void OnSearchValueChanged(ChangeEvent<string> evt)
         {
             string newText = evt.newValue;
-            if (!string.IsNullOrWhiteSpace(newText))
+            if (!string.IsNullOrWhiteSpace(newText) && !justClicked)
             {
                 List<AutoSuggestion> suggestions = await FetchAutoSuggestions(newText);
                 UpdateAutoSuggestionsUI(suggestions);
@@ -133,6 +134,7 @@ namespace POLARIS
             else
             {
                 ClearAutoSuggestionsUI();
+                justClicked = false;
             }
         }
 
@@ -210,12 +212,13 @@ namespace POLARIS
                 var splitSuggestion = suggestion.Text.Split(",");
                 var suggestionLocationName = splitSuggestion[0];
                 suggestionLocationName = suggestionLocationName.Replace("University of Central Florida Orlando Campus", "");
-                var suggestionLabel = new Label
+                var autoSuggestionSubLabel = new Label
                 {
                     text = suggestionLocationName
                 };
-                suggestionLabel.RegisterCallback<ClickEvent>(_ => OnSuggestionClick(suggestionLabel.text, suggestion.MagicKey));
-                _autoSuggestionText.Add(suggestionLabel);
+                autoSuggestionSubLabel.AddToClassList("sublabel"); 
+                autoSuggestionSubLabel.RegisterCallback<ClickEvent>(_ => OnSuggestionClick(autoSuggestionSubLabel.text, suggestion.MagicKey));
+                _autoSuggestionBigLabel.Add(autoSuggestionSubLabel);
             }
         }
 
@@ -223,17 +226,19 @@ namespace POLARIS
         {
             FillInputField(suggestionText);
             Geocode(suggestionText, magicKey);
+            ClearAutoSuggestionsUI();
+            justClicked = true;
         }
         
         private void FillInputField(string suggestionText)
         {
             _searchField.value = suggestionText;
-            ClearAutoSuggestionsUI();
+            // ClearAutoSuggestionsUI();
         }
 
         private void ClearAutoSuggestionsUI()
         {
-            _autoSuggestionText.Clear();
+            _autoSuggestionBigLabel.Clear();
         }
 
         private void OnButtonClick(ClickEvent clickEvent)
