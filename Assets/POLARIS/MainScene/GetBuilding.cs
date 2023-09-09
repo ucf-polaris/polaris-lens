@@ -5,7 +5,7 @@ using UnityEngine;
 using UnityEngine.UIElements;
 using static System.Char;
 
-namespace POLARIS
+namespace POLARIS.MainScene
 {
     public class GetBuilding : MonoBehaviour
     {
