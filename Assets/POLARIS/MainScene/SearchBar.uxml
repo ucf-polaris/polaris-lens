@@ -4,5 +4,7 @@
         <ui:TextField picking-mode="Ignore" text="Where do you want to go?" name="SearchBox" password="false" focusable="true" class="SearchBox" style="flex-basis: 85%; overflow: hidden;" />
         <ui:Button text="Find" display-tooltip-when-elided="true" name="SearchButton" class="SearchButton" style="flex-basis: 12%;" />
         <ui:Label name="AutoSuggestionBigLabel" class="AutoSuggestionBigLabel" style="flex-basis: 100%;" />
+        <ui:Label name="SearchResultBigLabel" class="SearchResultBigLabel" style="flex-basis: 100%; position: absolute; top: 464px; left: 66px; height: 213px; width: 266px;" />
+        <ui:Button text="Clear" display-tooltip-when-elided="true" name="ClearButton" class="ClearButton" style="flex-basis: 12%; position: absolute; top: 481px; left: -10px;" />
     </ui:VisualElement>
 </ui:UXML>

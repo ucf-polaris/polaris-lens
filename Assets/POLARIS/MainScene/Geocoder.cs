@@ -13,26 +13,23 @@
  * limitations under the License.
  */
 
-using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
 using Esri.ArcGISMapsSDK.Components;
 using Esri.ArcGISMapsSDK.Utils.GeoCoord;
 using Esri.GameEngine.Geometry;
 using Esri.HPFramework;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using TMPro;
 using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.EventSystems;
+using UnityEngine.Serialization;
 using UnityEngine.UIElements;
 
-using Newtonsoft.Json;
-using UnityEngine.Serialization;
-
-namespace POLARIS
+namespace POLARIS.MainScene
 {
     public class AutoSuggestion
     {
@@ -40,6 +37,14 @@ namespace POLARIS
         public string MagicKey { get; set; }
         public bool IsCollection { get; set; }
     }
+
+    public class SearchResult
+    {
+        public double Longitude { get; set;  }
+        public double Latitude { get; set;  }
+        public string Address { get; set; }
+    }
+    
     public class Geocoder : MonoBehaviour
     {
         [FormerlySerializedAs("AddressMarkerTemplate")] public GameObject addressMarkerTemplate;
@@ -51,6 +56,7 @@ namespace POLARIS
         
         private TextField _searchField;
         private Button _searchButton;
+        private Button _clearButton;
 
         private Camera _mainCamera;
         private ArcGISLocationComponent _cameraLocation;
@@ -73,7 +79,9 @@ namespace POLARIS
 
         // private Dropdown _dropdown;
         private Label _autoSuggestionBigLabel;
-        private bool justClicked = false;
+        private bool _justClicked = false;
+
+        private Label _searchResultBigLabel;
 
         private void Start()
         {
@@ -87,9 +95,12 @@ namespace POLARIS
             var rootVisual = searchBar.GetComponent<UIDocument>().rootVisualElement;
             _searchField = rootVisual.Q<TextField>("SearchBox");
             _searchField.RegisterValueChangedCallback(OnSearchValueChanged);
-            _searchButton = rootVisual.Q<UnityEngine.UIElements.Button>("SearchButton");
+            _searchButton = rootVisual.Q<Button>("SearchButton");
             _searchButton.RegisterCallback<ClickEvent>(OnButtonClick);
             _autoSuggestionBigLabel = rootVisual.Q<Label>("AutoSuggestionBigLabel");
+            _searchResultBigLabel = rootVisual.Q<Label>("SearchResultBigLabel");
+            _clearButton = rootVisual.Q<Button>("ClearButton");
+            _clearButton.RegisterCallback<ClickEvent>(_ => ClearSearchResultsUI());
         }
 
         private void Update()
@@ -126,7 +137,7 @@ namespace POLARIS
         private async void OnSearchValueChanged(ChangeEvent<string> evt)
         {
             string newText = evt.newValue;
-            if (!string.IsNullOrWhiteSpace(newText) && !justClicked)
+            if (!string.IsNullOrWhiteSpace(newText) && !_justClicked)
             {
                 List<AutoSuggestion> suggestions = await FetchAutoSuggestions(newText);
                 UpdateAutoSuggestionsUI(suggestions);
@@ -134,7 +145,7 @@ namespace POLARIS
             else
             {
                 ClearAutoSuggestionsUI();
-                justClicked = false;
+                _justClicked = false;
             }
         }
 
@@ -222,18 +233,34 @@ namespace POLARIS
             }
         }
 
-        private void OnSuggestionClick(string suggestionText, string magicKey)
+        private async void OnSuggestionClick(string suggestionText, string magicKey)
         {
             FillInputField(suggestionText);
-            Geocode(suggestionText, magicKey);
+            
+            // --------- Basically copied from OnButtonClick(), lol
+            if (_waitingForResponse) return;
+
+            _waitingForResponse = true;
+            List<SearchResult> searchResults = await FetchSearchResults(suggestionText, magicKey);
+            UpdateSearchResultsUI(searchResults);
+
+            // Deselect the text input field that was used to call this function. 
+            // It is required so that the camera controller can be enabled/disabled when the input field is deselected/selected 
+            var eventSystem = EventSystem.current;
+            if (!eventSystem.alreadySelecting)
+            {
+                eventSystem.SetSelectedGameObject(null);
+            }
+            _waitingForResponse = false;
+            // -----------
+            
             ClearAutoSuggestionsUI();
-            justClicked = true;
+            _justClicked = true;
         }
         
         private void FillInputField(string suggestionText)
         {
             _searchField.value = suggestionText;
-            // ClearAutoSuggestionsUI();
         }
 
         private void ClearAutoSuggestionsUI()
@@ -241,20 +268,16 @@ namespace POLARIS
             _autoSuggestionBigLabel.Clear();
         }
 
-        private void OnButtonClick(ClickEvent clickEvent)
+        private async void OnButtonClick(ClickEvent clickEvent)
         {
-            HandleTextInput(_searchField.value);
-        }
+            if (_waitingForResponse) return;
 
-        /// <summary>
-        /// Verify the input text and call the geocoder. This function is called when an address is entered in the text input field.
-        /// </summary>
-        /// <param name="textInput"></param>
-        private void HandleTextInput(string textInput)
-        {
+            _waitingForResponse = true;
+            var textInput = _searchField.value;
             if (!string.IsNullOrWhiteSpace(textInput))
             {
-                Geocode(textInput);
+                List<SearchResult> searchResults = await FetchSearchResults(_searchField.value);
+                UpdateSearchResultsUI(searchResults);
             }
 
             // Deselect the text input field that was used to call this function. 
@@ -264,76 +287,98 @@ namespace POLARIS
             {
                 eventSystem.SetSelectedGameObject(null);
             }
+            _waitingForResponse = false;
         }
 
-        /// <summary>
-        /// Perform a geocoding query (address lookup) and parse the response. If the server returned an error, the message is shown to the user.
-        /// </summary>
-        /// <param name="address"></param>
-        /// <param name="magicKey"></param>
-        private async void Geocode(string address, string magicKey = "")
+        private async Task<List<SearchResult>> FetchSearchResults(string address, string magicKey = "")
         {
-            if (_waitingForResponse) return;
+            // Add school name in front of address query for more relevant results
+            string results = await SendAddressQuery("University of Central Florida " + address, magicKey);
+            List<SearchResult> searchResults = ParseSearchResults(results);
+            return searchResults;
+        }
 
-            _waitingForResponse = true;
-            var results = await SendAddressQuery("University of Central Florida " + address, magicKey);
-            print(results);
-
-            if (results.Contains("error")) // Server returned an error
+        private List<SearchResult> ParseSearchResults(string jsonResponse)
+        {
+            List<SearchResult> searchResults = new List<SearchResult>();
+            if (jsonResponse.Contains("error")) // Server returned an error
             {
-                var response = JObject.Parse(results);
+                var response = JObject.Parse(jsonResponse);
                 var error = response.SelectToken("error");
                 Debug.Log(error.SelectToken("message"));
             }
             else
             {
                 // Parse the query response
-                var response = JObject.Parse(results);
+                var response = JObject.Parse(jsonResponse);
                 var candidates = response.SelectToken("candidates");
                 if (candidates is JArray array)
                 {
-                    if (array.Count > 0) // Check if the response included any result  
+                    if (array.Count > 0)
                     {
-                        if (array.Count > 1)
+                        foreach (JToken searchToken in array)
                         {
-                            print("multiple results: ");
-                            foreach (var token in array)
+                            var location = searchToken.SelectToken("location");
+                            SearchResult result = new SearchResult
                             {
-                                print((string)token.SelectToken("address"));
-                            }
+                                Longitude = (double)location.SelectToken("x"),
+                                Latitude = (double)location.SelectToken("y"),
+                                Address = (string)searchToken.SelectToken("address")
+                            };
+                            searchResults.Add(result);
                         }
-                        
-                        var location = array[0].SelectToken("location");
-                        var lon = location.SelectToken("x");
-                        var lat = location.SelectToken("y");
-                        _responseAddress = (string)array[0].SelectToken("address");
-
-                        // Move the camera to the queried address
-                        _oldCameraPosition = new double3(_cameraLocation.Position.X, _cameraLocation.Position.Y, _cameraLocation.Position.Z);
-                        _oldCameraRotation = new double3(_cameraLocation.Rotation.Heading, _cameraLocation.Rotation.Pitch, _cameraLocation.Rotation.Roll);
-
-                        _newCameraRotation = new double3(0, 0, 0);
-                        _newCameraPosition = new double3((double)lon, (double)lat, _cameraLocation.Position.Z);
-
-                        _shouldPlaceMarker = true;
-                        _timer = 0;
                     }
                     else
                     {
                         Destroy(_queryLocationGo);
                     }
-
-                    // Update the info field in the UI
-                    var errorText = array.Count switch
-                    {
-                        0 => "Query did not return a valid response.",
-                        1 => "Enter an address above to move there or shift+click on a location to see the address / description.",
-                        _ => "Query returned multiple results. If the shown location is not the intended one, make your input more specific."
-                    };
-                    print(errorText);
                 }
+
+                return searchResults;
             }
-            _waitingForResponse = false;
+
+            return new List<SearchResult>();
+        }
+
+        private void UpdateSearchResultsUI(List<SearchResult> searchResults)
+        {
+            ClearSearchResultsUI();
+            
+            foreach (var searchResult in searchResults)
+            {
+                var searchResultSubLabel = new Label
+                {
+                    text = searchResult.Address
+                };
+                // Add to class list
+                searchResultSubLabel.RegisterCallback<ClickEvent>(_ => SetStuff(searchResult.Longitude, searchResult.Latitude, searchResult.Address));
+                _searchResultBigLabel.Add(searchResultSubLabel);
+            }
+        }
+
+        // TODO: SHOULD SHOW BUILDING INFORMATION
+        private void OnSearchClick()
+        {
+            
+        }
+        
+        private void ClearSearchResultsUI()
+        {
+            _searchResultBigLabel.Clear();
+        }
+
+        private void SetStuff(double lon, double lat, string address)
+        {
+            _responseAddress = address;
+            
+            _oldCameraPosition = new double3(_cameraLocation.Position.X, _cameraLocation.Position.Y, _cameraLocation.Position.Z);
+            _oldCameraRotation = new double3(_cameraLocation.Rotation.Heading, _cameraLocation.Rotation.Pitch, _cameraLocation.Rotation.Roll);
+
+            _newCameraRotation = new double3(0, 0, 0);
+            _newCameraPosition = new double3(lon, lat, _cameraLocation.Position.Z);
+
+            _shouldPlaceMarker = true;
+            _timer = 0;
         }
 
         /// <summary>
