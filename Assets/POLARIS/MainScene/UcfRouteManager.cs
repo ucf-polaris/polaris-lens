@@ -218,13 +218,18 @@ namespace POLARIS
                 var geometry = feature.SelectToken("geometry");
                 var paths = geometry.SelectToken("paths")[0];
 
+                var pathList = new List<double[]>{};
+
                 foreach(var path in paths)
                 {
                     _breadcrumbs.Add(CreateBreadCrumb((float)path[0], (float)path[1]));
+                    pathList.Add(new[]{(double)path[0], (double)path[1]});
 
                     yield return null;
                     yield return null;
                 }
+
+                SwapData.PathPoints = pathList;
             }
 
             SetBreadcrumbHeight();

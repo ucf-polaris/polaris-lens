@@ -31,7 +31,6 @@ namespace POLARIS.GeospatialScene
             var eulerRot = targetRotation.eulerAngles;
 
             //Clamp x-rotation to 60 degrees each direction
-            print("TARGET ROT: " + targetRotation.eulerAngles);
             targetRotation = eulerRot.x switch
             {
                 > 60 and < 180  => Quaternion.Euler(60, eulerRot.y, eulerRot.z),

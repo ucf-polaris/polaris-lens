@@ -24,6 +24,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using Google.XR.ARCoreExtensions;
 using Google.XR.ARCoreExtensions.Samples.Geospatial;
+using POLARIS.MainScene;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.Android;
@@ -75,6 +76,8 @@ namespace POLARIS.GeospatialScene
         /// The ARCoreExtensions used in the sample.
         /// </summary>
         public ARCoreExtensions ARCoreExtensions;
+
+        public ARPathManager PathManager;
 
         [Header("UI Elements")]
 
@@ -262,6 +265,7 @@ namespace POLARIS.GeospatialScene
                 Destroy(anchor);
             }
 
+            PathManager.ClearPathAnchors();
             _anchorObjects.Clear();
             _historyCollection.Collection.Clear();
             SnackBarText.text = "Anchor(s) cleared!";
@@ -314,17 +318,23 @@ namespace POLARIS.GeospatialScene
             // {
             //     _historyCollection.Collection.Add(history);
             // }
-            var results = LoadPanels.LoadNearby(_anchorObjects, AnchorManager);
-            if (results.Length > 0)
-            {
-                foreach (var result in results)
-                {
-                    _historyCollection.Collection.Add(result.History);
-                }
-            }
+            // var results = LoadPanels.LoadNearby(_anchorObjects, AnchorManager);
+            // if (results.Length > 0)
+            // {
+            //     foreach (var result in results)
+            //     {
+            //         _historyCollection.Collection.Add(result.History);
+            //     }
+            // }
 
             ClearAllButton.gameObject.SetActive(_anchorObjects.Count > 0);
             SaveGeospatialAnchorHistory();
+            
+            // Load path if possible
+            // if (SwapData.PathPoints != null)
+            // {
+                PathManager.LoadPathAnchors(_anchorObjects, AnchorManager);
+            // }
         }
 
         /// <summary>
