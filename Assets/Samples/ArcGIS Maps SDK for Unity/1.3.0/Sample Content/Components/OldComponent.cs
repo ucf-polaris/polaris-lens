@@ -1,4 +1,4 @@
-// COPYRIGHT 1995-2022 ESRI
+﻿// COPYRIGHT 1995-2022 ESRI
 // TRADE SECRETS: ESRI PROPRIETARY AND CONFIDENTIAL
 // Unpublished material - all rights reserved under the
 // Copyright Laws of the United States and applicable international
@@ -20,30 +20,30 @@ using Esri.HPFramework;
 using System;
 using Unity.Mathematics;
 using UnityEngine;
-// #if ENABLE_INPUT_SYSTEM
-// using UnityEngine.InputSystem;
-// #endif
+#if ENABLE_INPUT_SYSTEM
+using UnityEngine.InputSystem;
+#endif
 
 namespace Esri.ArcGISMapsSDK.Samples.Components
 {
 	[DisallowMultipleComponent]
 	[RequireComponent(typeof(HPTransform))]
 	[AddComponentMenu("ArcGIS Maps SDK/Samples/ArcGIS Camera Controller")]
-	public class ArcGISCameraControllerComponent : MonoBehaviour
+	public class OldArcGISCameraControllerComponent : MonoBehaviour
 	{
 		private ArcGISMapComponent _arcGisMapComponent;
 		private HPTransform _hpTransform;
 
-// #if ENABLE_INPUT_SYSTEM
-// 		public ArcGISCameraControllerComponentActions CameraActions;
-// 		private InputAction _upControls;
-// 		private InputAction _forwardControls;
-// 		private InputAction _rightControls;
-// #endif
+#if ENABLE_INPUT_SYSTEM
+		public ArcGISCameraControllerComponentActions CameraActions;
+		private InputAction _upControls;
+		private InputAction _forwardControls;
+		private InputAction _rightControls;
+#endif
 
 		private float _translationSpeed = 0.0f;
 		private const float RotationSpeed = 100.0f;
-		private const double PinchZoomSpeed = 0.1f;
+		private const double MouseScrollSpeed = 0.1f;
 
 		private const double MaxCameraHeight = 2000.0;
 		private const double MinCameraHeight = 1.8;
@@ -54,7 +54,7 @@ namespace Esri.ArcGISMapsSDK.Samples.Components
 		private double _lastDotVc = 0.0f;
 		private bool _firstDragStep = true;
 
-		private Vector3 _lastTouchPosition;
+		private Vector3 _lastMouseScreenPosition;
 		private bool _firstOnFocus = true;
 
 		public double MaxSpeed = 2000000.0;
@@ -62,17 +62,16 @@ namespace Esri.ArcGISMapsSDK.Samples.Components
 
 		private void Awake()
 		{
-			// _lastMouseScreenPosition = GetMousePosition();
-			_lastTouchPosition = GetTouchPosition();
+			_lastMouseScreenPosition = GetMousePosition();
 
 			Application.focusChanged += FocusChanged;
 
-// #if ENABLE_INPUT_SYSTEM
-// 			CameraActions = new ArcGISCameraControllerComponentActions();
-// 			_upControls = CameraActions.Move.Up;
-// 			_forwardControls = CameraActions.Move.Forward;
-// 			_rightControls = CameraActions.Move.Right;
-// #endif
+#if ENABLE_INPUT_SYSTEM
+			CameraActions = new ArcGISCameraControllerComponentActions();
+			_upControls = CameraActions.Move.Up;
+			_forwardControls = CameraActions.Move.Forward;
+			_rightControls = CameraActions.Move.Right;
+#endif
 		}
 
 		private void OnEnable()
@@ -80,36 +79,29 @@ namespace Esri.ArcGISMapsSDK.Samples.Components
 			_arcGisMapComponent = gameObject.GetComponentInParent<ArcGISMapComponent>();
 			_hpTransform = GetComponent<HPTransform>();
 
-// #if ENABLE_INPUT_SYSTEM
-// 			_upControls.Enable();
-// 			_forwardControls.Enable();
-// 			_rightControls.Enable();
-// #endif
+#if ENABLE_INPUT_SYSTEM
+			_upControls.Enable();
+			_forwardControls.Enable();
+			_rightControls.Enable();
+#endif
 		}
 
-		// private void OnDisable()
-		// {
-// #if ENABLE_INPUT_SYSTEM
-// 			_upControls.Disable();
-// 			_forwardControls.Disable();
-// 			_rightControls.Disable();
-// #endif
-		// }
-
-// 		private static Vector3 GetMousePosition()
-// 		{
-// #if ENABLE_INPUT_SYSTEM
-// 			return Mouse.current.position.ReadValue();
-// #else
-// 			return Input.mousePosition;
-// #endif
-// 		}
-
-		private static Vector3 GetTouchPosition()
+		private void OnDisable()
 		{
-			if (Input.touchCount > 0) return Input.GetTouch(0).position;
-			
-			return new Vector3(Screen.width / 2, Screen.height / 2, 0);
+#if ENABLE_INPUT_SYSTEM
+			_upControls.Disable();
+			_forwardControls.Disable();
+			_rightControls.Disable();
+#endif
+		}
+
+		private static Vector3 GetMousePosition()
+		{
+#if ENABLE_INPUT_SYSTEM
+			return Mouse.current.position.ReadValue();
+#else
+			return Input.mousePosition;
+#endif
 		}
 
 		private double3 GetTotalTranslation()
@@ -117,78 +109,59 @@ namespace Esri.ArcGISMapsSDK.Samples.Components
 			var forward = _hpTransform.Forward.ToDouble3();
 			var right = _hpTransform.Right.ToDouble3();
 			var up = _hpTransform.Up.ToDouble3();
-			print("forward: " + forward);
-			print("right: " + right);
-			print("up: " + up);
 
 			var totalTranslation = double3.zero;
 
-			if (Input.touchCount > 0)
+#if ENABLE_INPUT_SYSTEM
+			up *= _upControls.ReadValue<float>() * _translationSpeed * Time.deltaTime;
+			right *= _rightControls.ReadValue<float>() * _translationSpeed * Time.deltaTime;
+			forward *= _forwardControls.ReadValue<float>() * _translationSpeed * Time.deltaTime;
+			totalTranslation += up + right + forward;
+#else
+
+			Action<string, double3> handleAxis = (axis, vector) =>
 			{
-				var touch = Input.GetTouch(0);
-				if (touch.phase == TouchPhase.Moved)
+				if (Input.GetAxis(axis) != 0)
 				{
-					var touchDelta = touch.deltaPosition;
-					print("x calc: " + touchDelta.x * _translationSpeed * Time.deltaTime);
-					print("y calc: " + touchDelta.y * _translationSpeed * Time.deltaTime);
-					right *= touchDelta.x * _translationSpeed * Time.deltaTime;
-					up *= touchDelta.y * _translationSpeed * Time.deltaTime;
-					totalTranslation += right + up;
+					totalTranslation += vector * Input.GetAxis(axis) * TranslationSpeed * Time.deltaTime;
 				}
-			}
+			};
+
+			handleAxis("Vertical", forward);
+			handleAxis("Horizontal", right);
+			handleAxis("Jump", up);
+			handleAxis("Submit", -up);
+#endif
 
 			return totalTranslation;
 		}
 
-// 		private static float GetMouseScrollValue()
-// 		{
-// #if ENABLE_INPUT_SYSTEM
-// 			return Mouse.current.scroll.ReadValue().y;
-// #else
-// 			return Input.mouseScrollDelta.y;
-// #endif
-// 		}
-		private static float GetPinchZoomValue()
+		private static float GetMouseScrollValue()
 		{
-			// Handle mobile pinch zoom
-			if (Input.touchCount == 2)
-			{
-				var touch1 = Input.touches[0];
-				var touch2 = Input.touches[1];
-
-				var touch1PrevPos = touch1.position - touch1.deltaPosition;
-				var touch2PrevPos = touch2.position - touch2.deltaPosition;
-
-				var prevTouchDeltaMag = (touch1PrevPos - touch2PrevPos).magnitude;
-				var touchDeltaMag = (touch1.position - touch2.position).magnitude;
-
-				return touchDeltaMag - prevTouchDeltaMag;
-			}
-
-			return 0.0f;
+#if ENABLE_INPUT_SYSTEM
+			return Mouse.current.scroll.ReadValue().y;
+#else
+			return Input.mouseScrollDelta.y;
+#endif
 		}
 
-// 		private static bool IsMouseLeftClicked()
-// 		{
-// #if ENABLE_INPUT_SYSTEM
-// 			return Mouse.current.leftButton.ReadValue() == 1;
-// #else
-// 			return Input.GetMouseButton(0);
-// #endif
-// 		}
-		private static bool IsTouchHeld()
+		private static bool IsMouseLeftClicked()
 		{
+#if ENABLE_INPUT_SYSTEM
+			return Mouse.current.leftButton.ReadValue() == 1;
+#else
 			return Input.GetMouseButton(0);
+#endif
 		}
 
-// 		private static bool IsMouseRightClicked()
-// 		{
-// #if ENABLE_INPUT_SYSTEM
-// 			return Mouse.current.rightButton.ReadValue() == 1;
-// #else
-// 			return Input.GetMouseButton(1);
-// #endif
-// 		}
+		private static bool IsMouseRightClicked()
+		{
+#if ENABLE_INPUT_SYSTEM
+			return Mouse.current.rightButton.ReadValue() == 1;
+#else
+			return Input.GetMouseButton(1);
+#endif
+		}
 
 		private void Start()
 		{
@@ -227,11 +200,11 @@ namespace Esri.ArcGISMapsSDK.Samples.Components
 
 			var totalTranslation = GetTotalTranslation();
 
-			var scrollValue = GetPinchZoomValue();
+			var scrollValue = GetMouseScrollValue();
 			if (scrollValue != 0.0)
 			{
 				var towardsMouse = GetMouseRayCastDirection();
-				var delta = PinchZoomSpeed * scrollValue;
+				var delta = MouseScrollSpeed * scrollValue;
 				totalTranslation += towardsMouse * delta;
 
 				if (altitude + totalTranslation.y < MinCameraHeight
@@ -303,12 +276,11 @@ namespace Esri.ArcGISMapsSDK.Samples.Components
 			var cartesianPosition = Position;
 			var cartesianRotation = Rotation;
 
-			// var deltaMouse = GetMousePosition() - _lastMouseScreenPosition;
-			var deltaMouse = GetTouchPosition() - _lastTouchPosition;
+			var deltaMouse = GetMousePosition() - _lastMouseScreenPosition;
 
 			if (!_firstOnFocus)
 			{
-				if (IsTouchHeld())
+				if (IsMouseLeftClicked())
 				{
 					if (deltaMouse != Vector3.zero)
 					{
@@ -325,13 +297,13 @@ namespace Esri.ArcGISMapsSDK.Samples.Components
 						}
 					}
 				}
-				// else if (IsMouseRightClicked())
-				// {
-				// 	if (!deltaMouse.Equals(Vector3.zero))
-				// 	{
-				// 		RotateAround(ref cartesianPosition, ref cartesianRotation, deltaMouse);
-				// 	}
-				// }
+				else if (IsMouseRightClicked())
+				{
+					if (!deltaMouse.Equals(Vector3.zero))
+					{
+						RotateAround(ref cartesianPosition, ref cartesianRotation, deltaMouse);
+					}
+				}
 				else
 				{
 					_firstDragStep = true;
@@ -345,7 +317,7 @@ namespace Esri.ArcGISMapsSDK.Samples.Components
 			Position = cartesianPosition;
 			Rotation = cartesianRotation;
 
-			_lastTouchPosition = GetTouchPosition();
+			_lastMouseScreenPosition = GetMousePosition();
 		}
 
 		private void LocalDragging(ref double3 cartesianPosition)
@@ -388,9 +360,11 @@ namespace Esri.ArcGISMapsSDK.Samples.Components
 			var deltaY = _firstDragStep ? 0 : _lastArcGisPoint.Y - currentGeoPosition.Y;
 
 			deltaY = Math.Sign(dotVC) != Math.Sign(_lastDotVc) ? 0 : deltaY;
-			
+
+
 			_lastArcGisPoint = new ArcGISPoint(currentGeoPosition.X + deltaX, currentGeoPosition.Y + deltaY, _lastArcGisPoint.Z, _lastArcGisPoint.SpatialReference);
-			
+
+
 			var YVal = geoPosition.Y + (dotVC <= 0 ? -deltaY : deltaY);
 			YVal = Math.Abs(YVal) < MaxCameraLatitude ? YVal : (YVal > 0 ? MaxCameraLatitude : -MaxCameraLatitude);
 
@@ -446,8 +420,7 @@ namespace Esri.ArcGISMapsSDK.Samples.Components
 			proj.c2.w *= -1;
 			proj.c3.z *= -1;
 
-			// var MousePosition = GetMousePosition();
-			var MousePosition = GetTouchPosition();
+			var MousePosition = GetMousePosition();
 			double3 ndcCoord = new double3(2.0 * (MousePosition.x / Screen.width) - 1.0, 2.0 * (MousePosition.y / Screen.height) - 1.0, 1);
 			double3 viewRayDir = math.normalize(proj.HomogeneousTransformPoint(ndcCoord));
 			return view.HomogeneousTransformVector(viewRayDir);

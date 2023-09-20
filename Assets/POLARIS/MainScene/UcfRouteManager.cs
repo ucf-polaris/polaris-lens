@@ -50,7 +50,9 @@ namespace POLARIS
 
         private Camera _mainCamera;
 
+        private string _startName;
         private string _destName;
+        private readonly Queue<string> _stopNames = new Queue<string>();
 
         private void Start()
         {
@@ -87,8 +89,6 @@ namespace POLARIS
 
                 if (Physics.Raycast(ray, out var hit))
                 {
-                    _destName = GetBuilding.ToTitleCase(hit.transform.name[4..]);
-                    
                     var routeMarker = Instantiate(RouteMarker, hit.point, Quaternion.identity, _arcGisMapComponent.transform);
 
                     var geoPosition = HitToGeoPosition(hit);
@@ -99,12 +99,22 @@ namespace POLARIS
                     locationComponent.Rotation = new ArcGISRotation(0, 90, 0);
 
                     _stops.Enqueue(routeMarker);
+                    _stopNames.Enqueue(GetBuilding.ToTitleCase(hit.transform.name[4..]));
+                    
+                    // if (_stops.Count < StopCount) 
+                    //     _startName = GetBuilding.ToTitleCase(hit.transform.name[4..]);
 
                     if (_stops.Count > StopCount)
+                    {
                         Destroy(_stops.Dequeue());
-
+                        _stopNames.Dequeue();
+                    }
+                    
                     if (_stops.Count == StopCount)
                     {
+                        var stopNamesArray = _stopNames.ToArray();
+                        _startName = stopNamesArray[0];
+                        _destName = stopNamesArray[1];
                         _routing = true;
 
                         var results = await FetchRoute(_stops.ToArray());
@@ -277,7 +287,7 @@ namespace POLARIS
 
             print($"Time: {travelMinutes:0.00} Minutes, Distance: {travelMiles:0.00} Miles");
 
-            _routingDestLabel.text = $"Routing to {_destName}";
+            _routingDestLabel.text = $"Routing from {_startName} to {_destName}";
             _routingInfoLabel.text = $"{travelMinutes:0} min, {travelMiles:0.0} miles";
         }
 

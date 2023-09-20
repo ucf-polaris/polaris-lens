@@ -47,20 +47,32 @@ namespace POLARIS.MainScene
         private static IEnumerable<char> ToTitleCaseEnumerable(string stringToConvert)
         {
             var newWord = true;
+            var prevLetterI = false;
             foreach (var c in stringToConvert)
             {
                 if (newWord)
                 {
                     yield return ToUpper(c);
                     newWord = false;
+                    prevLetterI = c == 'I';
                 }
                 else
                 {
-                    yield return ToLower(c);
+                    if (prevLetterI)
+                    {
+                        if (c == 'I') yield return ToUpper(c);
+                        else yield return ToLower(c);
+                    }
+                    else
+                    {
+                        yield return ToLower(c);
+                    }
                 }
+
                 if (c == ' ')
                 {
                     newWord = true;
+                    prevLetterI = false;
                 }
             }
         }
