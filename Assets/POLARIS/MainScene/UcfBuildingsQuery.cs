@@ -15,10 +15,7 @@ using UnityEngine;
 using UnityEngine.Networking;
 using Newtonsoft.Json;
 using Unity.Mathematics;
-
 using TMPro;
-using UnityEngine.EventSystems;
-using Esri.ArcGISMapsSDK.Samples.Components;
 
 namespace POLARIS
 { 
@@ -65,51 +62,64 @@ namespace POLARIS
         private const int BuildingSpawnHeight = 10000;
 
         // This will hold a reference to each feature we created
-        public List<GameObject> Buildings = new List<GameObject>();
+        // public List<GameObject> Buildings = new List<GameObject>();
 
         // In the query request we can denote the Spatial Reference we want the return geometries in.
         // It is important that we create the GameObjects with the same Spatial Reference
         private const int FeatureSRWKID = 4326;
 
-        private ArcGISMapComponent _arcGisMapComponent;
+        public ArcGISMapComponent ArcGisMapComponent;
         private ArcGISLocationComponent _locationComponent;
         private double3 _rootPos;
 
-        private ArcGISCameraComponent ArcGISCamera;
-        private TMP_Dropdown buildingSelector;
+        private ArcGISCameraComponent _arcGisCamera;
+        private TMP_Dropdown _buildingSelector;
 
         private PolyExtruder _polyExtruder;
+
+        private bool _runCreate;
 
         // Get all the features when the script starts
         private void Start()
         {
-            _arcGisMapComponent = FindObjectOfType<ArcGISMapComponent>();
-            var loader = FindChildWithTag(_arcGisMapComponent.gameObject, "Location");
+            var loader = FindChildWithTag(ArcGisMapComponent.gameObject, "Location");
             _locationComponent = loader.GetComponent<ArcGISLocationComponent>();
             _rootPos = loader.GetComponent<HPTransform>().UniversePosition;
 
-            StartCoroutine(GetFeatures());
-
+            if (ArcGisMapComponent.HasSpatialReference())
+            {
+                _runCreate = true;
+            }
+            else
+            {
+                ArcGisMapComponent.View.SpatialReferenceChanged += () => _runCreate = true;
+            }
+            
             //    buildingSelector.onValueChanged.AddListener(delegate
             //    {
             //        buildingSelected();
             //    });
         }
+        
+        private void Update()
+        {
+            if (!_runCreate) return;
+            
+            StartCoroutine(GetFeatures());
+            _runCreate = false;
 
-        //private void Update()
-        //{
-        //    if (MouseOverUI())
-        //    {
-        //        ArcGISCamera.GetComponent<ArcGISCameraControllerComponent>().enabled = false;
-        //    }
-        //    else
-        //    {
-        //        ArcGISCamera.GetComponent<ArcGISCameraControllerComponent>().enabled = true;
-        //    }
-        //}
+            // if (MouseOverUI())
+            // {
+            //     ArcGISCamera.GetComponent<ArcGISCameraControllerComponent>().enabled = false;
+            // }
+            // else
+            // {
+            //     ArcGISCamera.GetComponent<ArcGISCameraControllerComponent>().enabled = true;
+            // }
+        }
 
         // Sends the Request to get features from the service
-        private IEnumerator GetFeatures()
+        private IEnumerator GetFeatures() //Action<UnityWebRequest> callback
         {
             // To learn more about the Feature Layer rest API and all the things that are possible checkout
             // https://developers.arcgis.com/rest/services-reference/enterprise/query-feature-service-layer-.htm
@@ -117,8 +127,9 @@ namespace POLARIS
             var queryRequestURL = FeatureLayerURL + "/Query?" + MakeRequestHeaders();
             Debug.Log(queryRequestURL);
             var request = UnityWebRequest.Get(queryRequestURL);
-            yield return request.SendWebRequest();
 
+            
+            yield return request.SendWebRequest();
             if (request.result != UnityWebRequest.Result.Success)
             {
                 Debug.Log(request.error);
@@ -129,6 +140,7 @@ namespace POLARIS
                 // populateBuildingsDropdown();
             }
         }
+
 
         // Creates the Request Headers to be used in our HTTP Request
         private static string MakeRequestHeaders()
@@ -191,21 +203,20 @@ namespace POLARIS
                 {
                     var pair = feature.geometry.rings[0][index];
                     var position = new ArcGISPoint(pair[0], pair[1], 0, new ArcGISSpatialReference(FeatureSRWKID));
-                    var localCoords = _arcGisMapComponent.View.GeographicToWorld(position);
+                    var localCoords = ArcGisMapComponent.View.GeographicToWorld(position);
                     pointsList.Add(
                         new Vector2((float)(localCoords.x - _rootPos.x), (float)(localCoords.z - _rootPos.z)));
                 }
-
                 var vertices2D = pointsList.ToArray();
 
-                var gameObject = new GameObject(feature.attributes.BuildingNa);
-                gameObject.transform.SetParent(_locationComponent.transform);
-                
-                _polyExtruder = gameObject.AddComponent<PolyExtruder>();
+                var buildingObject = new GameObject(feature.attributes.BuildingNa);
+                buildingObject.transform.SetParent(_locationComponent.transform);
+
+                _polyExtruder = buildingObject.AddComponent<PolyExtruder>();
                 _polyExtruder.isOutlineRendered = false;
-                
+
                 _polyExtruder.createPrism(feature.attributes.BuildingNa, 50.0f, vertices2D, 
-                    new Color32(23, 103, 194, 255), true, false, true);
+                                          new Color32(23, 103, 194, 255), true, false, true);
                 // TODO: Add mesh collider to walls
                 // gameObject.AddComponent<MeshCollider>();
             }

@@ -13,8 +13,8 @@ namespace POLARIS.GeospatialScene
             // mock fetch for now
             var results = new[]
             {
-                new GeospatialAnchorContent("FIRST panel", new GeospatialAnchorHistory(28.614481, -81.195693, -5.6, new Quaternion(0, 0, 0, 0))),
-                new GeospatialAnchorContent("second panel", new GeospatialAnchorHistory(28.614469, -81.195702, -5.4, new Quaternion(0, 0, 0, 0)))
+                new GeospatialAnchorContent("FIRST panel", new GeospatialAnchorHistory(28.614481, -81.195693, -5.6, AnchorType.Geospatial, new Quaternion(0, 0, 0, 0))),
+                new GeospatialAnchorContent("second panel", new GeospatialAnchorHistory(28.614469, -81.195702, -5.4, AnchorType.Geospatial, new Quaternion(0, 0, 0, 0)))
             };
 
             foreach (var anchor in results)

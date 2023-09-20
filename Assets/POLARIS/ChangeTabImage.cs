@@ -7,36 +7,36 @@ using UnityEngine.UIElements;
 
 public class ChangeTabImage : MonoBehaviour
 {
-		public Button calendarButton;
-		public Button locationButton;
-		Image darkCalendarButton;
-		Image darkLocationButton;
+		private Button _calendarButton;
+		private Button _locationButton;
+		// Image _darkCalendarButton;
+		// Image _darkLocationButton;
 
     // Start is called before the first frame update
-    void Start()
+    private void Start()
     {
         var uiDoc = gameObject.GetComponent<UIDocument>();
-			calendarButton = uiDoc.rootVisualElement.Q<Button>("Cal");
-				calendarButton.clickable.clicked += onClickCalendar;
+			_calendarButton = uiDoc.rootVisualElement.Q<Button>("Cal");
+				_calendarButton.clickable.clicked += OnClickCalendar;
 
-				locationButton = uiDoc.rootVisualElement.Q<Button>("Loc");
-				locationButton.clickable.clicked += onClickLocation;
+				_locationButton = uiDoc.rootVisualElement.Q<Button>("Loc");
+				_locationButton.clickable.clicked += OnClickLocation;
     }
 
-		void onClickCalendar()
+    private void OnClickCalendar()
 		{
-			locationButton.style.backgroundImage = AssetDatabase.LoadAssetAtPath<Texture2D>("Assets/POLARIS/UI tabs/locationdark.png");
-			calendarButton.style.backgroundImage = AssetDatabase.LoadAssetAtPath<Texture2D>("Assets/POLARIS/UI tabs/calendar.png");
+			_locationButton.style.backgroundImage = Resources.Load<Texture2D>("Polaris/UI tabs/locationdark");
+			_calendarButton.style.backgroundImage = Resources.Load<Texture2D>("Polaris/UI tabs/calendar.png");
 
 			// locationButton.GetComponent<Image>().image = darkLocationButton;
 			// calendarButton.GetComponent<Image>().image = calendarButton;
 			print("Hello calendar!");
 		}
 
-		void onClickLocation()
+    private void OnClickLocation()
 		{
-			locationButton.style.backgroundImage = AssetDatabase.LoadAssetAtPath<Texture2D>("Assets/POLARIS/UI tabs/location.png");
-			calendarButton.style.backgroundImage = AssetDatabase.LoadAssetAtPath<Texture2D>("Assets/POLARIS/UI tabs/calendardark.png");
+			_locationButton.style.backgroundImage = Resources.Load<Texture2D>("Polaris/UI tabs/location.png");
+			_calendarButton.style.backgroundImage = Resources.Load<Texture2D>("Polaris/UI tabs/calendardark.png");
 			print("Hello location!");
 		}
 }

@@ -9,12 +9,12 @@ EditorBuildSettings:
     path: Assets/POLARIS/MainScene.unity
     guid: 414df7d762e5ff34eb84a77e166881c0
   - enabled: 0
-    path: Assets/Samples/ARCore Extensions/1.36.0/Geospatial Sample/Scenes/Geospatial.unity
+    path: Assets/Samples/ARCore Extensions/1.39.0/Geospatial Sample/Scenes/Geospatial.unity
     guid: 1ed15e9657253406185e4b2c7c5a4fc4
-  - enabled: 1
+  - enabled: 0
     path: Assets/POLARIS/Register.unity
     guid: d6fffa731ad37486ab8b6c94d362f56d
-  - enabled: 1
+  - enabled: 0
     path: Assets/POLARIS/Login.unity
     guid: dcb6b30fed2714731970bd1052d1f012
   m_configObjects:

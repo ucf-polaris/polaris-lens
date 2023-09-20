@@ -484,7 +484,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   FeatureLayerURL: https://services.arcgis.com/dVL5xxth19juhrDY/ArcGIS/rest/services/MainCampus_RPbldgs/FeatureServer/0
-  Buildings: []
+  ArcGisMapComponent: {fileID: 1548223581}
 --- !u!4 &607878209
 Transform:
   m_ObjectHideFlags: 0
@@ -665,6 +665,8 @@ GameObject:
   - component: {fileID: 972164399}
   - component: {fileID: 972164398}
   - component: {fileID: 972164402}
+  - component: {fileID: 972164404}
+  - component: {fileID: 972164403}
   m_Layer: 0
   m_Name: ArcGISCamera
   m_TagString: MainCamera
@@ -819,6 +821,63 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   MaxSpeed: 2000000
   MinSpeed: 1000
+  IgnoreUI: 0
+--- !u!114 &972164403
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 972164396}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a79441f348de89743a2939f4d699eac1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_RenderShadows: 1
+  m_RequiresDepthTextureOption: 2
+  m_RequiresOpaqueTextureOption: 2
+  m_CameraType: 0
+  m_Cameras: []
+  m_RendererIndex: -1
+  m_VolumeLayerMask:
+    serializedVersion: 2
+    m_Bits: 1
+  m_VolumeTrigger: {fileID: 0}
+  m_VolumeFrameworkUpdateModeOption: 2
+  m_RenderPostProcessing: 0
+  m_Antialiasing: 0
+  m_AntialiasingQuality: 2
+  m_StopNaN: 0
+  m_Dithering: 0
+  m_ClearDepth: 1
+  m_AllowXRRendering: 1
+  m_AllowHDROutput: 1
+  m_UseScreenCoordOverride: 0
+  m_ScreenSizeOverride: {x: 0, y: 0, z: 0, w: 0}
+  m_ScreenCoordScaleBias: {x: 0, y: 0, z: 0, w: 0}
+  m_RequiresDepthTexture: 0
+  m_RequiresColorTexture: 0
+  m_Version: 2
+  m_TaaSettings:
+    quality: 3
+    frameInfluence: 0.1
+    jitterScale: 1
+    mipBias: 0
+    varianceClampScale: 0.9
+    contrastAdaptiveSharpening: 0
+--- !u!114 &972164404
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 972164396}
+  m_Enabled: 0
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6715ece696adb074bbe6b0103cdafcff, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &1267588320
 GameObject:
   m_ObjectHideFlags: 0
@@ -887,7 +946,6 @@ GameObject:
   - component: {fileID: 1548223583}
   - component: {fileID: 1548223582}
   - component: {fileID: 1548223581}
-  - component: {fileID: 1548223580}
   m_Layer: 0
   m_Name: ArcGISMap
   m_TagString: Untagged
@@ -895,19 +953,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &1548223580
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1548223579}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 100949aafaf00444f8fc621b1a77835c, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  enableLogging: 0
 --- !u!114 &1548223581
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -938,14 +983,14 @@ MonoBehaviour:
       SRWkid: 4326
     ExtentShape: 0
     ShapeDimensions:
-      x: 1000
+      x: 2000
       y: 0
     UseOriginAsCenter: 0
   layers:
   - Name: 3D Buildings
-    Type: 2
-    Source: https://basemaps3d.https://basemaps3d.arcgis.com/arcgis/rest/services/OpenStreetMap3D_Buildings_v1/SceneServer
-    Opacity: 0
+    Type: 1
+    Source: https://basemaps3d.arcgis.com/arcgis/rest/services/OpenStreetMap3D_Buildings_v1/SceneServer
+    Opacity: 0.503
     IsVisible: 1
     Authentication:
       ConfigurationIndex: 0
