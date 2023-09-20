@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 0}
-  m_IndirectSpecularColor: {r: 0.44768894, g: 0.49703234, b: 0.5726779, a: 1}
+  m_IndirectSpecularColor: {r: 0.45031738, g: 0.50033987, b: 0.57531095, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -241,7 +241,7 @@ Transform:
   m_GameObject: {fileID: 177370685}
   serializedVersion: 2
   m_LocalRotation: {x: 0.70710677, y: -0, z: -0, w: 0.7071068}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalPosition: {x: 0, y: 0, z: 0.0000000013969839}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -484,7 +484,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   FeatureLayerURL: https://services.arcgis.com/dVL5xxth19juhrDY/ArcGIS/rest/services/MainCampus_RPbldgs/FeatureServer/0
-  ArcGisMapComponent: {fileID: 1548223581}
+  Buildings: []
 --- !u!4 &607878209
 Transform:
   m_ObjectHideFlags: 0
@@ -537,7 +537,7 @@ MonoBehaviour:
   m_LocalPosition:
     x: -9039478.68992216
     y: 0
-    z: 3325135.872468732
+    z: 3325135.8724687304
   m_LocalRotation:
     value:
       x: 0
@@ -665,8 +665,6 @@ GameObject:
   - component: {fileID: 972164399}
   - component: {fileID: 972164398}
   - component: {fileID: 972164402}
-  - component: {fileID: 972164404}
-  - component: {fileID: 972164403}
   m_Layer: 0
   m_Name: ArcGISCamera
   m_TagString: MainCamera
@@ -796,7 +794,7 @@ MonoBehaviour:
   m_LocalPosition:
     x: -9039198.95691282
     y: 283.4283447265625
-    z: 3324946.361543439
+    z: 3324946.3615434384
   m_LocalRotation:
     value:
       x: 0.54716814
@@ -821,61 +819,66 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   MaxSpeed: 2000000
   MinSpeed: 1000
-  IgnoreUI: 0
---- !u!114 &972164403
+--- !u!1 &985640667
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 985640669}
+  - component: {fileID: 985640668}
+  - component: {fileID: 985640670}
+  m_Layer: 5
+  m_Name: MenuUI
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &985640668
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 972164396}
+  m_GameObject: {fileID: 985640667}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: a79441f348de89743a2939f4d699eac1, type: 3}
+  m_Script: {fileID: 19102, guid: 0000000000000000e000000000000000, type: 0}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_RenderShadows: 1
-  m_RequiresDepthTextureOption: 2
-  m_RequiresOpaqueTextureOption: 2
-  m_CameraType: 0
-  m_Cameras: []
-  m_RendererIndex: -1
-  m_VolumeLayerMask:
-    serializedVersion: 2
-    m_Bits: 1
-  m_VolumeTrigger: {fileID: 0}
-  m_VolumeFrameworkUpdateModeOption: 2
-  m_RenderPostProcessing: 0
-  m_Antialiasing: 0
-  m_AntialiasingQuality: 2
-  m_StopNaN: 0
-  m_Dithering: 0
-  m_ClearDepth: 1
-  m_AllowXRRendering: 1
-  m_AllowHDROutput: 1
-  m_UseScreenCoordOverride: 0
-  m_ScreenSizeOverride: {x: 0, y: 0, z: 0, w: 0}
-  m_ScreenCoordScaleBias: {x: 0, y: 0, z: 0, w: 0}
-  m_RequiresDepthTexture: 0
-  m_RequiresColorTexture: 0
-  m_Version: 2
-  m_TaaSettings:
-    quality: 3
-    frameInfluence: 0.1
-    jitterScale: 1
-    mipBias: 0
-    varianceClampScale: 0.9
-    contrastAdaptiveSharpening: 0
---- !u!114 &972164404
+  m_PanelSettings: {fileID: 11400000, guid: 066bf3ac8a5ef4228ab73b54ac5c7636, type: 2}
+  m_ParentUI: {fileID: 0}
+  sourceAsset: {fileID: 9197481963319205126, guid: f551f179d441f4c11980d264741979e5,
+    type: 3}
+  m_SortingOrder: 0
+--- !u!4 &985640669
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 985640667}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1939349958}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &985640670
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 972164396}
-  m_Enabled: 0
+  m_GameObject: {fileID: 985640667}
+  m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 6715ece696adb074bbe6b0103cdafcff, type: 3}
+  m_Script: {fileID: 11500000, guid: dbf85519195344ec9897b8bba803bf0a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
 --- !u!1 &1267588320
@@ -946,6 +949,7 @@ GameObject:
   - component: {fileID: 1548223583}
   - component: {fileID: 1548223582}
   - component: {fileID: 1548223581}
+  - component: {fileID: 1548223580}
   m_Layer: 0
   m_Name: ArcGISMap
   m_TagString: Untagged
@@ -953,6 +957,19 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
+--- !u!114 &1548223580
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1548223579}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 100949aafaf00444f8fc621b1a77835c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  enableLogging: 0
 --- !u!114 &1548223581
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -983,14 +1000,14 @@ MonoBehaviour:
       SRWkid: 4326
     ExtentShape: 0
     ShapeDimensions:
-      x: 2000
+      x: 1000
       y: 0
     UseOriginAsCenter: 0
   layers:
   - Name: 3D Buildings
-    Type: 1
-    Source: https://basemaps3d.arcgis.com/arcgis/rest/services/OpenStreetMap3D_Buildings_v1/SceneServer
-    Opacity: 0.503
+    Type: 2
+    Source: https://basemaps3d.https://basemaps3d.arcgis.com/arcgis/rest/services/OpenStreetMap3D_Buildings_v1/SceneServer
+    Opacity: 0
     IsVisible: 1
     Authentication:
       ConfigurationIndex: 0
@@ -1027,7 +1044,7 @@ MonoBehaviour:
   m_LocalPosition:
     x: -9039162.689922158
     y: 1000
-    z: 3325135.872468732
+    z: 3325135.8724687304
   m_LocalRotation:
     value:
       x: 0
@@ -1328,6 +1345,7 @@ RectTransform:
   m_LocalScale: {x: 0, y: 0, z: 0}
   m_ConstrainProportionsScale: 0
   m_Children:
+  - {fileID: 985640669}
   - {fileID: 1267588321}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}

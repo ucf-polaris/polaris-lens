@@ -73,3 +73,8 @@ crashlytics-build.properties
 # Temporary auto-generated Android Assets
 /[Aa]ssets/[Ss]treamingAssets/aa.meta
 /[Aa]ssets/[Ss]treamingAssets/aa/*
+Assets/Resources/Polaris/UI tabs/.DS_Store
+Assets/Resources/Polaris/UI tabs/.DS_Store
+Assets/POLARIS/.DS_Store
+Assets/.DS_Store
+mono_crash.mem.34536.1.blob
