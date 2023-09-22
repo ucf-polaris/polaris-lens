@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 0}
-  m_IndirectSpecularColor: {r: 0.45031738, g: 0.50033987, b: 0.57531095, a: 1}
+  m_IndirectSpecularColor: {r: 0.44768894, g: 0.49703234, b: 0.5726779, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -241,7 +241,7 @@ Transform:
   m_GameObject: {fileID: 177370685}
   serializedVersion: 2
   m_LocalRotation: {x: 0.70710677, y: -0, z: -0, w: 0.7071068}
-  m_LocalPosition: {x: 0, y: 0, z: 0.0000000013969839}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -484,7 +484,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   FeatureLayerURL: https://services.arcgis.com/dVL5xxth19juhrDY/ArcGIS/rest/services/MainCampus_RPbldgs/FeatureServer/0
-  Buildings: []
+  ArcGisMapComponent: {fileID: 1548223581}
 --- !u!4 &607878209
 Transform:
   m_ObjectHideFlags: 0
@@ -537,7 +537,7 @@ MonoBehaviour:
   m_LocalPosition:
     x: -9039478.68992216
     y: 0
-    z: 3325135.8724687304
+    z: 3325135.872468732
   m_LocalRotation:
     value:
       x: 0
@@ -794,7 +794,7 @@ MonoBehaviour:
   m_LocalPosition:
     x: -9039198.95691282
     y: 283.4283447265625
-    z: 3324946.3615434384
+    z: 3324946.361543439
   m_LocalRotation:
     value:
       x: 0.54716814
@@ -817,8 +817,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 27afbdfc83e47004e95ef7726ed4a9cc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  MaxSpeed: 2000000
-  MinSpeed: 1000
 --- !u!1 &985640667
 GameObject:
   m_ObjectHideFlags: 0
@@ -1044,7 +1042,7 @@ MonoBehaviour:
   m_LocalPosition:
     x: -9039162.689922158
     y: 1000
-    z: 3325135.8724687304
+    z: 3325135.872468732
   m_LocalRotation:
     value:
       x: 0

@@ -17,13 +17,14 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
+using Unity.XR.CoreUtils;
+
 namespace Google.XR.ARCoreExtensions.Samples.Geospatial
 {
     using System;
     using System.Collections;
     using System.Collections.Generic;
     using System.Diagnostics.CodeAnalysis;
-    using System.Linq;
     using UnityEngine;
     using UnityEngine.EventSystems;
     using UnityEngine.UI;
@@ -47,7 +48,7 @@ namespace Google.XR.ARCoreExtensions.Samples.Geospatial
         /// <summary>
         /// The ARSessionOrigin used in the sample.
         /// </summary>
-        public ARSessionOrigin SessionOrigin;
+        public XROrigin SessionOrigin;
 
         /// <summary>
         /// The ARSession used in the sample.
