@@ -12,7 +12,7 @@ EditorBuildSettings:
     path: Assets/POLARIS/Register.unity
     guid: d6fffa731ad37486ab8b6c94d362f56d
   - enabled: 0
-    path: Assets/POLARIS/Login.unity
+    path: Assets/POLARIS/Credentials.unity
     guid: dcb6b30fed2714731970bd1052d1f012
   - enabled: 1
     path: Assets/POLARIS/GeospatialScene/Polaris Geospatial.unity
