@@ -12,6 +12,9 @@ namespace POLARIS.MainScene
         private Camera _mainCamera;
         private Label _uiDocLabel;
 
+        private float lastTapTime = 0;
+        private float doubleTapThreshold = 0.3f;
+
         private void Start()
         {
             _mainCamera = Camera.main;
@@ -20,15 +23,30 @@ namespace POLARIS.MainScene
         
         private void Update()
         {
-            if (!Input.GetMouseButtonDown(0)) return;
+            // Double tap to view building name
+            if (Input.touchCount == 1)
+            {
+                Touch touch = Input.GetTouch(0);
+                if (touch.phase == TouchPhase.Began)
+                {
+                    if (Time.time - lastTapTime <= doubleTapThreshold)
+                    {
+                        lastTapTime = 0;
+                        
+                        var ray = _mainCamera.ScreenPointToRay(touch.position);
 
-            var ray = _mainCamera.ScreenPointToRay(Input.mousePosition);
+                        if (!Physics.Raycast(ray, out var hit)) return;
 
-            if (!Physics.Raycast(ray, out var hit)) return;
-
-            print("My object is clicked by mouse " + hit.transform.name);
-            _uiDocLabel.text = ToTitleCase(hit.transform.name[4..]);
-            StartCoroutine(ToggleLabelHeight());
+                        print("My object is clicked by mouse " + hit.transform.name);
+                        _uiDocLabel.text = ToTitleCase(hit.transform.name[4..]);
+                        StartCoroutine(ToggleLabelHeight());
+                    }
+                    else
+                    {
+                        lastTapTime = Time.time;
+                    }
+                }
+            }
         }
 
         private IEnumerator ToggleLabelHeight()

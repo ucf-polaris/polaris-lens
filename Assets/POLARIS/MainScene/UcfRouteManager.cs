@@ -54,6 +54,8 @@ namespace POLARIS
         private string _destName;
         private readonly Queue<string> _stopNames = new Queue<string>();
 
+        private float pressTime = 0;
+
         private void Start()
         {
             // We need HPRoot for the HitToGeoPosition Method
@@ -73,63 +75,80 @@ namespace POLARIS
             _routingDestLabel = rootVisual.Q<Label>("RoutingDest");
             _routingInfoLabel = rootVisual.Q<Label>("RoutingInfos");
         }
-
+        
         private async void Update()
         {
-            // Only Create Marker when Shift is Held and Mouse is Clicked
-            if (Input.GetKey(KeyCode.LeftShift) && Input.GetMouseButtonDown(0))
+            if (Input.touchCount > 0)
             {
-                if (_routing)
+                Touch touch = Input.GetTouch(0);
+                switch (touch.phase)
                 {
-                    Debug.Log("Please Wait for Results or Cancel");
-                    return;
-                }
+                    // Uncomment below if you want to reset when the touch was moved
+                    //case TouchPhase.Moved:
+                    case TouchPhase.Began:
+                        pressTime = 0;
+                        break;
 
-                var ray = _mainCamera.ScreenPointToRay(Input.mousePosition);
+                    case TouchPhase.Stationary:
+                        pressTime += Time.deltaTime;
+                        break;
 
-                if (Physics.Raycast(ray, out var hit))
-                {
-                    var routeMarker = Instantiate(RouteMarker, hit.point, Quaternion.identity, _arcGisMapComponent.transform);
-
-                    var geoPosition = HitToGeoPosition(hit);
-
-                    var locationComponent = routeMarker.GetComponent<ArcGISLocationComponent>();
-                    locationComponent.enabled = true;
-                    locationComponent.Position = geoPosition;
-                    locationComponent.Rotation = new ArcGISRotation(0, 90, 0);
-
-                    _stops.Enqueue(routeMarker);
-                    _stopNames.Enqueue(GetBuilding.ToTitleCase(hit.transform.name[4..]));
-                    
-                    // if (_stops.Count < StopCount) 
-                    //     _startName = GetBuilding.ToTitleCase(hit.transform.name[4..]);
-
-                    if (_stops.Count > StopCount)
-                    {
-                        Destroy(_stops.Dequeue());
-                        _stopNames.Dequeue();
-                    }
-                    
-                    if (_stops.Count == StopCount)
-                    {
-                        var stopNamesArray = _stopNames.ToArray();
-                        _startName = stopNamesArray[0];
-                        _destName = stopNamesArray[1];
-                        _routing = true;
-
-                        var results = await FetchRoute(_stops.ToArray());
-
-                        if (results.Contains("error"))
+                    case TouchPhase.Ended:
+                    case TouchPhase.Canceled:
+                        if (pressTime > 0.5f)
                         {
-                            DisplayError(results);
-                        }
-                        else
-                        {
-                            StartCoroutine(DrawRoute(results));
-                        }
+                            if (_routing)
+                            {
+                                Debug.Log("Please Wait for Results or Cancel");
+                                return;
+                            }
 
-                        _routing = false;
-                    }
+                            var ray = _mainCamera.ScreenPointToRay(Input.mousePosition);
+
+                            if (Physics.Raycast(ray, out var hit))
+                            {
+                                var routeMarker = Instantiate(RouteMarker, hit.point, Quaternion.identity, _arcGisMapComponent.transform);
+
+                                var geoPosition = HitToGeoPosition(hit);
+
+                                var locationComponent = routeMarker.GetComponent<ArcGISLocationComponent>();
+                                locationComponent.enabled = true;
+                                locationComponent.Position = geoPosition;
+                                locationComponent.Rotation = new ArcGISRotation(0, 90, 0);
+
+                                _stops.Enqueue(routeMarker);
+                                _stopNames.Enqueue(GetBuilding.ToTitleCase(hit.transform.name[4..]));
+
+                                if (_stops.Count > StopCount)
+                                {
+                                    Destroy(_stops.Dequeue());
+                                    _stopNames.Dequeue();
+                                }
+                    
+                                if (_stops.Count == StopCount)
+                                {
+                                    var stopNamesArray = _stopNames.ToArray();
+                                    _startName = stopNamesArray[0];
+                                    _destName = stopNamesArray[1];
+                                    _routing = true;
+
+                                    var results = await FetchRoute(_stops.ToArray());
+
+                                    if (results.Contains("error"))
+                                    {
+                                        DisplayError(results);
+                                    }
+                                    else
+                                    {
+                                        StartCoroutine(DrawRoute(results));
+                                    }
+
+                                    _routing = false;
+                                }
+                            }
+                        }
+                        pressTime = 0;
+                        break;
                 }
             }
 

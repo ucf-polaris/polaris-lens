@@ -31,7 +31,7 @@ namespace Esri.ArcGISMapsSDK.Samples.Components
 		
 		private const double PinchZoomSpeed = 0.5f;
 		
-		private const double MaxCameraHeight = 1000.0;
+		private const double MaxCameraHeight = 1500.0;
 		private const double MinCameraHeight = 20;
 		private const double MaxCameraLatitude = 85.0;
 
