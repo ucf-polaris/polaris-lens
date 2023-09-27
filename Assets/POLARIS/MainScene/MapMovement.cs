@@ -14,8 +14,6 @@
 // email: legal@esri.com
 using Esri.ArcGISMapsSDK.Components;
 using Esri.ArcGISMapsSDK.Utils.Math;
-using Esri.GameEngine.Geometry;
-using Esri.GameEngine.View;
 using Esri.HPFramework;
 using System;
 using Unity.Mathematics;
@@ -30,19 +28,18 @@ namespace Esri.ArcGISMapsSDK.Samples.Components
 	{
 		private ArcGISMapComponent _arcGisMapComponent;
 		private HPTransform _hpTransform;
-
-		private float _translationSpeed = 0.0f;
-		private const float RotationSpeed = 100.0f;
-		private const double PinchZoomSpeed = 0.1f;
 		
-		private const double MaxCameraHeight = 2000.0;
-		private const double MinCameraHeight = 1.8;
+		private const double PinchZoomSpeed = 0.5f;
+		
+		private const double MaxCameraHeight = 1000.0;
+		private const double MinCameraHeight = 20;
 		private const double MaxCameraLatitude = 85.0;
 
 		private double3 _lastCartesianPoint;
-		private double _lastDotVc = 0.0f;
 		private bool _firstDragStep = true;
 		private bool _lastDragStep = false;
+
+		private Vector2 _rotStartPosition;
 
 		private Vector3 _lastMouseScreenPosition;
 		private bool _firstOnFocus = true;
@@ -80,44 +77,69 @@ namespace Esri.ArcGISMapsSDK.Samples.Components
 
 			// Not functional until we have a spatial reference
 			if (_arcGisMapComponent.View.SpatialReference == null) return;
-
-			// Side-to-side
-			DragTouchEvent();
 			
-			// Altitude
-			UpdateNavigation();
+			TouchEvent();
 		}
 		
-		private void DragTouchEvent()
+		private void TouchEvent()
 		{
 			var cartesianPosition = Position;
-			// var cartesianRotation = Rotation;
+			var cartesianRotation = Rotation;
 			
 			var deltaTouch =  GetTouchDelta();
 
 			if (!_firstOnFocus)
 			{
-				foreach (var touch in Input.touches)
+				// Pinch to zoom
+				var pinchZoomValue = GetPinchZoomValue();
+				var rotationAngle = GetRotationDegrees();
+
+				if (Math.Abs(pinchZoomValue) > float.Epsilon || Math.Abs(rotationAngle) > float.Epsilon)
 				{
-					if (touch.phase != TouchPhase.Moved)
+					var towardsMouse = GetMouseRayCastDirection();
+
+					var pinchOffset = towardsMouse * pinchZoomValue * PinchZoomSpeed *
+					                  (cartesianPosition.y / 300);
+
+					if (cartesianPosition.y + pinchOffset.y > MinCameraHeight
+					    && cartesianPosition.y + pinchOffset.y < MaxCameraHeight)
 					{
-						_lastCartesianPoint = GetCartesianCoord(cartesianPosition);
-						continue;
-					};
-					if (deltaTouch == Vector3.zero) continue;
-					
-					var worldRayDir = GetMouseRayCastDirection();
-					var isIntersected = Geometry.RayPlaneIntersection(cartesianPosition, worldRayDir, double3.zero, math.up(), out var intersection);
-					
-					if (!isIntersected || !(intersection >= 0)) return;
-			
-					var cartesianCoord = cartesianPosition + worldRayDir * intersection;
+						cartesianPosition += pinchOffset;
+					}
 
-					var delta = _firstDragStep ? double3.zero : _lastCartesianPoint - cartesianCoord;
+					var eulerRot = cartesianRotation.GetEulerDegrees();
+					cartesianRotation = Quaternion.Euler(eulerRot.x, eulerRot.y + rotationAngle, eulerRot.z);
+				}
+				else
+				{
+					// Lateral movement
+					foreach (var touch in Input.touches)
+					{
+						if (touch.phase != TouchPhase.Moved)
+						{
+							_lastCartesianPoint = GetCartesianCoord(cartesianPosition);
+							continue;
+						}
+						
+						if (deltaTouch == Vector3.zero) continue;
 
-					_lastCartesianPoint = cartesianCoord + delta;
-					cartesianPosition += delta;
-					_firstDragStep = false;
+						var worldRayDir = GetMouseRayCastDirection();
+						var isIntersected = Geometry.RayPlaneIntersection(
+							cartesianPosition, worldRayDir, double3.zero, math.up(),
+							out var intersection);
+
+						if (!isIntersected || !(intersection >= 0)) return;
+
+						var cartesianCoord = cartesianPosition + worldRayDir * intersection;
+
+						var delta = _firstDragStep
+							? double3.zero
+							: _lastCartesianPoint - cartesianCoord;
+
+						_lastCartesianPoint = cartesianCoord + delta;
+						cartesianPosition += delta;
+						_firstDragStep = false;
+					}
 				}
 			}
 			else
@@ -126,7 +148,7 @@ namespace Esri.ArcGISMapsSDK.Samples.Components
 			}
 
 			Position = cartesianPosition;
-			// Rotation = cartesianRotation;
+			Rotation = cartesianRotation;
 		}
 
 		private double3 GetCartesianCoord(double3 cartesianPosition)
@@ -164,15 +186,15 @@ namespace Esri.ArcGISMapsSDK.Samples.Components
 				return new Vector3(Screen.width / 2, Screen.height / 2, 0);
 			}
 		}
-		
+
 		private double3 GetMouseRayCastDirection()
 		{
 			var forward = _hpTransform.Forward.ToDouble3();
 			var right = _hpTransform.Right.ToDouble3();
 			var up = _hpTransform.Up.ToDouble3();
-		
-			var camera = gameObject.GetComponent<Camera>();
-		
+
+			var mainCamera = gameObject.GetComponent<Camera>();
+
 			var view = new double4x4
 			(
 				math.double4(right, 0),
@@ -180,44 +202,24 @@ namespace Esri.ArcGISMapsSDK.Samples.Components
 				math.double4(forward, 0),
 				math.double4(double3.zero, 1)
 			);
-		
-			var proj = camera.projectionMatrix.inverse.ToDouble4x4();
-		
+
+			var proj = mainCamera.projectionMatrix.inverse.ToDouble4x4();
+
 			proj.c2.w *= -1;
 			proj.c3.z *= -1;
-		
+
 			var mousePosition = GetTouchPosition();
-			var ndcCoord = new double3(2.0 * (mousePosition.x / Screen.width) - 1.0, 2.0 * (mousePosition.y / Screen.height) - 1.0, 1);
+			var ndcCoord = new double3(2.0 * (mousePosition.x / Screen.width) - 1.0,
+			                           2.0 * (mousePosition.y / Screen.height) - 1.0, 1);
 			var viewRayDir = math.normalize(proj.HomogeneousTransformPoint(ndcCoord));
 			return view.HomogeneousTransformVector(viewRayDir);
 		}
 
-		// private double3 GetTotalTranslation()
-		// {
-		// 	var forward = _hpTransform.Forward.ToDouble3();
-		// 	var right = _hpTransform.Right.ToDouble3();
-		// 	var up = _hpTransform.Up.ToDouble3();
-		//
-		// 	var totalTranslation = double3.zero;
-		// 	
-		// 	foreach (var touch in Input.touches)
-		// 	{
-		// 		if (touch.phase != TouchPhase.Moved) continue;
-		// 		
-		// 		var touchDelta = touch.deltaPosition;
-		//
-		// 		// Adjust translation speed based on touch sensitivity
-		// 		totalTranslation += (right * touchDelta.x + up * touchDelta.y) * _translationSpeed * Time.deltaTime;
-		// 	}
-		//
-		// 	return totalTranslation;
-		// }
-		
-		private float GetPinchZoomValue()
+		private static float GetPinchZoomValue()
 		{
 			// Handle mobile pinch zoom
 			if (Input.touchCount != 2) return 0.0f;
-			
+
 			var touch1 = Input.touches[0];
 			var touch2 = Input.touches[1];
 
@@ -230,111 +232,29 @@ namespace Esri.ArcGISMapsSDK.Samples.Components
 			return (touchDeltaMag - prevTouchDeltaMag) * (float)PinchZoomSpeed;
 		}
 
-
-		/// <summary>
-		/// Move the camera based on user input
-		/// </summary>
-		private void UpdateNavigation()
+		private float GetRotationDegrees()
 		{
-			var altitude = _arcGisMapComponent.View.AltitudeAtCartesianPosition(Position);
-			UpdateSpeed(altitude);
-
-			// var totalTranslation = GetTotalTranslation();
-			//
-			// var pinchZoomValue = GetPinchZoomValue();
-			// var pinchZoomValue = 0f;
-			// if (Math.Abs(pinchZoomValue) > float.Epsilon)
+			if (Input.touchCount != 2) return 0f;
+			
+			var touchOne = Input.GetTouch(0);
+			var touchTwo = Input.GetTouch(1);
+ 
+			if (touchOne.phase == TouchPhase.Began
+			    || touchTwo.phase == TouchPhase.Began)
 			{
-				// var towardsMouse = GetMouseRayCastDirection();
-				// totalTranslation += towardsMouse * pinchZoomValue;
-
-				// 	if (altitude + totalTranslation.y < MinCameraHeight
-				// 			|| altitude + totalTranslation.y > MaxCameraHeight)
-				// 		totalTranslation.y = 0;
-				//
-				// 	// print("ZOOM DELTA: " + delta);
-				// }
-				//
-				// if (!totalTranslation.Equals(double3.zero))
-				// {
-				// 	MoveCamera(totalTranslation);
-				// }
+				_rotStartPosition = touchTwo.position - touchOne.position;
 			}
+
+			if (touchOne.phase != TouchPhase.Moved
+			    && touchTwo.phase != TouchPhase.Moved) return 0f;
+				
+			var curVector = touchTwo.position - touchOne.position;
+			var angle = Vector2.SignedAngle(_rotStartPosition, curVector);
+			_rotStartPosition = curVector;
+				
+			return angle;
 		}
 
-
-		/// <summary>
-		/// Move the camera
-		/// </summary>
-		// private void MoveCamera(double3 movDir)
-		// {
-		// 	var distance = math.length(movDir);
-		// 	movDir /= distance;
-		//
-		// 	var cameraPosition = Position;
-		// 	var cameraRotation = Rotation;
-		//
-		// 	if (_arcGisMapComponent.MapType == GameEngine.Map.ArcGISMapType.Global)
-		// 	{
-		// 		var spheroidData = _arcGisMapComponent.View.SpatialReference.SpheroidData;
-		// 		var nextArcGISPoint = _arcGisMapComponent.View.WorldToGeographic(movDir + cameraPosition);
-		//
-		// 		if (nextArcGISPoint.Z > MaxCameraHeight)
-		// 		{
-		// 			var point = new ArcGISPoint(nextArcGISPoint.X, nextArcGISPoint.Y, MaxCameraHeight, nextArcGISPoint.SpatialReference);
-		// 			cameraPosition = _arcGisMapComponent.View.GeographicToWorld(point);
-		// 		}
-		// 		else if (nextArcGISPoint.Z < MinCameraHeight)
-		// 		{
-		// 			var point = new ArcGISPoint(nextArcGISPoint.X, nextArcGISPoint.Y, MinCameraHeight, nextArcGISPoint.SpatialReference);
-		// 			cameraPosition = _arcGisMapComponent.View.GeographicToWorld(point);
-		// 		}
-		// 		else
-		// 		{
-		// 			cameraPosition += movDir * distance;
-		// 		}
-		//
-		// 		var newENUReference = _arcGisMapComponent.View.GetENUReference(cameraPosition);
-		// 		var oldENUReference = _arcGisMapComponent.View.GetENUReference(Position);
-		//
-		// 		cameraRotation = math.mul(math.inverse(oldENUReference.GetRotation()), cameraRotation);
-		// 		cameraRotation = math.mul(newENUReference.GetRotation(), cameraRotation);
-		// 	}
-		// 	else
-		// 	{
-		// 		cameraPosition += movDir * distance;
-		// 	}
-		//
-		// 	Position = cameraPosition;
-		// 	Rotation = cameraRotation;
-		// }
-
-		// private void RotateAround(ref double3 cartesianPosition, ref quaternion cartesianRotation, Vector3 deltaMouse)
-		// {
-		// 	var ENUReference = _arcGisMapComponent.View.GetENUReference(cartesianPosition).ToMatrix4x4();
-		//
-		// 	Vector2 angles;
-		//
-		// 	angles.x = deltaMouse.x / (float)Screen.width * RotationSpeed;
-		// 	angles.y = deltaMouse.y / (float)Screen.height * RotationSpeed;
-		//
-		// 	angles.y = Mathf.Min(Mathf.Max(angles.y, -90.0f), 90.0f);
-		//
-		// 	var right = Matrix4x4.Rotate(cartesianRotation).GetColumn(0);
-		//
-		// 	var rotationY = Quaternion.AngleAxis(angles.x, ENUReference.GetColumn(1));
-		// 	var rotationX = Quaternion.AngleAxis(-angles.y, right);
-		//
-		// 	cartesianRotation = rotationY * rotationX * cartesianRotation;
-		// }
-
-		private void UpdateSpeed(double height)
-		{
-			var msMaxSpeed = (MaxSpeed * 1000) / 3600;
-			var msMinSpeed = (MinSpeed * 1000) / 3600;
-			_translationSpeed = (float)(Math.Pow(Math.Min((height / 100000.0), 1), 2.0) * (msMaxSpeed - msMinSpeed) + msMinSpeed);
-		}
-		
 		private void FocusChanged(bool isFocus)
 		{
 			_firstOnFocus = true;
