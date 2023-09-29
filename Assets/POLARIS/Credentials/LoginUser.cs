@@ -1,36 +1,32 @@
-using System;
-using UnityEngine;
-using UnityEngine.UI;
-using UnityEngine.Networking;
 using System.Collections;
 using System.Collections.Generic;
+using UnityEngine;
+using System;
+using UnityEngine.UI;
+using UnityEngine.Networking;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using TMPro;
-
-public class RegistrationScript : MonoBehaviour
+using TMPro; 
+public class LoginUser : MonoBehaviour
 {
     public TMP_InputField emailInput;
     public TMP_InputField passwordInput;
-    public string registrationURL = "https://api.ucfpolaris.com/user/register";
-
-    public void Register()
+    public string loginURL = "https://api.ucfpolaris.com/user/login";
+    
+    public void Login()
     {
-        StartCoroutine(SendRegistrationRequest(emailInput.text, passwordInput.text));
+        StartCoroutine(SendLoginRequest(emailInput.text, passwordInput.text));
     }
-
-    IEnumerator SendRegistrationRequest(string email, string password)
+    
+    IEnumerator SendLoginRequest(string email, string password)
     {
         JObject payload =
             new JObject(
                 new JProperty("email", email),
                 new JProperty("password", password)
             );
-            
         
-        
-
-        UnityWebRequest www = UnityWebRequest.Post(registrationURL, payload.ToString(), "application/json");
+        UnityWebRequest www = UnityWebRequest.Post(loginURL, payload.ToString(), "application/json");
 
         yield return www.SendWebRequest();
 
@@ -46,4 +42,7 @@ public class RegistrationScript : MonoBehaviour
             Debug.Log("Response: " + www.downloadHandler.text);
         }
     }
+    
+    
+    
 }
