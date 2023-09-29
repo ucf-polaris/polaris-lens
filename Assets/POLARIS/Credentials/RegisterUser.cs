@@ -1,8 +1,10 @@
+using System;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.Networking;
 using System.Collections;
 using System.Collections.Generic;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using TMPro;
 
@@ -10,7 +12,7 @@ public class RegistrationScript : MonoBehaviour
 {
     public TMP_InputField usernameInput;
     public TMP_InputField passwordInput;
-    public string registrationURL = "https://8vnj8pkog4.execute-api.us-east-2.amazonaws.com/dev2/register";
+    public string registrationURL = "http://api.ucfpolaris.com/user/register";
 
     public void Register()
     {
@@ -41,6 +43,9 @@ public class RegistrationScript : MonoBehaviour
         else
         {
             Debug.Log("Form upload complete!");
+            Debug.Log("Status Code: " + www.responseCode);
+            Debug.Log(www.result);
+            Debug.Log("Response: " + www.downloadHandler.text);
         }
     }
 }
