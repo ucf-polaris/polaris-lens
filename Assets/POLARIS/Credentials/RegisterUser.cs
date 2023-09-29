@@ -10,22 +10,22 @@ using TMPro;
 
 public class RegistrationScript : MonoBehaviour
 {
-    public TMP_InputField usernameInput;
+    public TMP_InputField emailInput;
     public TMP_InputField passwordInput;
     public string registrationURL = "http://api.ucfpolaris.com/user/register";
 
     public void Register()
     {
-        StartCoroutine(SendRegistrationRequest(usernameInput.text, passwordInput.text));
+        StartCoroutine(SendRegistrationRequest(emailInput.text, passwordInput.text));
     }
 
-    IEnumerator SendRegistrationRequest(string username, string password)
+    IEnumerator SendRegistrationRequest(string email, string password)
     {
         List<IMultipartFormSection> formData = new List<IMultipartFormSection>();
 
         JObject payload =
             new JObject(
-                new JProperty("username", username),
+                new JProperty("username", email),
                 new JProperty("password", password)
             );
             
