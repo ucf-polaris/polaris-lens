@@ -1,8 +1,10 @@
+using System;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.Networking;
 using System.Collections;
 using System.Collections.Generic;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using TMPro;
 
@@ -41,6 +43,9 @@ public class RegistrationScript : MonoBehaviour
         else
         {
             Debug.Log("Form upload complete!");
+            Debug.Log("Status Code: " + www.responseCode);
+            Debug.Log(www.result);
+            Debug.Log("Response: " + www.downloadHandler.text);
         }
     }
 }
