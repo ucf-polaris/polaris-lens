@@ -1,4 +1,3 @@
-using System;
 using Unity.XR.CoreUtils;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -10,6 +9,8 @@ namespace POLARIS.GeospatialScene
         private GameObject _arCamera;
         private Transform _marker;
         private FaceCamera _faceCamera;
+
+        public TextPanel Panel;
 
         private void Start()
         {
@@ -45,6 +46,7 @@ namespace POLARIS.GeospatialScene
             
             transform.parent.parent = _arCamera.transform;
             _faceCamera.Zoomed = true;
+            Panel.VisitedPanel();
         }
         
 

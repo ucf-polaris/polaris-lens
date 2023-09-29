@@ -726,7 +726,7 @@ namespace Google.XR.ARCoreExtensions.Samples.Geospatial
                 }
                 
                 // Load in nearby panels
-                var results = PanelManager.LoadNearbyIfNeeded(
+                var results = PanelManager.FetchNearbyIfNeeded(
                     new double2(pose.Latitude, pose.Longitude), _anchorObjects);
                 if (results.Length > 0)
                 {
@@ -735,6 +735,9 @@ namespace Google.XR.ARCoreExtensions.Samples.Geospatial
                         _historyCollection.Collection.Add(result.History);
                     }
                 }
+                
+                // Load/unload panels depending on distance
+                PanelManager.LoadNearby();
 
                 // Hide anchor settings and toggles if the storage limit has been reached.
                 if (_anchorObjects.Count >= StorageLimit)

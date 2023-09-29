@@ -10,12 +10,15 @@ namespace POLARIS.GeospatialScene
 {
     public class PanelManager : MonoBehaviour
     {
+        public Camera Camera;
         public ARAnchorManager AnchorManager;
         
-        private List<GameObject> _panelAnchors;
+        private List<TextPanel> _panels;
         
         private double2 _loadLocation;
         private float _loadTime;
+        
+        private const float LoadDistance = 20f;
 
         public PanelManager()
         {
@@ -23,24 +26,25 @@ namespace POLARIS.GeospatialScene
             _loadTime = 0;
         }
 
-        public GeospatialAnchorContent[] LoadNearbyIfNeeded(double2 currentLocation, List<GameObject> anchorObjects)
+        public GeospatialAnchorContent[] FetchNearbyIfNeeded(double2 currentLocation, List<GameObject> anchorObjects)
         {
             // Wait at least 5 seconds
             // Check for distance
             if (!(Time.time - _loadTime > 5 &&
                   DistanceInKmBetweenEarthCoordinates(currentLocation, _loadLocation) > 0.2))
             {
+                // Return nothing
                 return new GeospatialAnchorContent[] { };
             }
             
             _loadLocation = currentLocation;
             _loadTime = Time.time;
 
-            return LoadNearby(anchorObjects);
+            return FetchNearby(anchorObjects);
         }
         
         
-        private GeospatialAnchorContent[] LoadNearby(List<GameObject> anchorObjects)
+        private GeospatialAnchorContent[] FetchNearby(List<GameObject> anchorObjects)
         {
             // mock fetch for now
             var results = new[]
@@ -49,14 +53,40 @@ namespace POLARIS.GeospatialScene
                 new GeospatialAnchorContent("second panel", new GeospatialAnchorHistory(28.614469, -81.195702, -5.4, AnchorType.Geospatial, new Quaternion(0, 0, 0, 0)))
             };
 
-            foreach (var anchor in results)
+            foreach (var anchorContent in results)
             {
                 var panel = AnchorManager.AddComponent<TextPanel>();
-                panel.Instantiate(anchor);
-                panel.PlacePanelGeospatialAnchor(anchorObjects, AnchorManager);
+                panel.Instantiate(anchorContent);
+                var anchor = panel.PlacePanelGeospatialAnchor(anchorObjects, AnchorManager);
+                _panels.Add(panel);
+
+                if (Vector3.Distance(anchor.transform.position, Camera.transform.position) < LoadDistance)
+                {
+                    panel.LoadPanel();
+                }
             }
 
             return results;
+        }
+
+        public void LoadNearby()
+        {
+            foreach (var panel in _panels)
+            {
+                var withinThresh =
+                    Vector3.Distance(panel.transform.position, Camera.transform.position) <
+                    LoadDistance;
+
+                switch (panel.Loaded)
+                {
+                    case false when withinThresh:
+                        panel.LoadPanel();
+                        break;
+                    case true when !withinThresh:
+                        panel.UnloadPanel();
+                        break;
+                }
+            }
         }
         
         private static double DistanceInKmBetweenEarthCoordinates(double2 pointA, double2 pointB) {

@@ -123,7 +123,7 @@ namespace Esri.ArcGISMapsSDK.Samples.Components
 			{
 				if (Input.GetAxis(axis) != 0)
 				{
-					totalTranslation += vector * Input.GetAxis(axis) * TranslationSpeed * Time.deltaTime;
+					totalTranslation += vector * Input.GetAxis(axis) * _translationSpeed * Time.deltaTime;
 				}
 			};
 

@@ -9,47 +9,77 @@ namespace POLARIS.GeospatialScene
     public class TextPanel : MonoBehaviour
     {
         public GameObject PanelPrefab;
+        public GameObject LoadingPrefab;
         
+        public bool Loaded;
+        public bool Visited;
+
         private GeospatialAnchorContent _content;
+        private ARGeospatialAnchor _anchor;
+        private GameObject _currentPrefab;
 
         public void Instantiate(GeospatialAnchorContent content)
         {
-            this._content = content;
+            _content = content;
         }
 
         public ARGeospatialAnchor PlacePanelGeospatialAnchor(
             List<GameObject> anchorObjects, ARAnchorManager anchorManager)
         {
-            var anchor = anchorManager.AddAnchor(
+            _anchor = anchorManager.AddAnchor(
                 _content.History.Latitude,
                 _content.History.Longitude,
                 _content.History.Altitude,
                 _content.History.EunRotation);
             
-            PanelPrefab = Resources.Load("Polaris/PanelMarker") as GameObject;
+            LoadingPrefab = Resources.Load("Polaris/stand") as GameObject;
 
-            if (anchor != null)
+            if (_anchor != null)
             {
-                if (PanelPrefab == null)
+                if (LoadingPrefab == null || PanelPrefab == null)
                 {
                     Debug.LogError("Panel prefab is null!");
                 }
 
-                var anchorGo = Instantiate(PanelPrefab, anchor.transform);
-                anchorGo.GetComponentInChildren<TextMeshPro>().SetText(_content.Text);
-
-                anchorObjects.Add(anchor.gameObject);
+                _currentPrefab = Instantiate(LoadingPrefab, _anchor.transform);
+                anchorObjects.Add(_anchor.gameObject);
 
                 print("Anchor Set!");
-                
-                Debug.LogWarning(_content.Text);
             }
             else
             {
                 print("Failed to set an anchor!");
             }
 
-            return anchor;
+            return _anchor;
+        }
+
+        public void LoadPanel()
+        {
+            Loaded = true;
+            Destroy(_currentPrefab);
+            
+            PanelPrefab = Resources.Load("Polaris/PanelMarker") as GameObject;
+            _currentPrefab = Instantiate(PanelPrefab, _anchor.transform);
+            
+            _currentPrefab.GetComponentInChildren<TextMeshPro>().SetText(_content.Text);
+            _currentPrefab.GetComponentInChildren<PanelZoom>().Panel = this;
+        }
+
+        public void UnloadPanel()
+        {
+            Loaded = false;
+            Destroy(_currentPrefab);
+            
+            _currentPrefab = Instantiate(LoadingPrefab, _anchor.transform);
+        }
+
+        public void VisitedPanel()
+        {
+            print("visited!");
+            Visited = true;
+            
+            // Update API
         }
     }
 }
