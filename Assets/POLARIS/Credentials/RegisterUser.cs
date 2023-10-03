@@ -12,7 +12,7 @@ public class RegistrationScript : MonoBehaviour
 {
     public TMP_InputField emailInput;
     public TMP_InputField passwordInput;
-    public string registrationURL = "https://api.ucfpolaris.com/user/register";
+    public string registrationURL = "https://ea01n0gzv0.execute-api.us-east-2.amazonaws.com/Stage/user/register";
 
     public void Register()
     {
