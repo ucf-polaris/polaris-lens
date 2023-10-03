@@ -17,13 +17,17 @@ public class VerificationCodeScript : MonoBehaviour
 
     IEnumerator SendVerificationRequest(string code)
     {
-        JObject payload =
-            new JObject(
-            new JProperty("code", code)
-        );
-
-        UnityWebRequest www = UnityWebRequest.Post(verifyCodeURL, payload.ToString(), "application/json");
-
+        
+        // JObject payload =
+        //     new JObject(
+        //         new JProperty("token", code)
+        //     );
+        UnityWebRequest www = UnityWebRequest.PostWwwForm(verifyCodeURL, "application/json");
+        www.uploadHandler = new UploadHandlerRaw(System.Text.Encoding.UTF8.GetBytes("{}")); // Empty JSON payload
+        // Add the authorization token to the header
+        // www.SetRequestHeader("authorizationToken", payload.ToString());
+        www.SetRequestHeader("authorizationToken", code);
+        
         yield return www.SendWebRequest();
 
         if (www.result != UnityWebRequest.Result.Success)
