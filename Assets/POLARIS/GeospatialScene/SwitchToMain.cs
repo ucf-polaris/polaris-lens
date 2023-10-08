@@ -5,7 +5,7 @@ using UnityEngine.UIElements;
 
 namespace POLARIS
 {
-    public class SwitchToAR : MonoBehaviour
+    public class SwitchToMain : MonoBehaviour
     {
         private UIDocument _buttonDocument;
         private Button _button;
@@ -30,7 +30,7 @@ namespace POLARIS
         private void OnButtonClick(ClickEvent clickEvent)
         {
             print("Clicked da button");
-            GoToScene("Polaris Geospatial");
+            GoToScene("MainScene");
         }
         
         private void GoToScene(string sceneName)
@@ -42,7 +42,7 @@ namespace POLARIS
         {
             SceneManager.LoadSceneAsync(sceneName);
 
-            SceneManager.sceneLoaded += (newScene, mode) =>
+            SceneManager.sceneLoaded += (newScene, _) =>
             {
                 SceneManager.SetActiveScene(newScene);
             };

@@ -21,13 +21,13 @@ namespace POLARIS.GeospatialScene
             if (Zoomed)
             {
                 objTransform.SetLocalPositionAndRotation(
-                    Vector3.Slerp(objTransform.localPosition, Vector3.forward * 0.6f, Speed * 4 * Time.deltaTime),
-                    Quaternion.Slerp(objTransform.localRotation, Quaternion.Euler(180f, 0, 0), Speed * 4 * Time.deltaTime));
+                    Vector3.Slerp(objTransform.localPosition, Vector3.forward * 1.2f, Speed * 4 * Time.deltaTime),
+                    Quaternion.Slerp(objTransform.localRotation, Quaternion.Euler(0, 0, 0), Speed * 4 * Time.deltaTime));
                 return;
             }
             
             var distance = _arCamera.transform.position - objTransform.position;
-            var targetRotation = Quaternion.LookRotation(distance, Vector3.down);
+            var targetRotation = Quaternion.LookRotation(distance, Vector3.up);
             var eulerRot = targetRotation.eulerAngles;
 
             //Clamp x-rotation to 60 degrees each direction

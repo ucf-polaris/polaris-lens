@@ -722,7 +722,7 @@ namespace Google.XR.ARCoreExtensions.Samples.Geospatial
                     PlaceAnchorByScreenTap(Input.GetTouch(0).position);
                     
                     // LOAD PATH
-                    PathManager.LoadPathAnchors(_anchorObjects, AnchorManager);
+                    // PathManager.LoadPathAnchors(_anchorObjects, AnchorManager);
                 }
                 
                 // Load in nearby panels

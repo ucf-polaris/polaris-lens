@@ -1,7 +1,9 @@
 using System.Collections.Generic;
 using Google.XR.ARCoreExtensions;
 using TMPro;
+using Unity.XR.CoreUtils;
 using UnityEngine;
+using UnityEngine.UI;
 using UnityEngine.XR.ARFoundation;
 
 namespace POLARIS.GeospatialScene
@@ -13,14 +15,19 @@ namespace POLARIS.GeospatialScene
         
         public bool Loaded;
         public bool Visited;
+        public bool Favorited;
 
-        private GeospatialAnchorContent _content;
+        public GeospatialAnchorContent _content;
         private ARGeospatialAnchor _anchor;
-        private GameObject _currentPrefab;
+        public GameObject _currentPrefab;
 
         public void Instantiate(GeospatialAnchorContent content)
         {
             _content = content;
+            PanelPrefab = Resources.Load("Polaris/PanelParent") as GameObject;
+            LoadingPrefab = Resources.Load("Polaris/stand") as GameObject;
+            
+            // add onclicks
         }
 
         public ARGeospatialAnchor PlacePanelGeospatialAnchor(
@@ -31,8 +38,6 @@ namespace POLARIS.GeospatialScene
                 _content.History.Longitude,
                 _content.History.Altitude,
                 _content.History.EunRotation);
-            
-            LoadingPrefab = Resources.Load("Polaris/stand") as GameObject;
 
             if (_anchor != null)
             {
@@ -59,11 +64,16 @@ namespace POLARIS.GeospatialScene
             Loaded = true;
             Destroy(_currentPrefab);
             
-            PanelPrefab = Resources.Load("Polaris/PanelMarker") as GameObject;
             _currentPrefab = Instantiate(PanelPrefab, _anchor.transform);
             
             _currentPrefab.GetComponentInChildren<TextMeshPro>().SetText(_content.Text);
             _currentPrefab.GetComponentInChildren<PanelZoom>().Panel = this;
+            
+            // set onclicks
+            
+
+
+            // Check for favorited / visited
         }
 
         public void UnloadPanel()
@@ -80,6 +90,23 @@ namespace POLARIS.GeospatialScene
             Visited = true;
             
             // Update API
+        }
+
+        public void FavoritedClicked()
+        {
+            Favorited = !Favorited;
+            print("favorited? " + Favorited);
+            // Update API
+        }
+
+        public void PoiButtonClicked()
+        {
+            print("poi clicked!");
+        }
+        
+        public void EventsButtonClicked()
+        {
+            print("events clicked!");
         }
     }
 }

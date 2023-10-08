@@ -18,12 +18,13 @@ namespace POLARIS.GeospatialScene
         private double2 _loadLocation;
         private float _loadTime;
         
-        private const float LoadDistance = 20f;
+        private const float LoadDistance = 20f; // m
 
         public PanelManager()
         {
-            _loadLocation = new double2(double.PositiveInfinity, double.NegativeInfinity);
+            _loadLocation = new double2(0, 0);
             _loadTime = 0;
+            _panels = new List<TextPanel>();
         }
 
         public GeospatialAnchorContent[] FetchNearbyIfNeeded(double2 currentLocation, List<GameObject> anchorObjects)
@@ -31,7 +32,7 @@ namespace POLARIS.GeospatialScene
             // Wait at least 5 seconds
             // Check for distance
             if (!(Time.time - _loadTime > 5 &&
-                  DistanceInKmBetweenEarthCoordinates(currentLocation, _loadLocation) > 0.2))
+                  DistanceInKmBetweenEarthCoordinates(currentLocation, _loadLocation) > 0.5))
             {
                 // Return nothing
                 return new GeospatialAnchorContent[] { };
@@ -39,7 +40,8 @@ namespace POLARIS.GeospatialScene
             
             _loadLocation = currentLocation;
             _loadTime = Time.time;
-
+        
+            print("FETCHING NEARBY");
             return FetchNearby(anchorObjects);
         }
         
@@ -49,21 +51,18 @@ namespace POLARIS.GeospatialScene
             // mock fetch for now
             var results = new[]
             {
-                new GeospatialAnchorContent("FIRST panel", new GeospatialAnchorHistory(28.614481, -81.195693, -5.6, AnchorType.Geospatial, new Quaternion(0, 0, 0, 0))),
-                new GeospatialAnchorContent("second panel", new GeospatialAnchorHistory(28.614469, -81.195702, -5.4, AnchorType.Geospatial, new Quaternion(0, 0, 0, 0)))
+                new GeospatialAnchorContent("FIRST panel", new GeospatialAnchorHistory(28.614402, -81.195860, -5.6, AnchorType.Geospatial, new Quaternion(0, 0, 0, 0))),
+                new GeospatialAnchorContent("second panel", new GeospatialAnchorHistory(28.614469, -81.195702, -5.4, AnchorType.Geospatial, new Quaternion(0, 0, 0, 0))),
+                new GeospatialAnchorContent("<style=Description>third panel <color=green>hello</color></style>", new GeospatialAnchorHistory(28.614369, -81.195760, -5.4, AnchorType.Geospatial, new Quaternion(0, 0, 0, 0)))
             };
 
+            _panels.Clear();
             foreach (var anchorContent in results)
             {
                 var panel = AnchorManager.AddComponent<TextPanel>();
                 panel.Instantiate(anchorContent);
-                var anchor = panel.PlacePanelGeospatialAnchor(anchorObjects, AnchorManager);
+                panel.PlacePanelGeospatialAnchor(anchorObjects, AnchorManager);
                 _panels.Add(panel);
-
-                if (Vector3.Distance(anchor.transform.position, Camera.transform.position) < LoadDistance)
-                {
-                    panel.LoadPanel();
-                }
             }
 
             return results;
@@ -74,7 +73,7 @@ namespace POLARIS.GeospatialScene
             foreach (var panel in _panels)
             {
                 var withinThresh =
-                    Vector3.Distance(panel.transform.position, Camera.transform.position) <
+                    Vector3.Distance(panel._currentPrefab.transform.position, Camera.transform.position) <
                     LoadDistance;
 
                 switch (panel.Loaded)
