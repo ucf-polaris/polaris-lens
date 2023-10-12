@@ -21,8 +21,8 @@ namespace POLARIS.GeospatialScene
             if (Zoomed)
             {
                 objTransform.SetLocalPositionAndRotation(
-                    Vector3.Slerp(objTransform.localPosition, Vector3.forward * 1.2f, Speed * 4 * Time.deltaTime),
-                    Quaternion.Slerp(objTransform.localRotation, Quaternion.Euler(0, 0, 0), Speed * 4 * Time.deltaTime));
+                    Vector3.Slerp(objTransform.localPosition, Vector3.forward * 3f, Speed * 4 * Time.deltaTime),
+                    Quaternion.Slerp(objTransform.localRotation, Quaternion.Euler(0, 180, 0), Speed * 4 * Time.deltaTime));
                 return;
             }
             
