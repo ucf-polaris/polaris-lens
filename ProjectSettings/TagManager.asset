@@ -6,6 +6,7 @@ TagManager:
   tags:
   - Location
   - PanelManager
+  - EventPanel
   layers:
   - Default
   - TransparentFX

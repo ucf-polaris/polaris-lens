@@ -1,17 +1,25 @@
+using System.Collections.Generic;
+using Unity.XR.CoreUtils;
 using UnityEngine;
 
 namespace POLARIS.GeospatialScene
 {
     public class FaceCamera : MonoBehaviour
     {
-        private GameObject _arCamera;
         public float Speed;
         public bool Zoomed { get; set; }
+        
+        private GameObject _arCamera;
+        private GameObject _eventPanel;
 
         // Start is called before the first frame update
         private void Start()
         {
             _arCamera = GameObject.FindGameObjectWithTag("MainCamera");
+            
+            var goList = new List<GameObject>();
+            gameObject.GetChildGameObjects(goList);
+            _eventPanel = goList.Find(go => go.name.Equals("EventPanel"));
         }
 
         // Update is called once per frame
@@ -20,8 +28,14 @@ namespace POLARIS.GeospatialScene
             var objTransform = transform;
             if (Zoomed)
             {
+                var zoomPos = Vector3.forward * 3.3f;
+                if (_eventPanel.activeSelf)
+                {
+                    zoomPos = (Vector3.forward * 3.3f) + (Vector3.up * 1f);
+                }
+                
                 objTransform.SetLocalPositionAndRotation(
-                    Vector3.Slerp(objTransform.localPosition, Vector3.forward * 3f, Speed * 4 * Time.deltaTime),
+                    Vector3.Slerp(objTransform.localPosition, zoomPos, Speed * 4 * Time.deltaTime),
                     Quaternion.Slerp(objTransform.localRotation, Quaternion.Euler(0, 180, 0), Speed * 4 * Time.deltaTime));
                 return;
             }

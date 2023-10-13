@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using Google.XR.ARCoreExtensions;
 using TMPro;
+using Unity.XR.CoreUtils;
 using UnityEngine;
 using UnityEngine.Serialization;
 using UnityEngine.XR.ARFoundation;
@@ -20,6 +21,10 @@ namespace POLARIS.GeospatialScene
         public bool Favorited;
 
         private ARGeospatialAnchor _anchor;
+
+        private GameObject _eventPanel;
+
+        private bool _eventsShown;
 
         public void Instantiate(GeospatialAnchorContent content)
         {
@@ -67,6 +72,10 @@ namespace POLARIS.GeospatialScene
             CurrentPrefab.GetComponentInChildren<TextMeshPro>().SetText(Content.Text);
             CurrentPrefab.GetComponentInChildren<PanelZoom>().Panel = this;
             
+            var goList = new List<GameObject>();
+            CurrentPrefab.GetChildGameObjects(goList);
+            _eventPanel = goList.Find(go => go.name.Equals("EventPanel"));
+
             // Check for favorited / visited
         }
 
@@ -90,6 +99,7 @@ namespace POLARIS.GeospatialScene
         {
             Favorited = !Favorited;
             print("zz favorited? " + Favorited);
+            
             // Update API
         }
 
@@ -101,6 +111,14 @@ namespace POLARIS.GeospatialScene
         public void EventsButtonClicked()
         {
             print("zz events clicked!");
+            _eventsShown = !_eventsShown;
+
+            _eventPanel.SetActive(_eventsShown);
+        }
+
+        public void DisableEventsPanel()
+        {
+            _eventPanel.SetActive(false);
         }
     }
 }

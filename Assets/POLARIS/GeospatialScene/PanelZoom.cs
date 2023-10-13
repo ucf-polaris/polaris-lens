@@ -85,6 +85,7 @@ namespace POLARIS.GeospatialScene
             
             transform.parent.parent = _grandparent.transform;
             _faceCamera.Zoomed = false;
+            Panel.DisableEventsPanel();
         }
 
         private static void AddPhysics2DRaycaster(GameObject camera)

@@ -6,6 +6,9 @@ public class FavButton : MonoBehaviour, IPointerDownHandler
 {
     private PanelZoom _panelZoom;
     private TextPanel _panel;
+
+    public Sprite FavoritedSprite;
+    public Sprite UnfavoritedSprite;
     
     // Start is called before the first frame update
     private void Start()
@@ -18,5 +21,8 @@ public class FavButton : MonoBehaviour, IPointerDownHandler
     {
         _panelZoom.TouchedPanel = true;
         _panel.FavoritedClicked();
+        
+        // Change sprite
+        gameObject.GetComponent<SpriteRenderer>().sprite = _panel.Favorited ? FavoritedSprite : UnfavoritedSprite;
     }
 }
