@@ -16,7 +16,7 @@ using TMPro;
 public class VerificationCodeScript : MonoBehaviour
 {
     public TMP_InputField verificationCodeInput;
-    public string verifyCodeURL = "https://v21x6ajyg9.execute-api.us-east-2.amazonaws.com/dev/user/update";
+    public string verifyCodeURL = "https://v21x6ajyg9.execute-api.us-east-2.amazonaws.com/dev/user/registrationcode";
     // string _token = RegistrationScript.AuthToken;
     public void Verify()
     {
@@ -61,27 +61,30 @@ public class VerificationCodeScript : MonoBehaviour
         
         
         // Serialize the JObject to a JSON string
-        string jsonBody = code.ToString(); 
+        // string jsonBody = code.ToString(); 
         // string jsonHeader = JsonUtility.ToJson(authTokenHeader);
         
         // Convert the JSON string to bytes
-        byte[] bodyData = System.Text.Encoding.UTF8.GetBytes(jsonBody);
+        // byte[] bodyData = System.Text.Encoding.UTF8.GetBytes(jsonBody);
         // byte[] headerData = System.Text.Encoding.UTF8.GetBytes(jsonHeader);
         
         //make new unity web request object
-        UnityWebRequest www = new UnityWebRequest(verifyCodeURL, "POST");
-        
+        // UnityWebRequest www = new UnityWebRequest(verifyCodeURL, "POST");
+        // var www = UnityWebRequest.Put(verifyCodeURL, code.ToString(), "application/json");
+        var www = UnityWebRequest.Post(verifyCodeURL, code.ToString(), "application/json");
         //set request header
         // Debug.Log("heres the header!!" + jsonHeader);
         
         // Create the JSON string for the header
-        string jsonHeader = "{\"token\":\"" + authToken + "\"}";
-        Debug.Log("heres the header!!" + jsonHeader);
-        www.SetRequestHeader("authorizationToken",jsonHeader);
+        // string jsonHeader = "{\"token\":\"" + authToken + "\"}";
+        // Debug.Log("heres the header!!" + jsonHeader);
+        // www.SetRequestHeader("authorizationToken",jsonHeader);
+        www.SetRequestHeader("authorizationToken", "{\"token\":\"" + authToken + "\"}");
+        // yield return www.SendWebRequest();
         
         
         // Set the request body
-        www.uploadHandler = new UploadHandlerRaw(bodyData);
+        // www.uploadHandler = new UploadHandlerRaw(bodyData);
         
         
         // UnityWebRequest www = UnityWebRequest.Post(verifyCodeURL,code.ToString(),  "application/json");
@@ -101,31 +104,46 @@ public class VerificationCodeScript : MonoBehaviour
         
         yield return www.SendWebRequest();
         
-        
-
         if (www.result != UnityWebRequest.Result.Success)
         {
-            Debug.LogError("Network error: " + www.error);
+            Debug.Log(www.error);
         }
         else
         {
+            Debug.Log("Form upload complete!");
             Debug.Log("Status Code: " + www.responseCode);
+            Debug.Log(www.result);
+            Debug.Log("Response: " + www.downloadHandler.text);
+            
+            var jsonResponse = JObject.Parse(www.downloadHandler.text);
 
-            if (www.responseCode == 200) // Successful verification
-            {
-                Debug.Log("Verification successful!");
-                Debug.Log("Response: " + www.downloadHandler.text);
-                // Handle successful verification here, e.g., allow user access
-                
-            }
-            else
-            {
-                Debug.LogWarning("Verification failed. Status Code: " + www.responseCode);
-                // Handle the failed verification here, e.g., display an error message to the user
-                Debug.Log("Response: " + www.downloadHandler.text);
-                // Print request headers
-                Debug.Log("Request Header -  " + www.GetRequestHeader("authorizationToken"));
-            }
+            
         }
+        
+
+        // if (www.result != UnityWebRequest.Result.Success)
+        // {
+        //     Debug.LogError("Network error: " + www.error);
+        // }
+        // else
+        // {
+        //     Debug.Log("Status Code: " + www.responseCode);
+        //
+        //     if (www.responseCode == 200) // Successful verification
+        //     {
+        //         Debug.Log("Verification successful!");
+        //         Debug.Log("Response: " + www.downloadHandler.text);
+        //         // Handle successful verification here, e.g., allow user access
+        //         
+        //     }
+        //     else
+        //     {
+        //         Debug.LogWarning("Verification failed. Status Code: " + www.responseCode);
+        //         // Handle the failed verification here, e.g., display an error message to the user
+        //         Debug.Log("Response: " + www.downloadHandler.text);
+        //         // Print request headers
+        //         Debug.Log("Request Header -  " + www.GetRequestHeader("authorizationToken"));
+        //     }
+        // }
     }
 }
