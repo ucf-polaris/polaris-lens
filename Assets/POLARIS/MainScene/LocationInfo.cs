@@ -46,7 +46,7 @@ public class LocationInfo : MonoBehaviour
 
             foreach (Building building in Locations.LocationList)
             {
-                Debug.Log($"{building.BuildingName} has alias(es) {building.BuildingAllias}");
+                Debug.Log($"{building.BuildingName} has description {building.BuildingDesc}");
             }
         }
     }
@@ -61,8 +61,8 @@ public class Building
     public string BuildingLocationType;
     public string BuildingImage;
     public string BuildingAddress;
-    public string BuildingAllias;
-    public string BuildingAbbreviation;
+    public string[] BuildingAllias;
+    public string[] BuildingAbbreviation;
     public double BuildingLong;
     public double BuildingLat;
 }

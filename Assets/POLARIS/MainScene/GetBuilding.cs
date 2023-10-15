@@ -128,9 +128,8 @@ namespace POLARIS.MainScene
                     return building;
                 }
 
-                if (String.IsNullOrWhiteSpace(building.BuildingAllias)) continue;
-                string[] curAliases = building.BuildingAllias.Split(',');
-                foreach (string alias in curAliases)
+                if (building.BuildingAllias.Length == 0) continue;
+                foreach (string alias in building.BuildingAllias)
                 {
                     if (String.Equals(raycastHitName, alias,
                             StringComparison.OrdinalIgnoreCase))
