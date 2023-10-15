@@ -16,6 +16,7 @@ public class EventPanel : MonoBehaviour, IPointerDownHandler
     
     public void OnPointerDown(PointerEventData eventData)
     {
+        print("zz eents touched");
         _panelZoom.TouchedPanel = true;
     }
 }

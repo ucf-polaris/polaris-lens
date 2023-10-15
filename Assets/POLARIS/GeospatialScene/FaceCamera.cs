@@ -62,6 +62,12 @@ namespace POLARIS.GeospatialScene
                 Quaternion.Slerp(transform.rotation, targetRotation, Speed * Time.deltaTime));
         }
 
+        public static void TestFunction(Vector2 val)
+        {
+            print("zz I have been tested: " + val);
+        }
+
+
         // private static Vector3 getClosestPointOnCircle(Vector3 point, Vector3 circleCenter, float radius)
         // {
         //     var denominator = (float)Math.Sqrt((point.x - circleCenter.x) * (point.x - circleCenter.x) 
