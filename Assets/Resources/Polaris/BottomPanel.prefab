@@ -290,9 +290,9 @@ GameObject:
   - component: {fileID: 5144013906393278001}
   - component: {fileID: 5144013906393277998}
   - component: {fileID: 8143330721604937590}
-  - component: {fileID: 5342696692749484929}
+  - component: {fileID: 4381311226136148133}
   m_Layer: 0
-  m_Name: EventPanel
+  m_Name: BottomPanel
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -389,7 +389,7 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 0.02, y: 0.02000001, z: 0.02000001}
   m_Center: {x: 0, y: 0.00000035762787, z: -0.000000004656613}
---- !u!114 &5342696692749484929
+--- !u!114 &4381311226136148133
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}

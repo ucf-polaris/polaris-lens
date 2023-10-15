@@ -4,7 +4,7 @@ using POLARIS.GeospatialScene;
 using UnityEngine;
 using UnityEngine.EventSystems;
 
-public class EventPanel : MonoBehaviour, IPointerDownHandler
+public class BottomPanel : MonoBehaviour, IPointerDownHandler
 {
     private PanelZoom _panelZoom;
     

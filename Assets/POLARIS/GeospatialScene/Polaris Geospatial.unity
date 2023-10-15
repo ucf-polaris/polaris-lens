@@ -1481,6 +1481,26 @@ PrefabInstance:
       propertyPath: m_AnchoredPosition.y
       value: -0.0018864158
       objectReference: {fileID: 0}
+    - target: {fileID: 4400764726651425512, guid: 1c98f608ce5a562448bc463cd33d07aa,
+        type: 3}
+      propertyPath: m_Name
+      value: BottomPanel
+      objectReference: {fileID: 0}
+    - target: {fileID: 5856333967501854546, guid: 1c98f608ce5a562448bc463cd33d07aa,
+        type: 3}
+      propertyPath: m_Color.b
+      value: 0.7264151
+      objectReference: {fileID: 0}
+    - target: {fileID: 5856333967501854546, guid: 1c98f608ce5a562448bc463cd33d07aa,
+        type: 3}
+      propertyPath: m_Color.g
+      value: 0.42077252
+      objectReference: {fileID: 0}
+    - target: {fileID: 5856333967501854546, guid: 1c98f608ce5a562448bc463cd33d07aa,
+        type: 3}
+      propertyPath: m_Color.r
+      value: 0.64782125
+      objectReference: {fileID: 0}
     - target: {fileID: 5969278693857074096, guid: 1c98f608ce5a562448bc463cd33d07aa,
         type: 3}
       propertyPath: m_AnchoredPosition.y
@@ -1559,11 +1579,7 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents:
-    - targetCorrespondingSourceObject: {fileID: 3455792306671096764, guid: 1c98f608ce5a562448bc463cd33d07aa,
-        type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 0}
+    m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 1c98f608ce5a562448bc463cd33d07aa, type: 3}
 --- !u!1 &683091019
 GameObject:

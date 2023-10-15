@@ -102,7 +102,7 @@ PrefabInstance:
     - target: {fileID: 5144013906393277996, guid: f8c7b3f02327be94d87543ca8389c1a8,
         type: 3}
       propertyPath: m_Name
-      value: EventPanel
+      value: BottomPanel
       objectReference: {fileID: 0}
     - target: {fileID: 5144013906393277996, guid: f8c7b3f02327be94d87543ca8389c1a8,
         type: 3}

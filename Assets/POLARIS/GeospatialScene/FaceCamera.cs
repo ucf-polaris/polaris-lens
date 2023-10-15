@@ -10,7 +10,7 @@ namespace POLARIS.GeospatialScene
         public bool Zoomed { get; set; }
         
         private GameObject _arCamera;
-        private GameObject _eventPanel;
+        private GameObject _bottomPanel;
 
         // Start is called before the first frame update
         private void Start()
@@ -19,7 +19,7 @@ namespace POLARIS.GeospatialScene
             
             var goList = new List<GameObject>();
             gameObject.GetChildGameObjects(goList);
-            _eventPanel = goList.Find(go => go.name.Equals("EventPanel"));
+            _bottomPanel = goList.Find(go => go.name.Equals("BottomPanel"));
         }
 
         // Update is called once per frame
@@ -29,7 +29,7 @@ namespace POLARIS.GeospatialScene
             if (Zoomed)
             {
                 var zoomPos = Vector3.forward * 3.3f;
-                if (_eventPanel.activeSelf)
+                if (_bottomPanel.activeSelf)
                 {
                     zoomPos = (Vector3.forward * 3.3f) + (Vector3.up * 1f);
                 }
@@ -66,7 +66,6 @@ namespace POLARIS.GeospatialScene
         {
             print("zz I have been tested: " + val);
         }
-
 
         // private static Vector3 getClosestPointOnCircle(Vector3 point, Vector3 circleCenter, float radius)
         // {
