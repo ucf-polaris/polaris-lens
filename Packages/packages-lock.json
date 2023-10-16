@@ -20,6 +20,12 @@
       },
       "hash": "92e1dbfdb637b9d29372e3891dcd55194e33d601"
     },
+    "com.quickeye.ui-toolkit-plus": {
+      "version": "file:C:/Users/eman6/Downloads/UI-Toolkit-Plus-upm",
+      "depth": 0,
+      "source": "local",
+      "dependencies": {}
+    },
     "com.unity.2d.sprite": {
       "version": "1.0.0",
       "depth": 1,
