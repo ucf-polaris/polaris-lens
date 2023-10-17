@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Text;
 using Google.XR.ARCoreExtensions;
 using TMPro;
 using Unity.XR.CoreUtils;
@@ -141,6 +142,21 @@ namespace POLARIS.GeospatialScene
         public void DisableEventsPanel()
         {
             _bottomPanel.SetActive(false);
+        }
+
+        public static string GenerateLocationText(Building location)
+        {
+            var sb = new StringBuilder(location.BuildingDesc.Length);
+
+            sb.Append("<style=Title>");
+            sb.Append(location.BuildingName);
+            sb.Append("</style>\n\n");
+
+            sb.Append("<style=Description>");
+            sb.Append(location.BuildingDesc);
+            sb.Append("</style>");
+
+            return sb.ToString();
         }
     }
 }

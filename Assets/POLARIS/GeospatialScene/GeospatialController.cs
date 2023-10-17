@@ -346,6 +346,7 @@ namespace Google.XR.ARCoreExtensions.Samples.Geospatial
             }
 
             PathManager.ClearPathAnchors();
+            PanelManager.ClearPanels();
             _anchorObjects.Clear();
             _historyCollection.Collection.Clear();
             SnackBarText.text = "Anchor(s) cleared!";
@@ -535,6 +536,8 @@ namespace Google.XR.ARCoreExtensions.Samples.Geospatial
             }
 
             _anchorObjects.Clear();
+            PathManager.ClearPathAnchors();
+            PanelManager.ClearPanels();
             SaveGeospatialAnchorHistory();
 
             if (StreetscapeGeometryManager)
@@ -680,7 +683,7 @@ namespace Google.XR.ARCoreExtensions.Samples.Geospatial
                     go.SetActive(true);
                 }
 
-                ResolveHistory();
+                // ResolveHistory();
             }
             else
             {
@@ -728,7 +731,7 @@ namespace Google.XR.ARCoreExtensions.Samples.Geospatial
                 // Load in nearby panels
                 var results = PanelManager.FetchNearbyIfNeeded(
                     new double2(pose.Latitude, pose.Longitude), _anchorObjects);
-                if (results.Length > 0)
+                if (results.Count > 0)
                 {
                     foreach (var result in results)
                     {
@@ -1040,21 +1043,8 @@ namespace Google.XR.ARCoreExtensions.Samples.Geospatial
                     StartCoroutine(CheckRooftopPromise(rooftopPromise, history));
                     return;
                 }
-
-                // var anchor = PlaceGeospatialAnchor(history);
-                var textPanel = AnchorManager.AddComponent<TextPanel>();
-            
-                textPanel.Instantiate(new GeospatialAnchorContent(
-                                          @"<style=Title>Polaris Panel</style>
-
-                        <style=Body>Hello everyone welcome to our app :)
-
-                        <indent=5%>• Hello</indent>
-
-                        Welcome to the <color=green>Fun Zone</color>",
-                                          history));
-
-                var anchor = textPanel.PlacePanelGeospatialAnchor(_anchorObjects, AnchorManager);
+                
+                var anchor = PanelManager.PlacePanel(_anchorObjects, history);
                 
                 if (anchor != null)
                 {

@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using POLARIS.GeospatialScene;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -16,7 +14,6 @@ public class BottomPanel : MonoBehaviour, IPointerDownHandler
     
     public void OnPointerDown(PointerEventData eventData)
     {
-        print("zz eents touched");
         _panelZoom.TouchedPanel = true;
     }
 }
