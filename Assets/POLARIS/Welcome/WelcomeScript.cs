@@ -7,12 +7,12 @@ public class WelcomeScript : MonoBehaviour
 {
     public void OnLoginButtonClick()
     {
-        SceneManager.LoadScene("Login"); // Replace "LoginScene" with the actual name of your login scene.
+        SceneManager.LoadScene("Login"); 
     }
     
     public void OnRegisterButtonClick()
     {
-        SceneManager.LoadScene("Register"); // Replace "LoginScene" with the actual name of your login scene.
+        SceneManager.LoadScene("Register"); 
     }
     
     // Start is called before the first frame update
