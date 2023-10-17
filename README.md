@@ -18,7 +18,7 @@ You will be added to the Unity Organization by the organization owner using your
 Installing Unity
 Follow the steps listed at unity.com/download to install Unity Hub.
 
-From there, install the latest LTS version of Unity (2021.3.20f1).
+From there, install the latest LTS version of Unity (2022.3.7f1).
 It is also recommended to install Visual Studio (with Unity support).
 
 Clone the project from GitHub.
@@ -32,6 +32,8 @@ Use the Git command line (or Desktop I suppose), no Unity integration required.
 Keep files small if possible! 
 Also remember to pull and merge before new development!
 It is also a good idea also to work on one feature at a time.
+
+Openning Script files from Unity after connecting Rider: right click on file, open C# project
 
 Review the [C# coding conventions
 ](https://learn.microsoft.com/en-us/dotnet/csharp/fundamentals/coding-style/coding-conventions)
