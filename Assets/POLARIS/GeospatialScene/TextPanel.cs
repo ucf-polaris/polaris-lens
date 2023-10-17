@@ -3,7 +3,6 @@ using Google.XR.ARCoreExtensions;
 using TMPro;
 using Unity.XR.CoreUtils;
 using UnityEngine;
-using UnityEngine.UI;
 using UnityEngine.XR.ARFoundation;
 
 namespace POLARIS.GeospatialScene
@@ -12,32 +11,37 @@ namespace POLARIS.GeospatialScene
     {
         public GameObject PanelPrefab;
         public GameObject LoadingPrefab;
-        
+        public GameObject CurrentPrefab;
+
+        public GeospatialAnchorContent Content;
+
         public bool Loaded;
         public bool Visited;
         public bool Favorited;
 
-        public GeospatialAnchorContent _content;
         private ARGeospatialAnchor _anchor;
-        public GameObject _currentPrefab;
+
+        private GameObject _bottomPanel;
+        private TextMeshProUGUI _bottomText;
+
+        private string _lastPressed;
+        private bool _bottomPanelShown;
 
         public void Instantiate(GeospatialAnchorContent content)
         {
-            _content = content;
+            Content = content;
             PanelPrefab = Resources.Load("Polaris/PanelParent") as GameObject;
             LoadingPrefab = Resources.Load("Polaris/stand") as GameObject;
-            
-            // add onclicks
         }
 
         public ARGeospatialAnchor PlacePanelGeospatialAnchor(
             List<GameObject> anchorObjects, ARAnchorManager anchorManager)
         {
             _anchor = anchorManager.AddAnchor(
-                _content.History.Latitude,
-                _content.History.Longitude,
-                _content.History.Altitude,
-                _content.History.EunRotation);
+                Content.History.Latitude,
+                Content.History.Longitude,
+                Content.History.Altitude,
+                Content.History.EunRotation);
 
             if (_anchor != null)
             {
@@ -46,7 +50,7 @@ namespace POLARIS.GeospatialScene
                     Debug.LogError("Panel prefab is null!");
                 }
 
-                _currentPrefab = Instantiate(LoadingPrefab, _anchor.transform);
+                CurrentPrefab = Instantiate(LoadingPrefab, _anchor.transform);
                 anchorObjects.Add(_anchor.gameObject);
 
                 print("Anchor Set!");
@@ -62,16 +66,17 @@ namespace POLARIS.GeospatialScene
         public void LoadPanel()
         {
             Loaded = true;
-            Destroy(_currentPrefab);
+            Destroy(CurrentPrefab);
             
-            _currentPrefab = Instantiate(PanelPrefab, _anchor.transform);
+            CurrentPrefab = Instantiate(PanelPrefab, _anchor.transform);
             
-            _currentPrefab.GetComponentInChildren<TextMeshPro>().SetText(_content.Text);
-            _currentPrefab.GetComponentInChildren<PanelZoom>().Panel = this;
+            CurrentPrefab.GetComponentInChildren<TextMeshPro>().SetText(Content.Text);
+            CurrentPrefab.GetComponentInChildren<PanelZoom>().Panel = this;
             
-            // set onclicks
-            
-
+            var goList = new List<GameObject>();
+            CurrentPrefab.GetChildGameObjects(goList);
+            _bottomPanel = goList.Find(go => go.name.Equals("BottomPanel"));
+            _bottomText = _bottomPanel.GetComponentInChildren<TextMeshProUGUI>();
 
             // Check for favorited / visited
         }
@@ -79,34 +84,63 @@ namespace POLARIS.GeospatialScene
         public void UnloadPanel()
         {
             Loaded = false;
-            Destroy(_currentPrefab);
+            Destroy(CurrentPrefab);
             
-            _currentPrefab = Instantiate(LoadingPrefab, _anchor.transform);
+            CurrentPrefab = Instantiate(LoadingPrefab, _anchor.transform);
         }
 
         public void VisitedPanel()
         {
             print("visited!");
-            Visited = true;
+            if (Visited) return;
             
+            Visited = true;
             // Update API
         }
 
         public void FavoritedClicked()
         {
             Favorited = !Favorited;
-            print("favorited? " + Favorited);
+            print("zz favorited? " + Favorited);
+            
             // Update API
         }
 
         public void PoiButtonClicked()
         {
-            print("poi clicked!");
+            if (_bottomPanelShown && _lastPressed == "poi")
+            {
+                _bottomPanelShown = false;
+            }
+            else
+            {
+                _bottomPanelShown = true;
+                _bottomText.SetText("Information points of interest wow");
+            }
+            _lastPressed = "poi";
+            
+            _bottomPanel.SetActive(_bottomPanelShown);
         }
         
         public void EventsButtonClicked()
         {
-            print("events clicked!");
+            if (_bottomPanelShown && _lastPressed == "events")
+            {
+                _bottomPanelShown = false;
+            }
+            else
+            {
+                _bottomPanelShown = true;
+                _bottomText.SetText("But I must explain to you how all this mistaken idea of denouncing pleasure and praising pain was born and I will give you a complete account of the system, and expound the actual teachings of the great explorer of the truth, the master-builder of human happiness. No one rejects, dislikes, or avoids pleasure itself, because it is pleasure, but because those who do not know how to pursue pleasure rationally encounter consequences that are extre");
+            }
+            _lastPressed = "events";
+
+            _bottomPanel.SetActive(_bottomPanelShown);
+        }
+
+        public void DisableEventsPanel()
+        {
+            _bottomPanel.SetActive(false);
         }
     }
 }

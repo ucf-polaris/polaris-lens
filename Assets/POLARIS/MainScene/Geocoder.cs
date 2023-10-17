@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+using System;
 using System.Collections.Generic;
 using System.Net.Http;
 using System.Threading.Tasks;
@@ -76,12 +77,18 @@ namespace POLARIS.MainScene
         private const string AddressQueryURL = "https://geocode-api.arcgis.com/arcgis/rest/services/World/GeocodeServer/findAddressCandidates";
         private const string LocationQueryURL = "https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/reverseGeocode";
         private const string SuggestQueryURL = "https://geocode-api.arcgis.com/arcgis/rest/services/World/GeocodeServer/suggest";
-
-        // private Dropdown _dropdown;
-        private Label _autoSuggestionBigLabel;
+        
         private bool _justClicked = false;
 
-        private Label _searchResultBigLabel;
+        // private Label _autoSuggestionBigLabel;
+        private List<AutoSuggestion> _suggestionList = new List<AutoSuggestion>();
+        private VisualElement _searchAndSuggestContainer;
+        private ListView _suggestionListView;
+        
+        // private Label _searchResultBigLabel;
+        private List<SearchResult> _searchResultList = new List<SearchResult>();
+        private VisualElement _searchResultContainer;
+        private ListView _searchResultListView;
 
         private void Start()
         {
@@ -93,18 +100,78 @@ namespace POLARIS.MainScene
             _queryLocationLocation = _queryLocationGo.GetComponent<ArcGISLocationComponent>();
             
             var rootVisual = searchBar.GetComponent<UIDocument>().rootVisualElement;
+            
             _searchField = rootVisual.Q<TextField>("SearchBox");
             _searchField.RegisterValueChangedCallback(OnSearchValueChanged);
-            _searchButton = rootVisual.Q<Button>("SearchButton");
-            _searchButton.RegisterCallback<ClickEvent>(OnButtonClick);
-            _autoSuggestionBigLabel = rootVisual.Q<Label>("AutoSuggestionBigLabel");
-            _searchResultBigLabel = rootVisual.Q<Label>("SearchResultBigLabel");
+            _searchField.selectAllOnFocus = true;
+            SetPlaceholderText(_searchField, "Where do you want to go?");
+            
+            // _searchButton = rootVisual.Q<Button>("SearchButton");
+            // _searchButton.RegisterCallback<ClickEvent>(OnButtonClick);
+            
+            // _autoSuggestionBigLabel = rootVisual.Q<Label>("AutoSuggestionBigLabel");
+            
+            // _searchResultBigLabel = rootVisual.Q<Label>("SearchResultBigLabel");
+            
             _clearButton = rootVisual.Q<Button>("ClearButton");
             _clearButton.RegisterCallback<ClickEvent>(_ => ClearSearchResultsUI());
+            
+            Func<VisualElement> makeItem = () => new Label();
+            Action<VisualElement, int> bindSuggestionItem = (VisualElement element, int index) => {
+                (element as Label).text = _suggestionList[index].Text;
+                (element as Label).RegisterCallback<ClickEvent>(_ => OnSuggestionClick(_suggestionList[index].Text, _suggestionList[index].MagicKey));
+                element.style.flexGrow = 1;
+                element.style.color = Color.black;
+                element.style.backgroundColor = Color.white;
+                element.style.paddingBottom = new StyleLength(index == _suggestionList.Count - 1 ? 0 : 6);
+            };
+            Action<VisualElement, int> bindSearchResultItem = (VisualElement element, int index) => {
+                (element as Label).text = _searchResultList[index].Address;
+                (element as Label).RegisterCallback<ClickEvent>(_ => SetStuff(_searchResultList[index].Longitude, _searchResultList[index].Latitude, _searchResultList[index].Address));
+                element.style.flexGrow = 1;
+                element.style.color = Color.black;
+                element.style.backgroundColor = Color.white;
+                element.style.paddingBottom = new StyleLength(index == _searchResultList.Count - 1 ? 0 : 6);
+            };
+            // output = new ListView(suggestionListTest, 20, makeItem, bindItem);
+
+            _suggestionListView = rootVisual.Q<ListView>("AutoSuggestionBigLabel");
+            _suggestionListView.itemsSource = _suggestionList;
+            _suggestionListView.fixedItemHeight = 20;
+            _suggestionListView.makeItem = makeItem;
+            _suggestionListView.bindItem = bindSuggestionItem;
+            _suggestionListView.selectionType = SelectionType.Single;
+            _suggestionListView.style.flexGrow = 1;
+            
+            _searchAndSuggestContainer = rootVisual.Q<VisualElement>("SearchAndSuggest");
+            _searchAndSuggestContainer.Add(_suggestionListView);
+
+            _searchResultListView = rootVisual.Q<ListView>("SearchResultBigLabel");
+            _searchResultListView.itemsSource = _searchResultList;
+            _searchResultListView.fixedItemHeight = 20;
+            _searchResultListView.makeItem = makeItem;
+            _searchResultListView.bindItem = bindSearchResultItem;
+            _searchResultListView.selectionType = SelectionType.Single;
+            _searchResultListView.style.flexGrow = 1;
+            
+            _searchResultContainer = rootVisual.Q<VisualElement>("SearchResults");
+            _searchResultContainer.Add(_searchResultListView);
         }
 
         private void Update()
         {
+            if (Input.GetKeyDown(KeyCode.KeypadEnter) || Input.GetKeyDown(KeyCode.Return))
+            {
+                Debug.Log("Pressed Return / Enter");
+                OnButtonClick();
+            }
+            
+            // foreach (KeyCode kcode in Enum.GetValues(typeof(KeyCode)))
+            // {
+            //     if (Input.GetKey(kcode))
+            //         Debug.Log("KeyCode down: " + kcode);
+            // }
+
             // Create a marker and address card after an address lookup
             if (!_shouldPlaceMarker) return;
             
@@ -137,6 +204,14 @@ namespace POLARIS.MainScene
         private async void OnSearchValueChanged(ChangeEvent<string> evt)
         {
             string newText = evt.newValue;
+
+            if (newText.EndsWith("\n"))
+            {
+                OnButtonClick();
+                _searchField.value = newText.TrimEnd('\n');
+                return;
+            }
+
             if (!string.IsNullOrWhiteSpace(newText) && !_justClicked)
             {
                 List<AutoSuggestion> suggestions = await FetchAutoSuggestions(newText);
@@ -215,21 +290,24 @@ namespace POLARIS.MainScene
         {
             // Clear previous suggestions
             ClearAutoSuggestionsUI();
-
+            // output.Rebuild();
+            // suggestionListTest.Clear();
             // Display the new suggestions in the AutoSuggestionText
             foreach (var suggestion in suggestions)
             {
                 // Just get place name (no city / state), and no UCF since that is added in find button anyways
-                var splitSuggestion = suggestion.Text.Split(",");
-                var suggestionLocationName = splitSuggestion[0];
-                suggestionLocationName = suggestionLocationName.Replace("University of Central Florida Orlando Campus", "");
-                var autoSuggestionSubLabel = new Label
-                {
-                    text = suggestionLocationName
-                };
-                autoSuggestionSubLabel.AddToClassList("sublabel"); 
-                autoSuggestionSubLabel.RegisterCallback<ClickEvent>(_ => OnSuggestionClick(autoSuggestionSubLabel.text, suggestion.MagicKey));
-                _autoSuggestionBigLabel.Add(autoSuggestionSubLabel);
+                // var splitSuggestion = suggestion.Text.Split(",");
+                // var suggestionLocationName = splitSuggestion[0];
+                // suggestionLocationName = suggestionLocationName.Replace("University of Central Florida Orlando Campus", "");
+                // var autoSuggestionSubLabel = new Label
+                // {
+                //     text = suggestionLocationName
+                // };
+                // autoSuggestionSubLabel.AddToClassList("sublabel"); 
+                // autoSuggestionSubLabel.RegisterCallback<ClickEvent>(_ => OnSuggestionClick(autoSuggestionSubLabel.text, suggestion.MagicKey));
+                // _autoSuggestionBigLabel.Add(autoSuggestionSubLabel);
+                _suggestionListView.itemsSource.Add(suggestion);
+                _suggestionListView.Rebuild();
             }
         }
 
@@ -265,10 +343,14 @@ namespace POLARIS.MainScene
 
         private void ClearAutoSuggestionsUI()
         {
-            _autoSuggestionBigLabel.Clear();
+            // _autoSuggestionBigLabel.Clear();
+            // output.Clear();
+            // suggestionListTest.Clear();
+            _suggestionListView.itemsSource.Clear();
+            _suggestionListView.Rebuild();
         }
 
-        private async void OnButtonClick(ClickEvent clickEvent)
+        private async void OnButtonClick()
         {
             if (_waitingForResponse) return;
 
@@ -346,13 +428,15 @@ namespace POLARIS.MainScene
             
             foreach (var searchResult in searchResults)
             {
-                var searchResultSubLabel = new Label
-                {
-                    text = searchResult.Address
-                };
-                // Add to class list
-                searchResultSubLabel.RegisterCallback<ClickEvent>(_ => SetStuff(searchResult.Longitude, searchResult.Latitude, searchResult.Address));
-                _searchResultBigLabel.Add(searchResultSubLabel);
+                // var searchResultSubLabel = new Label
+                // {
+                //     text = searchResult.Address
+                // };
+                // // Add to class list
+                // searchResultSubLabel.RegisterCallback<ClickEvent>(_ => SetStuff(searchResult.Longitude, searchResult.Latitude, searchResult.Address));
+                // _searchResultBigLabel.Add(searchResultSubLabel);
+                _searchResultListView.itemsSource.Add(searchResult);
+                _searchResultListView.Rebuild();
             }
         }
 
@@ -364,7 +448,9 @@ namespace POLARIS.MainScene
         
         private void ClearSearchResultsUI()
         {
-            _searchResultBigLabel.Clear();
+            // _searchResultBigLabel.Clear();
+            _searchResultListView.itemsSource.Clear();
+            _searchResultListView.Rebuild();
         }
 
         private void SetStuff(double lon, double lat, string address)
@@ -379,6 +465,33 @@ namespace POLARIS.MainScene
 
             _shouldPlaceMarker = true;
             _timer = 0;
+        }
+        
+        public static void SetPlaceholderText(TextField textField, string placeholder)
+        {
+            string placeholderClass = TextField.ussClassName + "__placeholder";
+ 
+            onFocusOut();
+            textField.RegisterCallback<FocusInEvent>(_ => onFocusIn());
+            textField.RegisterCallback<FocusOutEvent>(_ => onFocusOut());
+ 
+            void onFocusIn()
+            {
+                if (textField.ClassListContains(placeholderClass))
+                {
+                    textField.value = string.Empty;
+                    textField.RemoveFromClassList(placeholderClass);
+                }
+            }
+ 
+            void onFocusOut()
+            {
+                if (string.IsNullOrEmpty(textField.text))
+                {
+                    textField.SetValueWithoutNotify(placeholder);
+                    textField.AddToClassList(placeholderClass);
+                }
+            }
         }
 
         /// <summary>

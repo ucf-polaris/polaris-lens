@@ -10,6 +10,8 @@ GameObject:
   m_Component:
   - component: {fileID: 576075716194340708}
   - component: {fileID: 5314542252641831958}
+  - component: {fileID: 3203398209762901639}
+  - component: {fileID: 2021343555688775074}
   m_Layer: 0
   m_Name: FavButton
   m_TagString: Untagged
@@ -26,7 +28,7 @@ Transform:
   m_GameObject: {fileID: 414594677694596247}
   serializedVersion: 2
   m_LocalRotation: {x: 0.7071068, y: 0, z: 0, w: 0.7071068}
-  m_LocalPosition: {x: 0.006, y: 0, z: -0.0085}
+  m_LocalPosition: {x: 0.006, y: 0.015, z: -0.0085}
   m_LocalScale: {x: 0.002, y: 0.002, z: 0.002}
   m_ConstrainProportionsScale: 1
   m_Children: []
@@ -73,9 +75,8 @@ SpriteRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
-  m_Sprite: {fileID: -2413806693520163455, guid: 4adeaf2d2b1c7417e89f026626d8264f,
-    type: 3}
-  m_Color: {r: 0.74509805, g: 0.34117648, b: 0.28627452, a: 1}
+  m_Sprite: {fileID: 21300000, guid: 30d547968d0151a49b73a4b3d6a184f1, type: 3}
+  m_Color: {r: 0.854902, g: 0.6666667, b: 0.37254903, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
@@ -85,6 +86,41 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
+--- !u!65 &3203398209762901639
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 414594677694596247}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 0
+  serializedVersion: 3
+  m_Size: {x: 1.0000006, y: 1.0000006, z: 0.20000963}
+  m_Center: {x: 0.00000166893, y: -0.0000009536743, z: -0.00004196167}
+--- !u!114 &2021343555688775074
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 414594677694596247}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 65b6fba3cdbee894097b453193faa342, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  FavoritedSprite: {fileID: 21300000, guid: 6647fea0adf1fe04695fc6bd6c058638, type: 3}
+  UnfavoritedSprite: {fileID: 21300000, guid: 30d547968d0151a49b73a4b3d6a184f1, type: 3}
 --- !u!1 &2087972255831516790
 GameObject:
   m_ObjectHideFlags: 0
@@ -95,7 +131,8 @@ GameObject:
   m_Component:
   - component: {fileID: 7752905990324136883}
   - component: {fileID: 4166855606298210946}
-  - component: {fileID: 5324279720986637395}
+  - component: {fileID: 6752181117758956233}
+  - component: {fileID: 4419436576692138547}
   m_Layer: 0
   m_Name: PoiButton
   m_TagString: Untagged
@@ -112,7 +149,7 @@ Transform:
   m_GameObject: {fileID: 2087972255831516790}
   serializedVersion: 2
   m_LocalRotation: {x: 0.7071068, y: 0, z: 0, w: 0.7071068}
-  m_LocalPosition: {x: -0.006, y: 0, z: -0.0085}
+  m_LocalPosition: {x: -0.006, y: 0.015, z: -0.0085}
   m_LocalScale: {x: 0.003, y: 0.003, z: 0.003}
   m_ConstrainProportionsScale: 1
   m_Children: []
@@ -170,7 +207,28 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
---- !u!114 &5324279720986637395
+--- !u!65 &6752181117758956233
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2087972255831516790}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 0
+  serializedVersion: 3
+  m_Size: {x: 0.6400003, y: 0.64000034, z: 0.2000062}
+  m_Center: {x: -0.0000009536743, y: -0.0000009536743, z: -0.00002861023}
+--- !u!114 &4419436576692138547
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -179,41 +237,9 @@ MonoBehaviour:
   m_GameObject: {fileID: 2087972255831516790}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4e29b1a8efbd4b44bb3f3716e73f07ff, type: 3}
+  m_Script: {fileID: 11500000, guid: 33017625d510be340857025b7d1a5ba7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_Navigation:
-    m_Mode: 3
-    m_WrapAround: 0
-    m_SelectOnUp: {fileID: 0}
-    m_SelectOnDown: {fileID: 0}
-    m_SelectOnLeft: {fileID: 0}
-    m_SelectOnRight: {fileID: 0}
-  m_Transition: 0
-  m_Colors:
-    m_NormalColor: {r: 1, g: 1, b: 1, a: 1}
-    m_HighlightedColor: {r: 0.9607843, g: 0.9607843, b: 0.9607843, a: 1}
-    m_PressedColor: {r: 0.78431374, g: 0.78431374, b: 0.78431374, a: 1}
-    m_SelectedColor: {r: 0.9607843, g: 0.9607843, b: 0.9607843, a: 1}
-    m_DisabledColor: {r: 0.78431374, g: 0.78431374, b: 0.78431374, a: 0.5019608}
-    m_ColorMultiplier: 1
-    m_FadeDuration: 0.1
-  m_SpriteState:
-    m_HighlightedSprite: {fileID: 0}
-    m_PressedSprite: {fileID: 0}
-    m_SelectedSprite: {fileID: 0}
-    m_DisabledSprite: {fileID: 0}
-  m_AnimationTriggers:
-    m_NormalTrigger: Normal
-    m_HighlightedTrigger: Highlighted
-    m_PressedTrigger: Pressed
-    m_SelectedTrigger: Selected
-    m_DisabledTrigger: Disabled
-  m_Interactable: 1
-  m_TargetGraphic: {fileID: 0}
-  m_OnClick:
-    m_PersistentCalls:
-      m_Calls: []
 --- !u!1 &5144013906393277996
 GameObject:
   m_ObjectHideFlags: 0
@@ -242,7 +268,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 5144013906393277996}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalRotation: {x: 0, y: 0.7071068, z: 0.7071068, w: 0}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 100, y: 2.0000002, z: 80}
   m_ConstrainProportionsScale: 1
@@ -252,7 +278,7 @@ Transform:
   - {fileID: 1667154294496543360}
   - {fileID: 576075716194340708}
   m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_LocalEulerAnglesHint: {x: -90, y: 0, z: 180}
 --- !u!33 &5144013906393278001
 MeshFilter:
   m_ObjectHideFlags: 0
@@ -316,6 +342,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   Panel: {fileID: 0}
+  TouchedPanel: 0
 --- !u!65 &8143330721604937590
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -394,7 +421,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
+  - {fileID: -9087230933869019084, guid: 603f10c492281704c97555249ff70cd4, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -440,8 +467,9 @@ MonoBehaviour:
     welcome to our app :)\n\n<indent=0%>\u2022 Hello</indent>\n\nWelcome to the <color=green>Fun
     Zone</color>\n\n</style>"
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
-  m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: 603f10c492281704c97555249ff70cd4, type: 2}
+  m_sharedMaterial: {fileID: -9087230933869019084, guid: 603f10c492281704c97555249ff70cd4,
+    type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -465,7 +493,7 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 37.7
+  m_fontSize: 37.25
   m_fontSizeBase: 36
   m_fontWeight: 400
   m_enableAutoSizing: 1
@@ -520,6 +548,8 @@ GameObject:
   m_Component:
   - component: {fileID: 1667154294496543360}
   - component: {fileID: 7912542476690961705}
+  - component: {fileID: 3070621209190527355}
+  - component: {fileID: 6656523890163184536}
   m_Layer: 0
   m_Name: EventsButton
   m_TagString: Untagged
@@ -536,7 +566,7 @@ Transform:
   m_GameObject: {fileID: 8186767920551491330}
   serializedVersion: 2
   m_LocalRotation: {x: 0.7071068, y: 0, z: 0, w: 0.7071068}
-  m_LocalPosition: {x: 0, y: 0, z: -0.0085}
+  m_LocalPosition: {x: 0, y: 0.015, z: -0.0085}
   m_LocalScale: {x: 0.002, y: 0.002, z: 0.002}
   m_ConstrainProportionsScale: 1
   m_Children: []
@@ -585,7 +615,7 @@ SpriteRenderer:
   m_SortingOrder: 0
   m_Sprite: {fileID: 2747690628134850419, guid: a9716c16a44a94eed9b5c90fbf4d9bdd,
     type: 3}
-  m_Color: {r: 0.9568628, g: 0.7176471, b: 0.38431376, a: 1}
+  m_Color: {r: 0.7137255, g: 0.4666667, b: 0.18823531, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
@@ -595,3 +625,36 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
+--- !u!65 &3070621209190527355
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8186767920551491330}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 0
+  serializedVersion: 3
+  m_Size: {x: 1.0000006, y: 0.88281304, z: 0.20000851}
+  m_Center: {x: 0, y: -0.0000009536743, z: -0.00004196167}
+--- !u!114 &6656523890163184536
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8186767920551491330}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c8d72b6afdde9c94ab9c715c0c545384, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 

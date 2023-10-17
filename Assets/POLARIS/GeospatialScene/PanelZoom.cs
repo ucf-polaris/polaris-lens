@@ -7,40 +7,50 @@ namespace POLARIS.GeospatialScene
 {
     public class PanelZoom : MonoBehaviour, IPointerDownHandler
     {
+        public TextPanel Panel;
+        public bool TouchedPanel;
+
         private GameObject _arCamera;
-        private Transform _marker;
+        private Transform _grandparent;
         private FaceCamera _faceCamera;
 
-        private Button _poiButton;
-        private Button _eventsButton;
-        private Button _favButton;
+        private BoxCollider _poiButton;
+        private BoxCollider _eventsButton;
+        private BoxCollider _favButton;
 
-        public TextPanel Panel;
 
         private void Start()
         {
             _arCamera = GameObject.FindGameObjectWithTag("MainCamera");
             _faceCamera = transform.parent.GetComponent<FaceCamera>();
-            _marker = gameObject.transform.parent.parent;
+            _grandparent = gameObject.transform.parent.parent;
             AddPhysics2DRaycaster(_arCamera);
 
-            _poiButton = gameObject.GetNamedChild("PoiButton").GetComponent<Button>();
-            _eventsButton = gameObject.GetNamedChild("EventsButton").GetComponent<Button>();
-            _favButton = gameObject.GetNamedChild("FavButton").GetComponent<Button>();
+            _poiButton = gameObject.GetNamedChild("PoiButton").GetComponent<BoxCollider>();
+            _eventsButton = gameObject.GetNamedChild("EventsButton").GetComponent<BoxCollider>();
+            _favButton = gameObject.GetNamedChild("FavButton").GetComponent<BoxCollider>();
+        }
+
+        private void LateUpdate()
+        {
+            if (!_faceCamera.Zoomed) return;
+            if (Input.touchCount == 0)
+            {
+                TouchedPanel = false;
+                return;
+            };
+            if (TouchedPanel) return;
+            
+            DisableZoom();
         }
 
         public void OnPointerDown(PointerEventData eventData)
         {
-            // TODO: Check if button pressed (dont unzoom on press)
-            
-            if (_faceCamera.Zoomed)
-            {
-                DisableZoom();
-            }
-            else
-            {
-                EnableZoom();
-            }
+            TouchedPanel = true;
+
+            if (_faceCamera.Zoomed) return;
+
+            EnableZoom();
         }
 
         private void EnableZoom()
@@ -55,10 +65,10 @@ namespace POLARIS.GeospatialScene
                 // ignore - nothing is zoomed
             }
             
-            // enable onclicks
-            _poiButton.onClick.AddListener(Panel.PoiButtonClicked);
-            _eventsButton.onClick.AddListener(Panel.EventsButtonClicked);
-            _favButton.onClick.AddListener(Panel.FavoritedClicked);
+            // enable colliders
+            _poiButton.enabled = true;
+            _eventsButton.enabled = true;
+            _favButton.enabled = true;
 
             transform.parent.parent = _arCamera.transform;
             _faceCamera.Zoomed = true;
@@ -68,13 +78,14 @@ namespace POLARIS.GeospatialScene
 
         public void DisableZoom()
         {
-            // disable onclicks
-            _poiButton.onClick.RemoveAllListeners();
-            _eventsButton.onClick.RemoveAllListeners();
-            _favButton.onClick.RemoveAllListeners();
+            // disable colliders
+            _poiButton.enabled = false;
+            _eventsButton.enabled = false;
+            _favButton.enabled = false;
             
-            transform.parent.parent = _marker.transform;
+            transform.parent.parent = _grandparent.transform;
             _faceCamera.Zoomed = false;
+            Panel.DisableEventsPanel();
         }
 
         private static void AddPhysics2DRaycaster(GameObject camera)
