@@ -1,6 +1,12 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using Esri.ArcGISMapsSDK.Components;
+using Esri.ArcGISMapsSDK.Utils.GeoCoord;
+using Esri.GameEngine.Geometry;
+using Esri.HPFramework;
+using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.UIElements;
 using static System.Char;
@@ -14,11 +20,15 @@ namespace POLARIS.MainScene
 
         private float lastTapTime = 0;
         private float doubleTapThreshold = 0.3f;
+        
+        private ArcGISMapComponent _arcGisMapComponent;
+
 
         private void Start()
         {
             _mainCamera = Camera.main;
             _uiDocLabel = gameObject.GetComponent<UIDocument>().rootVisualElement.Q<Label>("BuildingTopLabel");
+            _arcGisMapComponent = FindObjectOfType<ArcGISMapComponent>();
         }
         
         private void Update()
@@ -36,10 +46,22 @@ namespace POLARIS.MainScene
                         var ray = _mainCamera.ScreenPointToRay(touch.position);
 
                         if (!Physics.Raycast(ray, out var hit)) return;
-
-                        print("My object is clicked by mouse " + hit.transform.name);
-                        _uiDocLabel.text = ToTitleCase(hit.transform.name[4..]);
-                        StartCoroutine(ToggleLabelHeight());
+                        
+                        var worldPosition = math.inverse(_arcGisMapComponent.WorldMatrix).HomogeneousTransformPoint(hit.point.ToDouble3());
+                        var geoPosition = _arcGisMapComponent.View.WorldToGeographic(worldPosition);
+                        var offsetPosition = new ArcGISPoint(geoPosition.X, geoPosition.Y, geoPosition.Z, geoPosition.SpatialReference);
+                        var coords = GeoUtils.ProjectToSpatialReference(offsetPosition, new ArcGISSpatialReference(4326));
+                        
+                        var locationName = hit.transform.name;
+                        Debug.Log($"Hit position: {coords.X}, {coords.Y}, {coords.Z}");
+                        print("My object is clicked by mouse " + locationName);
+                        if (!string.IsNullOrWhiteSpace(locationName) &&
+                            !locationName.StartsWith("ArcGISGameObject_") && locationName.Length > 4)
+                        {
+                            var buildingName = ToTitleCase(locationName[4..]);
+                            _uiDocLabel.text = $"{buildingName}: {GetClosestBuilding(buildingName).BuildingDesc}";
+                            StartCoroutine(ToggleLabelHeight());
+                        }
                     }
                     else
                     {
@@ -62,6 +84,7 @@ namespace POLARIS.MainScene
         {
             return new string(ToTitleCaseEnumerable(stringToConvert).ToArray());
         }
+        
         private static IEnumerable<char> ToTitleCaseEnumerable(string stringToConvert)
         {
             var newWord = true;
@@ -94,7 +117,29 @@ namespace POLARIS.MainScene
                 }
             }
         }
+
+        public static Building GetClosestBuilding(String raycastHitName)
+        {
+            foreach (Building building in Locations.LocationList)
+            {
+                if (String.Equals(raycastHitName, building.BuildingName,
+                        StringComparison.OrdinalIgnoreCase))
+                {
+                    return building;
+                }
+
+                if (building.BuildingAllias.Length == 0) continue;
+                foreach (string alias in building.BuildingAllias)
+                {
+                    if (String.Equals(raycastHitName, alias,
+                            StringComparison.OrdinalIgnoreCase))
+                    {
+                        return building;
+                    }
+                }
+            }
+
+            return Locations.LocationList[0];
+        }
     }
-    
-    
 }

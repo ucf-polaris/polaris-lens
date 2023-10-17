@@ -117,7 +117,8 @@ namespace POLARIS
                                 locationComponent.Rotation = new ArcGISRotation(0, 90, 0);
 
                                 _stops.Enqueue(routeMarker);
-                                _stopNames.Enqueue(GetBuilding.ToTitleCase(hit.transform.name[4..]));
+                                var locationName = hit.transform.name;
+                                _stopNames.Enqueue(locationName.StartsWith("ArcGISGameObject_") ? "Point" : GetBuilding.ToTitleCase(locationName[4..]));
 
                                 if (_stops.Count > StopCount)
                                 {

@@ -1,15 +1,9 @@
 .switchButton {
-    margin-left: 10px;
-    margin-right: 10px;
-    margin-top: 10px;
-    margin-bottom: 10px;
+    margin: 10px;
     -unity-text-align: middle-center;
     white-space: normal;
     background-color: rgba(52, 16, 75, 0.77);
-    border-top-left-radius: 10px;
-    border-bottom-left-radius: 10px;
-    border-top-right-radius: 10px;
-    border-bottom-right-radius: 10px;
+    border-radius: 10px;
     width: 20%;
     height: 20%;
     position: absolute;
@@ -28,52 +22,23 @@
 
 .SearchBox {
     -unity-font: resource('FlatSkin/Font/Roboto-Light');
-    background-color: rgba(32, 32, 32, 255);
-    border-left-color: rgba(33, 66, 131, 255);
-    border-right-color: rgba(33, 66, 131, 255);
-    border-top-color: rgba(33, 66, 131, 255);
-    border-bottom-color: rgba(33, 66, 131, 255);
-    border-left-width: 5px;
-    border-right-width: 5px;
-    border-top-width: 5px;
-    border-bottom-width: 5px;
-    border-top-left-radius: 10px;
-    border-bottom-left-radius: 10px;
-    border-top-right-radius: 10px;
-    border-bottom-right-radius: 10px;
     align-items: center;
     justify-content: center;
-    flex-basis: 80%;
     display: flex;
+    flex-basis: auto;
     font-size: 20px;
+    margin: 0;
+    /*flex: 1;*/
 }
 
 .SearchDiv {
-    border-left-color: rgba(33, 66, 131, 255);
-    border-right-color: rgba(33, 66, 131, 255);
-    border-top-color: rgba(33, 66, 131, 255);
-    border-bottom-color: rgba(33, 66, 131, 255);
-    border-left-width: 5px;
-    border-right-width: 5px;
-    border-top-width: 5px;
-    border-bottom-width: 5px;
-    border-top-left-radius: 10px;
-    border-bottom-left-radius: 10px;
-    border-top-right-radius: 10px;
-    border-bottom-right-radius: 10px;
-    background-color: rgba(33, 66, 131, 255);
-    padding-left: 0;
-    padding-right: 0;
-    padding-top: 0;
-    padding-bottom: 0;
-    margin-left: 0;
-    margin-right: 0;
-    margin-top: 0;
-    margin-bottom: 0;
+    padding: 0;
+    margin: 0;
     width: 60%;
     left: 50px;
     top: 80px;
     height: 100%;
+    flex-direction: column;
 }
 
 .SearchButton {
@@ -82,14 +47,8 @@
     font-size: 24px;
     flex-basis: 17%;
     color: rgba(255, 255, 255, 255);
-    margin-left: 4px;
-    margin-right: 4px;
-    margin-top: 4px;
-    margin-bottom: 4px;
-    padding-left: 0;
-    padding-right: 0;
-    padding-top: 0;
-    padding-bottom: 0;
+    margin: 0;
+    padding: 0;
 }
 
 .RoutingDest {
@@ -105,4 +64,21 @@
 
 .sublabel {
     font-size: 10px;
+}
+
+.AutoSuggestionBigLabel {
+    flex-basis: auto;
+    /*background-color: dimgrey;*/
+}
+
+.SearchAndSuggest {
+    /*background-color: dimgrey;*/
+}
+
+.unity-list-view__empty-label {
+    display: none;
+}
+
+#SearchBox .unity-text-field__input {
+    margin: 0;
 }

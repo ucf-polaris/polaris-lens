@@ -73,7 +73,7 @@ namespace POLARIS.GeospatialScene
             foreach (var panel in _panels)
             {
                 var withinThresh =
-                    Vector3.Distance(panel._currentPrefab.transform.position, Camera.transform.position) <
+                    Vector3.Distance(panel.CurrentPrefab.transform.position, Camera.transform.position) <
                     LoadDistance;
 
                 switch (panel.Loaded)
