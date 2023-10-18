@@ -18,7 +18,7 @@
         "com.unity.xr.arcore": "4.1.5",
         "com.unity.xr.arkit": "4.1.5"
       },
-      "hash": "92e1dbfdb637b9d29372e3891dcd55194e33d601"
+      "hash": "9dfa8896ec061747a0ac4f11abac923d60c6f7e2"
     },
     "com.quickeye.ui-toolkit-plus": {
       "version": "3.0.3",
@@ -80,7 +80,7 @@
       }
     },
     "com.unity.ide.rider": {
-      "version": "3.0.25",
+      "version": "3.0.26",
       "depth": 0,
       "source": "registry",
       "dependencies": {
