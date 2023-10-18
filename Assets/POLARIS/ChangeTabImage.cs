@@ -12,6 +12,7 @@ public class ChangeTabImage : MonoBehaviour
 	private Texture2D _calendarDark;
 
 	private VisualElement _spacer;
+	private VisualElement _arrow;
 	private string _lastPressed;
 	private bool _menuOpen;
 
@@ -32,6 +33,7 @@ public class ChangeTabImage : MonoBehaviour
 		_calendarDark = Resources.Load<Texture2D>("Polaris/UI tabs/calendardark");
 		
 		_spacer = uiDoc.rootVisualElement.Q<VisualElement>("Spacer");
+		_arrow = uiDoc.rootVisualElement.Q<VisualElement>("Arrow");
     }
 
     private void OnClickCalendar()
@@ -56,5 +58,6 @@ public class ChangeTabImage : MonoBehaviour
 	    _lastPressed = pressed;
 
 	    _spacer.style.height = Length.Percent(_menuOpen ?  15 : 80);
+	    _arrow.style.rotate = new Rotate(_menuOpen ? 90 : 270);
     }
 }
