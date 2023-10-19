@@ -41,11 +41,16 @@ public class LoginUser : MonoBehaviour
             Debug.Log("Form upload complete!");
             Debug.Log("Status Code: " + www.responseCode);
             Debug.Log(www.result);
-            Debug.Log("Response: " + www.downloadHandler.text);
-            SceneManager.LoadScene("MainScene"); 
+            JObject jsonResponse = JObject.Parse(www.downloadHandler.text);
+            Debug.Log("Response: " + jsonResponse);
+            if (jsonResponse.ContainsKey("UserID"))
+            {
+                SceneManager.LoadScene("MainScene");
+            }
+            else Debug.Log("incorrect login");
+
+
         }
     }
-    
-    
     
 }
