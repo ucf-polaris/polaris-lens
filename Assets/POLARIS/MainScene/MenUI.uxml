@@ -1,5 +1,6 @@
 <ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" xsi="http://www.w3.org/2001/XMLSchema-instance" engine="UnityEngine.UIElements" editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False" gen-cs-file="27cb86f4d54650a4bb6f086c044cbb3a">
-    <ui:VisualElement name="Spacer" style="height: 80%; transition-property: height; transition-duration: 0.5s; transition-timing-function: ease-in-out-back;" />
+    <Style src="project://database/Assets/POLARIS/MainScene/MainUSS.uss?fileID=7433441132597879392&amp;guid=c0cbfe978347ae54f841f39e05b3b78e&amp;type=3#MainUSS" />
+    <ui:VisualElement name="Spacer" style="height: 34%; transition-property: height; transition-duration: 0.5s; transition-timing-function: ease-in-out-back;" />
     <ui:GroupBox name="Tabs" style="margin-left: 0; margin-right: 0; margin-top: 0; margin-bottom: 0; padding-top: 0; padding-right: 0; padding-bottom: 0; padding-left: 0; flex-direction: row; height: auto; justify-content: space-between;">
         <ui:GroupBox name="CalBox" style="margin-top: 0; margin-right: 0; margin-bottom: 0; margin-left: 0; padding-top: 20%; padding-right: 0; padding-bottom: 0; padding-left: 0; width: 40%; height: 0;">
             <ui:Button display-tooltip-when-elided="true" name="Cal" style="background-image: resource(&apos;Polaris/UI tabs/calendardark&apos;); -unity-background-scale-mode: scale-to-fit; margin-left: 0; margin-right: 0; margin-top: 0; margin-bottom: 0; padding-left: 0; padding-right: 0; padding-top: 0; padding-bottom: 0; border-top-left-radius: 0; border-bottom-left-radius: 0; border-top-right-radius: 0; border-bottom-right-radius: 0; border-left-width: 0; border-right-width: 0; border-top-width: 0; border-bottom-width: 0; background-color: rgba(0, 0, 0, 0); white-space: nowrap; -unity-text-align: upper-left; position: absolute; left: 0; top: 0; right: 0; bottom: 0;" />
@@ -9,5 +10,10 @@
             <ui:Button display-tooltip-when-elided="true" name="Loc" style="-unity-background-scale-mode: scale-to-fit; background-image: resource(&apos;Polaris/UI tabs/locationlight&apos;); margin-left: 0; margin-right: 0; margin-top: 0; margin-bottom: 0; padding-left: 0; padding-right: 0; padding-top: 0; padding-bottom: 0; border-top-left-radius: 0; border-bottom-left-radius: 0; border-top-right-radius: 0; border-bottom-right-radius: 0; border-left-width: 0; border-right-width: 0; border-top-width: 0; border-bottom-width: 0; background-color: rgba(0, 0, 0, 0); transition-property: background-image; transition-duration: 0.2s; position: absolute; left: 0; top: 0; right: 0; bottom: 0;" />
         </ui:GroupBox>
     </ui:GroupBox>
-    <ui:ScrollView style="flex-grow: 1; background-color: rgb(46, 48, 82);" />
+    <ui:ScrollView name="ScrollView" horizontal-scroller-visibility="Hidden" vertical-scroller-visibility="Hidden" style="flex-grow: 1; background-color: rgb(46, 48, 82);">
+        <ui:TextField picking-mode="Ignore" keyboard-type="Search" name="SearchBar" style="width: 90%; align-self: center; padding-top: 0; padding-right: 0; padding-bottom: 0; padding-left: 0; margin-top: 4%; margin-right: 2%; margin-bottom: 2%; margin-left: 2%; height: auto; min-height: auto;" />
+        <ui:VisualElement name="SearchResults" class="SearchResults" style="flex-direction: column; align-items: flex-start; justify-content: flex-end; height: 40%; align-self: auto;">
+            <ui:ListView name="SearchResultBigLabel" class="SearchResultBigLabel" />
+        </ui:VisualElement>
+    </ui:ScrollView>
 </ui:UXML>

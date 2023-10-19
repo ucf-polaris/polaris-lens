@@ -31,6 +31,16 @@
     /*flex: 1;*/
 }
 
+#SearchBar > TextInput {
+    background-color: rgba(0, 0, 0, 0);
+    background-image: resource("Assets/POLARIS/Rectangle 16.png");
+    border-width: 0;
+}
+
+#SearchBar > TextInput > TextElement {
+    color: whitesmoke;
+}
+
 .SearchDiv {
     padding: 0;
     margin: 0;
