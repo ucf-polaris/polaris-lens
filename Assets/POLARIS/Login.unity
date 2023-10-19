@@ -848,7 +848,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   emailInput: {fileID: 1014790790}
   passwordInput: {fileID: 1655857797}
-  loginURL: https://qgfl17av2f.execute-api.us-east-2.amazonaws.com/Stage/user/login
+  loginURL: https://api.ucfpolaris.com/user/login
 --- !u!1 &519986534
 GameObject:
   m_ObjectHideFlags: 0

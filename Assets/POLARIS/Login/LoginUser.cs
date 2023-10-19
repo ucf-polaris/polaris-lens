@@ -7,11 +7,13 @@ using UnityEngine.Networking;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using TMPro; 
+using UnityEngine.SceneManagement;
+
 public class LoginUser : MonoBehaviour
 {
     public TMP_InputField emailInput;
     public TMP_InputField passwordInput;
-    public string loginURL = "https://qgfl17av2f.execute-api.us-east-2.amazonaws.com/Stage/user/login";
+    public string loginURL = "https://api.ucfpolaris.com/user/login";
     
     public void Login()
     {
@@ -40,6 +42,7 @@ public class LoginUser : MonoBehaviour
             Debug.Log("Status Code: " + www.responseCode);
             Debug.Log(www.result);
             Debug.Log("Response: " + www.downloadHandler.text);
+            SceneManager.LoadScene("MainScene"); 
         }
     }
     
