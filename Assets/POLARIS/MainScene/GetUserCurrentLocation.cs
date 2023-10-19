@@ -3,8 +3,13 @@ using System.Collections;
 
 public class GetUserCurrentLocation : MonoBehaviour
 {
+    public GameObject currentLocationMarker;
     private float _latitude = 0f;
     private float _longitude = 0f;
+    private double latMin = -81.209995;
+    private double longMin = 28.580255;
+    private double latMax = -81.181589;
+    private double longMax = 28.613986;
     private void Start()
     {
         StartCoroutine(LocationCoroutine());
@@ -33,14 +38,14 @@ public class GetUserCurrentLocation : MonoBehaviour
         // First, check if user has location service enabled
         if (!Input.location.isEnabledByUser) {
             // TODO Failure
-            Debug.LogFormat("Android and Location not enabled");
+            Debug.LogFormat("Android - Location not enabled");
             yield break;
         }
 
 #elif UNITY_IOS
         if (!Input.location.isEnabledByUser) {
             // TODO Failure
-            Debug.LogFormat("IOS and Location not enabled");
+            Debug.LogFormat("IOS - Location not enabled");
             yield break;
         }
 #endif
@@ -90,7 +95,7 @@ public class GetUserCurrentLocation : MonoBehaviour
 
             _latitude = Input.location.lastData.latitude;
             _longitude = Input.location.lastData.longitude;
-            // TODO success do something with location
+            // TODO DRAW LOCATION KEEP UPDATING
         }
 
         // Stop service if there is no need to query location updates continuously
