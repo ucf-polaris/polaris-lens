@@ -49,6 +49,7 @@
     top: 80px;
     height: 100%;
     flex-direction: column;
+    flex-wrap: nowrap;
 }
 
 .SearchButton {

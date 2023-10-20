@@ -34,6 +34,7 @@ public class ChangeTabImage : MonoBehaviour
 		
 		_spacer = uiDoc.rootVisualElement.Q<VisualElement>("Spacer");
 		_arrow = uiDoc.rootVisualElement.Q<VisualElement>("Arrow");
+		_arrow.RegisterCallback<ClickEvent>(OnClickArrow);
     }
 
     private void OnClickCalendar()
@@ -51,6 +52,13 @@ public class ChangeTabImage : MonoBehaviour
 		print("Hello location!");
 		MoveUI("location");
 	}
+
+    private void OnClickArrow(ClickEvent evt)
+    {
+	    _menuOpen = !_menuOpen;
+	    _spacer.style.height = Length.Percent(_menuOpen ?  15 : 80);
+	    _arrow.style.rotate = new Rotate(_menuOpen ? 90 : 270);
+    }
 
     private void MoveUI(string pressed)
     {

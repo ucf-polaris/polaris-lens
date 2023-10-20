@@ -1,6 +1,6 @@
 <ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" xsi="http://www.w3.org/2001/XMLSchema-instance" engine="UnityEngine.UIElements" editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
     <Style src="project://database/Assets/POLARIS/MainScene/MainUSS.uss?fileID=7433441132597879392&amp;guid=c0cbfe978347ae54f841f39e05b3b78e&amp;type=3#MainUSS" />
-    <ui:VisualElement name="SearchDiv" class="SearchDiv" style="flex-wrap: nowrap; flex-direction: column;">
+    <ui:VisualElement name="SearchDiv" class="SearchDiv">
         <ui:VisualElement name="SearchAndSuggest" class="SearchAndSuggest" style="flex-wrap: nowrap; flex-direction: column;">
             <ui:TextField name="SearchBox" picking-mode="Ignore" class="SearchBox" multiline="true"/>
             <ui:ListView name="AutoSuggestionBigLabel" class="AutoSuggestionBigLabel" />

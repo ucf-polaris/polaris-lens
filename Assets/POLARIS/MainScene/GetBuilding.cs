@@ -59,7 +59,18 @@ namespace POLARIS.MainScene
                             !locationName.StartsWith("ArcGISGameObject_") && locationName.Length > 4)
                         {
                             var buildingName = ToTitleCase(locationName[4..]);
-                            _uiDocLabel.text = $"{buildingName}: {GetClosestBuilding(buildingName).BuildingDesc}";
+                            _uiDocLabel.text = $"{buildingName}";
+                            var closestBuilding = GetClosestBuilding(buildingName);
+                            Debug.Log(
+                                $"Name: {closestBuilding.BuildingName ?? ""}\n" +
+                                $"Aliases: {((closestBuilding.BuildingAllias != null) ? string.Join(", ", closestBuilding.BuildingAllias) : "")}\n" +
+                                $"Abbreviations: {((closestBuilding.BuildingAbbreviation != null) ? string.Join(", ", closestBuilding.BuildingAbbreviation) : "")}\n" +
+                                $"Description: {closestBuilding.BuildingDesc ?? ""}\n" +
+                                $"Longitude: {closestBuilding.BuildingLong}\n" +
+                                $"Latitude: {closestBuilding.BuildingLat}\n" +
+                                $"Address: {closestBuilding.BuildingAddress ?? ""}\n" +
+                                $"Events: {((closestBuilding.BuildingEvents != null) ? string.Join(", ", closestBuilding.BuildingEvents) : "")}\n");
+
                             StartCoroutine(ToggleLabelHeight());
                         }
                     }
@@ -128,7 +139,7 @@ namespace POLARIS.MainScene
                     return building;
                 }
 
-                if (building.BuildingAllias.Length == 0) continue;
+                if (building.BuildingAllias == null) continue;
                 foreach (string alias in building.BuildingAllias)
                 {
                     if (String.Equals(raycastHitName, alias,
