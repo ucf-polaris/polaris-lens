@@ -47,7 +47,7 @@ public class RegistrationScript : MonoBehaviour
             Debug.Log("Response: " + www.downloadHandler.text);
             JObject jsonResponse = JObject.Parse(www.downloadHandler.text);
             AuthToken = jsonResponse["token"].Value<string>();
-            
+
             // Save the authToken to PlayerPrefs for later use
             PlayerPrefs.SetString("AuthToken", AuthToken);
             

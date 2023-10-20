@@ -48,8 +48,6 @@ public class LoginUser : MonoBehaviour
                 SceneManager.LoadScene("MainScene");
             }
             else Debug.Log("incorrect login");
-
-
         }
     }
     
