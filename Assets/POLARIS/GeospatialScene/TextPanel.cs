@@ -1,9 +1,15 @@
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 using Google.XR.ARCoreExtensions;
 using TMPro;
 using Unity.XR.CoreUtils;
 using UnityEngine;
+using UnityEngine.Networking;
+using UnityEngine.UI;
 using UnityEngine.XR.ARFoundation;
 
 namespace POLARIS.GeospatialScene
@@ -23,7 +29,7 @@ namespace POLARIS.GeospatialScene
         private ARGeospatialAnchor _anchor;
 
         private GameObject _bottomPanel;
-        private TextMeshProUGUI _bottomText;
+        private GameObject _bottomLayout;
 
         private string _lastPressed;
         private bool _bottomPanelShown;
@@ -77,7 +83,7 @@ namespace POLARIS.GeospatialScene
             var goList = new List<GameObject>();
             CurrentPrefab.GetChildGameObjects(goList);
             _bottomPanel = goList.Find(go => go.name.Equals("BottomPanel"));
-            _bottomText = _bottomPanel.GetComponentInChildren<TextMeshProUGUI>();
+            _bottomLayout = _bottomPanel.GetComponentInChildren<VerticalLayoutGroup>().gameObject;
 
             // Check for favorited / visited
         }
@@ -116,7 +122,7 @@ namespace POLARIS.GeospatialScene
             else
             {
                 _bottomPanelShown = true;
-                _bottomText.SetText("Information points of interest wow");
+                // _bottomText.SetText("Information points of interest wow");
             }
             _lastPressed = "poi";
             
@@ -132,10 +138,11 @@ namespace POLARIS.GeospatialScene
             else
             {
                 _bottomPanelShown = true;
-                _bottomText.SetText("But I must explain to you how all this mistaken idea of denouncing pleasure and praising pain was born and I will give you a complete account of the system, and expound the actual teachings of the great explorer of the truth, the master-builder of human happiness. No one rejects, dislikes, or avoids pleasure itself, because it is pleasure, but because those who do not know how to pursue pleasure rationally encounter consequences that are extre");
+                // _bottomText.SetText("But I must explain to you how all this mistaken idea of denouncing pleasure and praising pain was born and I will give you a complete account of the system, and expound the actual teachings of the great explorer of the truth, the master-builder of human happiness. No one rejects, dislikes, or avoids pleasure itself, because it is pleasure, but because those who do not know how to pursue pleasure rationally encounter consequences that are extre");
             }
             _lastPressed = "events";
 
+            AddEvents();
             _bottomPanel.SetActive(_bottomPanelShown);
         }
 
@@ -157,6 +164,57 @@ namespace POLARIS.GeospatialScene
             sb.Append("</style>");
 
             return sb.ToString();
+        }
+
+        private void AddEvents()
+        {
+            var events = Events.EventList.Where(e =>
+                                                    Math.Abs(e.location.BuildingLat -
+                                                             this.Content.History.Latitude) <
+                                                    0.000001 &&
+                                                    Math.Abs(e.location.BuildingLong -
+                                                             this.Content.History.Longitude) <
+                                                    0.000001);
+            
+            // APPEND HEADER somehow
+
+            foreach (var e in events)
+            {
+                var textObj = Resources.Load<GameObject>("Polaris/AREventText");
+
+                var text = GenerateEventText(e);
+                textObj.GetComponent<TextMeshProUGUI>().SetText(text);
+                 _ = SetImage(e.image, textObj.GetComponentInChildren<Image>());
+
+                Instantiate(textObj, _bottomLayout.transform);
+            }
+        }
+
+        private static string GenerateEventText(Event e)
+        {
+            var sb = new StringBuilder();
+
+            sb.Append(e.name + "\n\n");
+            sb.Append(e.listedLocation + "\n");
+            sb.Append( e.dateTime + "-" + e.endsOn + "\n");
+            sb.Append(e.host + "\n\n");
+            sb.Append(e.description);
+
+            return sb.ToString();
+        }
+        
+        private static IEnumerator SetImage(string url, Graphic img)
+        {   
+            var request = UnityWebRequestTexture.GetTexture(url);
+            yield return request.SendWebRequest();
+            if (request.result != UnityWebRequest.Result.Success)
+            {
+                Debug.Log(request.error);
+            }
+            else
+            {
+                img.material.mainTexture = ((DownloadHandlerTexture)request.downloadHandler).texture;
+            }
         }
     }
 }
