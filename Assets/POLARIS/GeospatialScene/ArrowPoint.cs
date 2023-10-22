@@ -14,7 +14,7 @@ namespace POLARIS.GeospatialScene
         // Start is called before the first frame update
         private void Start()
         {
-            _destPoint = SwapData.DestinationPoint;
+            _destPoint = PersistData.DestinationPoint;
             _arCamera = GameObject.FindGameObjectWithTag("MainCamera");
             
             var offset = _arCamera.transform.forward * 8 + _arCamera.transform.up * -3;

@@ -3,7 +3,6 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 using Google.XR.ARCoreExtensions;
 using TMPro;
 using Unity.XR.CoreUtils;
@@ -33,6 +32,7 @@ namespace POLARIS.GeospatialScene
 
         private string _lastPressed;
         private bool _bottomPanelShown;
+        private bool _eventsLoaded;
 
         public void Instantiate(GeospatialAnchorContent content)
         {
@@ -84,6 +84,7 @@ namespace POLARIS.GeospatialScene
             CurrentPrefab.GetChildGameObjects(goList);
             _bottomPanel = goList.Find(go => go.name.Equals("BottomPanel"));
             _bottomLayout = _bottomPanel.GetComponentInChildren<VerticalLayoutGroup>().gameObject;
+            print("botttom " + _bottomLayout);
 
             // Check for favorited / visited
         }
@@ -142,13 +143,26 @@ namespace POLARIS.GeospatialScene
             }
             _lastPressed = "events";
 
-            AddEvents();
+            if (!_eventsLoaded)
+            {
+                AddEvents();
+            }
+            
             _bottomPanel.SetActive(_bottomPanelShown);
         }
 
         public void DisableEventsPanel()
         {
             _bottomPanel.SetActive(false);
+
+            var goList = new List<GameObject>();
+            _bottomLayout.GetChildGameObjects(goList);
+            foreach (var go in goList)
+            {
+                Destroy(go);
+            }
+
+            _eventsLoaded = false;
         }
 
         public static string GenerateLocationText(Building location)
@@ -168,12 +182,15 @@ namespace POLARIS.GeospatialScene
 
         private void AddEvents()
         {
+            // Mock using student union coords 28.601927704512025, -81.20044219923692
+            if (Events.EventList is null) return;
+            
             var events = Events.EventList.Where(e =>
                                                     Math.Abs(e.location.BuildingLat -
-                                                             this.Content.History.Latitude) <
+                                                             28.601927704512025) < // this.Content.History.Latitude
                                                     0.000001 &&
                                                     Math.Abs(e.location.BuildingLong -
-                                                             this.Content.History.Longitude) <
+                                                             -81.20044219923692) < // this.Content.History.Longitude
                                                     0.000001);
             
             // APPEND HEADER somehow
@@ -184,10 +201,12 @@ namespace POLARIS.GeospatialScene
 
                 var text = GenerateEventText(e);
                 textObj.GetComponent<TextMeshProUGUI>().SetText(text);
-                 _ = SetImage(e.image, textObj.GetComponentInChildren<Image>());
+                 // _ = SetImage(e.image, textObj.GetComponentInChildren<Image>());
 
                 Instantiate(textObj, _bottomLayout.transform);
             }
+
+            _eventsLoaded = true;
         }
 
         private static string GenerateEventText(Event e)
@@ -195,12 +214,17 @@ namespace POLARIS.GeospatialScene
             var sb = new StringBuilder();
 
             sb.Append(e.name + "\n\n");
-            sb.Append(e.listedLocation + "\n");
-            sb.Append( e.dateTime + "-" + e.endsOn + "\n");
-            sb.Append(e.host + "\n\n");
-            sb.Append(e.description);
+            sb.Append("<indent=45%><line-height=120%>" + e.listedLocation + "\n");
+            sb.Append("<line-height=120%>" + GenerateTime(e.dateTime) + "\n");
+            sb.Append("<line-height=120%>" + e.host + "\n\n");
+            sb.Append("<indent=0%>" + HtmlParser.RichParse(e.description));
 
             return sb.ToString();
+        }
+
+        private static string GenerateTime(DateTime dt)
+        {
+            return $"{dt:h:mm tt - dddd, MMMM dd}";
         }
         
         private static IEnumerator SetImage(string url, Graphic img)
