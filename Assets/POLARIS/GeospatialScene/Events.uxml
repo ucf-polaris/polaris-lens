@@ -1,0 +1,8 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" xsi="http://www.w3.org/2001/XMLSchema-instance" engine="UnityEngine.UIElements" editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+    <ui:VisualElement style="flex-grow: 1;">
+        <ui:GroupBox>
+            <ui:Label tabindex="-1" text="Hello everyone&#10;" parse-escape-sequences="true" display-tooltip-when-elided="true" name="Hey" style="background-color: rgba(147, 179, 248, 0); background-image: url(&apos;project://database/Assets/Samples/ARCore%20Extensions/1.39.0/Geospatial%20Sample/Materials/ic_geospatial_foreground.png?fileID=2800000&amp;guid=d88cfb29aa03649de965d693ff90fe7a&amp;type=3#ic_geospatial_foreground&apos;);" />
+        </ui:GroupBox>
+        <ui:Button text="Button" parse-escape-sequences="true" display-tooltip-when-elided="true" />
+    </ui:VisualElement>
+</ui:UXML>
