@@ -15,14 +15,10 @@
 
 using System;
 using System.Collections.Generic;
-using System.Net.Http;
-using System.Threading.Tasks;
 using Esri.ArcGISMapsSDK.Components;
 using Esri.ArcGISMapsSDK.Utils.GeoCoord;
 using Esri.GameEngine.Geometry;
 using Esri.HPFramework;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 using TMPro;
 using Unity.Mathematics;
 using UnityEngine;
@@ -32,20 +28,6 @@ using UnityEngine.UIElements;
 
 namespace POLARIS.MainScene
 {
-    public class AutoSuggestion
-    {
-        public string Text { get; set; }
-        public string MagicKey { get; set; }
-        public bool IsCollection { get; set; }
-    }
-
-    public class SearchResult
-    {
-        public double Longitude { get; set;  }
-        public double Latitude { get; set;  }
-        public string Address { get; set; }
-    }
-    
     public class Geocoder : MonoBehaviour
     {
         [FormerlySerializedAs("AddressMarkerTemplate")] public GameObject addressMarkerTemplate;
@@ -74,22 +56,14 @@ namespace POLARIS.MainScene
         private bool _waitingForResponse = false;
         private float _timer = 0;
         private const float SlowLoadFactor = 1;
-        private const string AddressQueryURL = "https://geocode-api.arcgis.com/arcgis/rest/services/World/GeocodeServer/findAddressCandidates";
-        private const string LocationQueryURL = "https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/reverseGeocode";
-        private const string SuggestQueryURL = "https://geocode-api.arcgis.com/arcgis/rest/services/World/GeocodeServer/suggest";
         
-        private bool _justClicked = false;
-
-        // private Label _autoSuggestionBigLabel;
-        private List<AutoSuggestion> _suggestionList = new List<AutoSuggestion>();
-        private VisualElement _searchAndSuggestContainer;
-        private ListView _suggestionListView;
+        private List<Building> _buildingSearchList = new List<Building>();
+        private List<Event> _eventSearchList = new List<Event>();
+        private ListView _buildingOrEventListView;
+        private Action<VisualElement, int> bindLocationItem;
+        private Action<VisualElement, int> bindEventItem;
         
-        // private Label _searchResultBigLabel;
-        private List<SearchResult> _searchResultList = new List<SearchResult>();
-        private VisualElement _searchResultContainer;
-        private ListView _searchResultListView;
-
+        private string currentTab;
         private void Start()
         {
             _arcGisMapComponent = FindObjectOfType<ArcGISMapComponent>();
@@ -99,79 +73,47 @@ namespace POLARIS.MainScene
             SetupQueryLocationGameObject(addressMarkerTemplate, scale: new Vector3(addressMarkerScale, addressMarkerScale, addressMarkerScale));
             _queryLocationLocation = _queryLocationGo.GetComponent<ArcGISLocationComponent>();
             
+            currentTab = ChangeTabImage._lastPressed;
+
             var rootVisual = searchBar.GetComponent<UIDocument>().rootVisualElement;
-            
-            _searchField = rootVisual.Q<TextField>("SearchBox");
+
+            _searchField = rootVisual.Q<TextField>("SearchBar");
             _searchField.RegisterValueChangedCallback(OnSearchValueChanged);
             _searchField.selectAllOnFocus = true;
-            SetPlaceholderText(_searchField, "Where do you want to go?");
-            
-            // _searchButton = rootVisual.Q<Button>("SearchButton");
-            // _searchButton.RegisterCallback<ClickEvent>(OnButtonClick);
-            
-            // _autoSuggestionBigLabel = rootVisual.Q<Label>("AutoSuggestionBigLabel");
-            
-            // _searchResultBigLabel = rootVisual.Q<Label>("SearchResultBigLabel");
-            
-            _clearButton = rootVisual.Q<Button>("ClearButton");
-            _clearButton.RegisterCallback<ClickEvent>(_ => ClearSearchResultsUI());
+            SetPlaceholderText(_searchField, currentTab == "location" ? "Search for locations" : "Search for events");
             
             Func<VisualElement> makeItem = () => new Label();
-            Action<VisualElement, int> bindSuggestionItem = (VisualElement element, int index) => {
-                (element as Label).text = _suggestionList[index].Text;
-                (element as Label).RegisterCallback<ClickEvent>(_ => OnSuggestionClick(_suggestionList[index].Text, _suggestionList[index].MagicKey));
+            bindLocationItem = (VisualElement element, int index) => {
+                (element as Label).text = _buildingSearchList[index].BuildingName;
+                (element as Label).RegisterCallback<ClickEvent>(_ => OnBuildingSearchClick(_buildingSearchList[index]));
                 element.style.flexGrow = 1;
                 element.style.color = Color.black;
                 element.style.backgroundColor = Color.white;
-                element.style.paddingBottom = new StyleLength(index == _suggestionList.Count - 1 ? 0 : 6);
             };
-            Action<VisualElement, int> bindSearchResultItem = (VisualElement element, int index) => {
-                (element as Label).text = _searchResultList[index].Address;
-                (element as Label).RegisterCallback<ClickEvent>(_ => SetStuff(_searchResultList[index].Longitude, _searchResultList[index].Latitude, _searchResultList[index].Address));
+            bindEventItem = (VisualElement element, int index) => {
+                (element as Label).text = _eventSearchList[index].name;
+                (element as Label).RegisterCallback<ClickEvent>(_ => OnEventSearchClick(_eventSearchList[index]));
                 element.style.flexGrow = 1;
                 element.style.color = Color.black;
                 element.style.backgroundColor = Color.white;
-                element.style.paddingBottom = new StyleLength(index == _searchResultList.Count - 1 ? 0 : 6);
             };
-            // output = new ListView(suggestionListTest, 20, makeItem, bindItem);
-
-            _suggestionListView = rootVisual.Q<ListView>("AutoSuggestionBigLabel");
-            _suggestionListView.itemsSource = _suggestionList;
-            _suggestionListView.fixedItemHeight = 20;
-            _suggestionListView.makeItem = makeItem;
-            _suggestionListView.bindItem = bindSuggestionItem;
-            _suggestionListView.selectionType = SelectionType.Single;
-            _suggestionListView.style.flexGrow = 1;
-            
-            _searchAndSuggestContainer = rootVisual.Q<VisualElement>("SearchAndSuggest");
-            _searchAndSuggestContainer.Add(_suggestionListView);
-
-            _searchResultListView = rootVisual.Q<ListView>("SearchResultBigLabel");
-            _searchResultListView.itemsSource = _searchResultList;
-            _searchResultListView.fixedItemHeight = 20;
-            _searchResultListView.makeItem = makeItem;
-            _searchResultListView.bindItem = bindSearchResultItem;
-            _searchResultListView.selectionType = SelectionType.Single;
-            _searchResultListView.style.flexGrow = 1;
-            
-            _searchResultContainer = rootVisual.Q<VisualElement>("SearchResults");
-            _searchResultContainer.Add(_searchResultListView);
+            _buildingOrEventListView = rootVisual.Q<ListView>("SearchResultBigLabel");
+            _buildingOrEventListView.fixedItemHeight = 20;
+            _buildingOrEventListView.makeItem = makeItem;
+            _buildingOrEventListView.selectionType = SelectionType.Single;
+            _buildingOrEventListView.style.flexGrow = 1;
         }
 
         private void Update()
         {
-            if (Input.GetKeyDown(KeyCode.KeypadEnter) || Input.GetKeyDown(KeyCode.Return))
+            if (ChangeTabImage._lastPressed != currentTab)
             {
-                Debug.Log("Pressed Return / Enter");
-                OnButtonClick();
+                currentTab = ChangeTabImage._lastPressed;
+                _searchField.value = "";
+                ClearSearchResults();
+                SetPlaceholderText(_searchField, ChangeTabImage._lastPressed == "location" ? "Search for locations" : "Search for events");
             }
             
-            // foreach (KeyCode kcode in Enum.GetValues(typeof(KeyCode)))
-            // {
-            //     if (Input.GetKey(kcode))
-            //         Debug.Log("KeyCode down: " + kcode);
-            // }
-
             // Create a marker and address card after an address lookup
             if (!_shouldPlaceMarker) return;
             
@@ -201,256 +143,176 @@ namespace POLARIS.MainScene
             }
         }
 
-        private async void OnSearchValueChanged(ChangeEvent<string> evt)
+        private void OnSearchValueChanged(ChangeEvent<string> evt)
         {
+            if (currentTab == "location")
+            {
+                _buildingOrEventListView.itemsSource = _buildingSearchList;
+                _buildingOrEventListView.bindItem = bindLocationItem;
+            }
+            else
+            {
+                _buildingOrEventListView.itemsSource = _eventSearchList;
+                _buildingOrEventListView.bindItem = bindEventItem;
+            }
             string newText = evt.newValue;
 
             if (newText.EndsWith("\n"))
             {
-                OnButtonClick();
+                Deselect();
                 _searchField.value = newText.TrimEnd('\n');
                 return;
             }
 
-            if (!string.IsNullOrWhiteSpace(newText) && !_justClicked)
+            if (!string.IsNullOrWhiteSpace(newText))
             {
-                List<AutoSuggestion> suggestions = await FetchAutoSuggestions(newText);
-                UpdateAutoSuggestionsUI(suggestions);
-            }
-            else
-            {
-                ClearAutoSuggestionsUI();
-                _justClicked = false;
-            }
-        }
-
-        private async Task<List<AutoSuggestion>> FetchAutoSuggestions(string query)
-        {
-            IEnumerable<KeyValuePair<string, string>> payload = new List<KeyValuePair<string, string>>()
-            {
-                new KeyValuePair<string, string>("text", "University of Central Florida " + query),
-                new KeyValuePair<string, string>("token", _arcGisMapComponent.APIKey),
-                new KeyValuePair<string, string>("searchExtent", "-81.209995,28.580255,-81.181589,28.613986"),
-                new KeyValuePair<string, string>("f", "json"),
-            };
-            
-            var client = new HttpClient();
-            HttpContent content = new FormUrlEncodedContent(payload);
-            HttpResponseMessage response = await client.PostAsync(SuggestQueryURL, content);
-            
-            if (response.IsSuccessStatusCode)
-            {
-                string responseContent = await response.Content.ReadAsStringAsync();
-                List<AutoSuggestion> suggestions = ParseSuggestions(responseContent);
-                return suggestions;
-            }
-            else
-            {
-                print($"Error fetching suggestions: {response.StatusCode}");
-                return new List<AutoSuggestion>();
-            }
-        }
-        
-        private List<AutoSuggestion> ParseSuggestions(string jsonResponse)
-        {
-            List<AutoSuggestion> suggestions = new List<AutoSuggestion>();
-            
-            try
-            {
-                JObject response = JObject.Parse(jsonResponse);
-                print(response);
-                if (response.TryGetValue("suggestions", out JToken suggestionsToken) &&
-                    suggestionsToken is JArray suggestionArray)
+                if (currentTab == "location")
                 {
-                    foreach (JToken suggestionToken in suggestionArray)
-                    {
-                        AutoSuggestion suggestion = new AutoSuggestion
-                        {
-                            Text = suggestionToken["text"].ToString(),
-                            MagicKey = suggestionToken["magicKey"].ToString(),
-                            IsCollection = (bool)suggestionToken["isCollection"]
-                        };
-                        suggestions.Add(suggestion);
-                    }
+                    List<Building> buildings = GetBuildingsFromSearch(newText, newText[0] == '~');
+                    UpdateBuildingSearchUI(buildings);
                 }
                 else
                 {
-                    print("No suggestions found in the JSON response.");
+                    List<Event> events = GetEventsFromSearch(newText, newText[0] == '~');
+                    UpdateEventSearchUI(events);
                 }
-            }
-            catch (JsonException ex)
-            {
-                print($"Error parsing JSON response: {ex.Message}");
-            }
-
-            return suggestions;
-        }
-
-        private void UpdateAutoSuggestionsUI(List<AutoSuggestion> suggestions)
-        {
-            // Clear previous suggestions
-            ClearAutoSuggestionsUI();
-            // output.Rebuild();
-            // suggestionListTest.Clear();
-            // Display the new suggestions in the AutoSuggestionText
-            foreach (var suggestion in suggestions)
-            {
-                // Just get place name (no city / state), and no UCF since that is added in find button anyways
-                // var splitSuggestion = suggestion.Text.Split(",");
-                // var suggestionLocationName = splitSuggestion[0];
-                // suggestionLocationName = suggestionLocationName.Replace("University of Central Florida Orlando Campus", "");
-                // var autoSuggestionSubLabel = new Label
-                // {
-                //     text = suggestionLocationName
-                // };
-                // autoSuggestionSubLabel.AddToClassList("sublabel"); 
-                // autoSuggestionSubLabel.RegisterCallback<ClickEvent>(_ => OnSuggestionClick(autoSuggestionSubLabel.text, suggestion.MagicKey));
-                // _autoSuggestionBigLabel.Add(autoSuggestionSubLabel);
-                _suggestionListView.itemsSource.Add(suggestion);
-                _suggestionListView.Rebuild();
-            }
-        }
-
-        private async void OnSuggestionClick(string suggestionText, string magicKey)
-        {
-            FillInputField(suggestionText);
-            
-            // --------- Basically copied from OnButtonClick(), lol
-            if (_waitingForResponse) return;
-
-            _waitingForResponse = true;
-            List<SearchResult> searchResults = await FetchSearchResults(suggestionText, magicKey);
-            UpdateSearchResultsUI(searchResults);
-
-            // Deselect the text input field that was used to call this function. 
-            // It is required so that the camera controller can be enabled/disabled when the input field is deselected/selected 
-            var eventSystem = EventSystem.current;
-            if (!eventSystem.alreadySelecting)
-            {
-                eventSystem.SetSelectedGameObject(null);
-            }
-            _waitingForResponse = false;
-            // -----------
-            
-            ClearAutoSuggestionsUI();
-            _justClicked = true;
-        }
-        
-        private void FillInputField(string suggestionText)
-        {
-            _searchField.value = suggestionText;
-        }
-
-        private void ClearAutoSuggestionsUI()
-        {
-            // _autoSuggestionBigLabel.Clear();
-            // output.Clear();
-            // suggestionListTest.Clear();
-            _suggestionListView.itemsSource.Clear();
-            _suggestionListView.Rebuild();
-        }
-
-        private async void OnButtonClick()
-        {
-            if (_waitingForResponse) return;
-
-            _waitingForResponse = true;
-            var textInput = _searchField.value;
-            if (!string.IsNullOrWhiteSpace(textInput))
-            {
-                List<SearchResult> searchResults = await FetchSearchResults(_searchField.value);
-                UpdateSearchResultsUI(searchResults);
-            }
-
-            // Deselect the text input field that was used to call this function. 
-            // It is required so that the camera controller can be enabled/disabled when the input field is deselected/selected 
-            var eventSystem = EventSystem.current;
-            if (!eventSystem.alreadySelecting)
-            {
-                eventSystem.SetSelectedGameObject(null);
-            }
-            _waitingForResponse = false;
-        }
-
-        private async Task<List<SearchResult>> FetchSearchResults(string address, string magicKey = "")
-        {
-            // Add school name in front of address query for more relevant results
-            string results = await SendAddressQuery("University of Central Florida " + address, magicKey);
-            List<SearchResult> searchResults = ParseSearchResults(results);
-            return searchResults;
-        }
-
-        private List<SearchResult> ParseSearchResults(string jsonResponse)
-        {
-            List<SearchResult> searchResults = new List<SearchResult>();
-            if (jsonResponse.Contains("error")) // Server returned an error
-            {
-                var response = JObject.Parse(jsonResponse);
-                var error = response.SelectToken("error");
-                Debug.Log(error.SelectToken("message"));
             }
             else
             {
-                // Parse the query response
-                var response = JObject.Parse(jsonResponse);
-                var candidates = response.SelectToken("candidates");
-                if (candidates is JArray array)
+                ClearSearchResults();
+            }
+        }
+
+        private List<Building> GetBuildingsFromSearch(string query, bool fuzzySearch)
+        {
+            const int TOLERANCE = 1;
+            
+            List<Building> buildings = new List<Building>();
+            foreach (Building building in Locations.LocationList)
+            {
+                if (building.BuildingName.IndexOf(query, StringComparison.OrdinalIgnoreCase) >= 0 || 
+                    (fuzzySearch && FuzzyMatch(building.BuildingName, query, TOLERANCE)))
                 {
-                    if (array.Count > 0)
-                    {
-                        foreach (JToken searchToken in array)
-                        {
-                            var location = searchToken.SelectToken("location");
-                            SearchResult result = new SearchResult
-                            {
-                                Longitude = (double)location.SelectToken("x"),
-                                Latitude = (double)location.SelectToken("y"),
-                                Address = (string)searchToken.SelectToken("address")
-                            };
-                            searchResults.Add(result);
-                        }
-                    }
-                    else
-                    {
-                        Destroy(_queryLocationGo);
-                    }
+                    buildings.Add(building);
+                    continue;
                 }
 
-                return searchResults;
+                if (building.BuildingAllias == null) continue;
+                foreach (string alias in building.BuildingAllias)
+                {
+                    if (alias.IndexOf(query, StringComparison.OrdinalIgnoreCase) >= 0 || 
+                        (fuzzySearch && FuzzyMatch(alias, query, TOLERANCE)))
+                    {
+                        buildings.Add(building);
+                        break;
+                    }
+                }
             }
 
-            return new List<SearchResult>();
-        }
-
-        private void UpdateSearchResultsUI(List<SearchResult> searchResults)
-        {
-            ClearSearchResultsUI();
-            
-            foreach (var searchResult in searchResults)
-            {
-                // var searchResultSubLabel = new Label
-                // {
-                //     text = searchResult.Address
-                // };
-                // // Add to class list
-                // searchResultSubLabel.RegisterCallback<ClickEvent>(_ => SetStuff(searchResult.Longitude, searchResult.Latitude, searchResult.Address));
-                // _searchResultBigLabel.Add(searchResultSubLabel);
-                _searchResultListView.itemsSource.Add(searchResult);
-                _searchResultListView.Rebuild();
-            }
-        }
-
-        // TODO: SHOULD SHOW BUILDING INFORMATION
-        private void OnSearchClick()
-        {
-            
+            return buildings;
         }
         
-        private void ClearSearchResultsUI()
+        private List<Event> GetEventsFromSearch(string query, bool fuzzySearch)
         {
-            // _searchResultBigLabel.Clear();
-            _searchResultListView.itemsSource.Clear();
-            _searchResultListView.Rebuild();
+            const int TOLERANCE = 1;
+            
+            List<Event> events = new List<Event>();
+            foreach (Event UCFEvent in Events.EventList)
+            {
+                if (UCFEvent.name.IndexOf(query, StringComparison.OrdinalIgnoreCase) >= 0 || 
+                    (fuzzySearch && FuzzyMatch(UCFEvent.name, query, TOLERANCE)))
+                {
+                    events.Add(UCFEvent);
+                }
+            }
+
+            return events;
+        }
+
+        private void UpdateBuildingSearchUI(List<Building> buildings)
+        {
+            // Clear previous suggestions
+            ClearSearchResults();
+            
+            // Display the new suggestions in the AutoSuggestionText
+            foreach (var building in buildings)
+            {
+                _buildingOrEventListView.itemsSource.Add(building);
+                _buildingOrEventListView.Rebuild();
+            }
+        }
+        
+        private void UpdateEventSearchUI(List<Event> events)
+        {
+            // Clear previous suggestions
+            ClearSearchResults();
+            
+            // Display the new suggestions in the AutoSuggestionText
+            foreach (var UCFEvent in events)
+            {
+                _buildingOrEventListView.itemsSource.Add(UCFEvent);
+                _buildingOrEventListView.Rebuild();
+            }
+        }
+
+        private void OnBuildingSearchClick(Building selectedBuilding)
+        {
+            if (_waitingForResponse) return;
+            _waitingForResponse = true;
+            Deselect();
+            Debug.Log(
+                $"Name: {selectedBuilding.BuildingName ?? ""}\n" +
+                $"Aliases: {((selectedBuilding.BuildingAllias != null) ? string.Join(", ", selectedBuilding.BuildingAllias) : "")}\n" +
+                $"Abbreviations: {((selectedBuilding.BuildingAbbreviation != null) ? string.Join(", ", selectedBuilding.BuildingAbbreviation) : "")}\n" +
+                $"Description: {selectedBuilding.BuildingDesc ?? ""}\n" +
+                $"Longitude: {selectedBuilding.BuildingLong}\n" +
+                $"Latitude: {selectedBuilding.BuildingLat}\n" +
+                $"Address: {selectedBuilding.BuildingAddress ?? ""}\n" +
+                $"Events: {((selectedBuilding.BuildingEvents != null) ? string.Join(", ", selectedBuilding.BuildingEvents) : "")}\n");
+            SetStuff(selectedBuilding.BuildingLong, selectedBuilding.BuildingLat, selectedBuilding.BuildingAddress);
+            // ClearSearchResults();
+            _waitingForResponse = false;
+        }
+
+        private void OnEventSearchClick(Event selectedEvent)
+        {
+            if (_waitingForResponse) return;
+            _waitingForResponse = true;
+            Deselect();
+            Debug.Log(
+                $"Name: {selectedEvent.name ?? ""}\n" +
+                $"Description: {selectedEvent.description ?? ""}\n" +
+                $"Longitude: {selectedEvent.location.BuildingLong}\n" +
+                $"Latitude: {selectedEvent.location.BuildingLat}\n" +
+                $"Host: {selectedEvent.host ?? ""}\n" +
+                $"Start Time: {selectedEvent.dateTime}\n" +
+                $"End Time: {selectedEvent.endsOn}\n" +
+                $"Image Path: {selectedEvent.image ?? ""}\n" +
+                $"Location: {selectedEvent.listedLocation ?? ""}\n");
+            // ClearSearchResults();
+            _waitingForResponse = false;
+        }
+        
+        private void Deselect()
+        {
+            // Deselect the text input field that was used to call this function. 
+            // It is required so that the camera controller can be enabled/disabled when the input field is deselected/selected 
+            var eventSystem = EventSystem.current;
+            if (!eventSystem.alreadySelecting)
+            {
+                eventSystem.SetSelectedGameObject(null);
+            }
+        }
+        
+        private void FillInputField(string searchText)
+        {
+            _searchField.value = searchText;
+        }
+
+        private void ClearSearchResults()
+        {
+            _buildingOrEventListView.itemsSource.Clear();
+            _buildingOrEventListView.Rebuild();
         }
 
         private void SetStuff(double lon, double lat, string address)
@@ -492,32 +354,6 @@ namespace POLARIS.MainScene
                     textField.AddToClassList(placeholderClass);
                 }
             }
-        }
-
-        /// <summary>
-        /// Create and send an HTTP request for a geocoding query and return the received response.
-        /// </summary>
-        /// <param name="address"></param>
-        /// <param name="magicKey"></param>
-        /// <returns></returns>
-        private async Task<string> SendAddressQuery(string address, string magicKey = "")
-        {
-            IEnumerable<KeyValuePair<string, string>> payload = new List<KeyValuePair<string, string>>()
-            {
-                new KeyValuePair<string, string>("SingleLine", address),
-                new KeyValuePair<string, string>("token", _arcGisMapComponent.APIKey),
-                new KeyValuePair<string, string>("searchExtent", "-81.209995,28.580255,-81.181589,28.613986"),
-                new KeyValuePair<string, string>("f", "json"),
-                new KeyValuePair<string, string>("magicKey", magicKey),
-            };
-
-            var client = new HttpClient();
-            HttpContent content = new FormUrlEncodedContent(payload);
-            var response = await client.PostAsync(AddressQueryURL, content);
-
-            response.EnsureSuccessStatusCode();
-            var results = await response.Content.ReadAsStringAsync();
-            return results;
         }
 
         /// <summary>
@@ -614,6 +450,66 @@ namespace POLARIS.MainScene
             if (t != null)
             {
                 t.text = _responseAddress;
+            }
+        }
+
+        private bool FuzzyMatch(string source, string target, int tolerance)
+        {
+            return LongestCommonSubsequence(source, target).Length >= target.Length - tolerance;
+        }
+        
+        private string LongestCommonSubsequence(string source, string target)
+        {
+            int[,] C = LongestCommonSubsequenceLengthTable(source, target);
+
+            return Backtrack(C, source, target, source.Length, target.Length);
+        }
+
+        private int[,] LongestCommonSubsequenceLengthTable(string source, string target)
+        {
+            int[,] C = new int[source.Length + 1, target.Length + 1];
+
+            for (int i = 0; i < source.Length + 1; i++) { C[i, 0] = 0; }
+            for (int j = 0; j < target.Length + 1; j++) { C[0, j] = 0; }
+
+            for (int i = 1; i < source.Length + 1; i++)
+            {
+                for (int j = 1; j < target.Length + 1; j++)
+                {
+                    if (source[i - 1].Equals(target[j - 1]))
+                    {
+                        C[i, j] = C[i - 1, j - 1] + 1;
+                    }
+                    else
+                    {
+                        C[i, j] = Math.Max(C[i, j - 1], C[i - 1, j]);
+                    }
+                }
+            }
+
+            return C;
+        }
+
+        private string Backtrack(int[,] C, string source, string target, int i, int j)
+        {
+            if (i == 0 || j == 0)
+            {
+                return "";
+            }
+            else if (source[i - 1].Equals(target[j - 1]))
+            {
+                return Backtrack(C, source, target, i - 1, j - 1) + source[i - 1];
+            }
+            else
+            {
+                if (C[i, j - 1] > C[i - 1, j])
+                {
+                    return Backtrack(C, source, target, i, j - 1);
+                }
+                else
+                {
+                    return Backtrack(C, source, target, i - 1, j);
+                }
             }
         }
     }

@@ -21,8 +21,10 @@ public class FavButton : MonoBehaviour, IPointerDownHandler
     {
         _panelZoom.TouchedPanel = true;
         _panel.FavoritedClicked();
-        
-        // Change sprite
+    }
+
+    public void UpdateSprite()
+    {
         gameObject.GetComponent<SpriteRenderer>().sprite = _panel.Favorited ? FavoritedSprite : UnfavoritedSprite;
     }
 }

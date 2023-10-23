@@ -170,7 +170,7 @@ namespace POLARIS
             var offsetPosition = new ArcGISPoint(geoPosition.X, geoPosition.Y, geoPosition.Z + yOffset, geoPosition.SpatialReference);
 
             var spatialRef = GeoUtils.ProjectToSpatialReference(offsetPosition, new ArcGISSpatialReference(4326));
-            SwapData.DestinationPoint = spatialRef;
+            PersistData.DestinationPoint = spatialRef;
                 
             return GeoUtils.ProjectToSpatialReference(offsetPosition, new ArcGISSpatialReference(4326));
         }
@@ -259,7 +259,7 @@ namespace POLARIS
                     yield return null;
                 }
 
-                SwapData.PathPoints = pathList;
+                PersistData.PathPoints = pathList;
             }
 
             SetBreadcrumbHeight();

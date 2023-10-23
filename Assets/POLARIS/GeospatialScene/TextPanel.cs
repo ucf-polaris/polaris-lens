@@ -1,9 +1,14 @@
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using Google.XR.ARCoreExtensions;
 using TMPro;
 using Unity.XR.CoreUtils;
 using UnityEngine;
+using UnityEngine.Networking;
+using UnityEngine.UI;
 using UnityEngine.XR.ARFoundation;
 
 namespace POLARIS.GeospatialScene
@@ -23,16 +28,18 @@ namespace POLARIS.GeospatialScene
         private ARGeospatialAnchor _anchor;
 
         private GameObject _bottomPanel;
-        private TextMeshProUGUI _bottomText;
+        private GameObject _bottomLayout;
+        private GameObject _visitedIndicator;
 
         private string _lastPressed;
         private bool _bottomPanelShown;
+        private bool _eventsLoaded;
 
         public void Instantiate(GeospatialAnchorContent content)
         {
             Content = content;
             PanelPrefab = Resources.Load("Polaris/PanelParent") as GameObject;
-            LoadingPrefab = Resources.Load("Polaris/stand") as GameObject;
+            LoadingPrefab = Resources.Load("Polaris/Capsule") as GameObject;
         }
 
         public ARGeospatialAnchor PlacePanelGeospatialAnchor(
@@ -77,9 +84,20 @@ namespace POLARIS.GeospatialScene
             var goList = new List<GameObject>();
             CurrentPrefab.GetChildGameObjects(goList);
             _bottomPanel = goList.Find(go => go.name.Equals("BottomPanel"));
-            _bottomText = _bottomPanel.GetComponentInChildren<TextMeshProUGUI>();
-
+            _bottomLayout = _bottomPanel.GetComponentInChildren<VerticalLayoutGroup>().gameObject;
+            
             // Check for favorited / visited
+            if (Favorited)
+            {
+                GetComponentInChildren<FavButton>().UpdateSprite();
+            }
+
+            if (!Visited)
+            {
+                _visitedIndicator =
+                    Instantiate(Resources.Load("Polaris/simplearrow") as GameObject, CurrentPrefab.transform);
+                _visitedIndicator.transform.localPosition = Vector3.up;
+            }
         }
 
         public void UnloadPanel()
@@ -92,10 +110,10 @@ namespace POLARIS.GeospatialScene
 
         public void VisitedPanel()
         {
-            print("visited!");
             if (Visited) return;
             
             Visited = true;
+            Destroy(_visitedIndicator);
             // Update API
         }
 
@@ -103,6 +121,7 @@ namespace POLARIS.GeospatialScene
         {
             Favorited = !Favorited;
             print("zz favorited? " + Favorited);
+            GetComponentInChildren<FavButton>().UpdateSprite();
             
             // Update API
         }
@@ -116,7 +135,6 @@ namespace POLARIS.GeospatialScene
             else
             {
                 _bottomPanelShown = true;
-                _bottomText.SetText("Information points of interest wow");
             }
             _lastPressed = "poi";
             
@@ -132,16 +150,29 @@ namespace POLARIS.GeospatialScene
             else
             {
                 _bottomPanelShown = true;
-                _bottomText.SetText("But I must explain to you how all this mistaken idea of denouncing pleasure and praising pain was born and I will give you a complete account of the system, and expound the actual teachings of the great explorer of the truth, the master-builder of human happiness. No one rejects, dislikes, or avoids pleasure itself, because it is pleasure, but because those who do not know how to pursue pleasure rationally encounter consequences that are extre");
             }
             _lastPressed = "events";
 
+            if (!_eventsLoaded)
+            {
+                AddEvents();
+            }
+            
             _bottomPanel.SetActive(_bottomPanelShown);
         }
 
         public void DisableEventsPanel()
         {
             _bottomPanel.SetActive(false);
+
+            var goList = new List<GameObject>();
+            _bottomLayout.GetChildGameObjects(goList);
+            foreach (var go in goList)
+            {
+                Destroy(go);
+            }
+
+            _eventsLoaded = false;
         }
 
         public static string GenerateLocationText(Building location)
@@ -157,6 +188,67 @@ namespace POLARIS.GeospatialScene
             sb.Append("</style>");
 
             return sb.ToString();
+        }
+
+        private void AddEvents()
+        {
+            // Mock using student union coords 28.601927704512025, -81.20044219923692
+            if (Events.EventList is null) return;
+            
+            var events = Events.EventList.Where(e =>
+                                                    Math.Abs(e.location.BuildingLat -
+                                                             28.601927704512025) < // this.Content.History.Latitude
+                                                    0.000001 &&
+                                                    Math.Abs(e.location.BuildingLong -
+                                                             -81.20044219923692) < // this.Content.History.Longitude
+                                                    0.000001);
+            
+            // TODO: APPEND HEADER somehow
+
+            foreach (var e in events)
+            {
+                var textObj = Resources.Load<GameObject>("Polaris/AREventText");
+
+                var text = GenerateEventText(e);
+                textObj.GetComponent<TextMeshProUGUI>().SetText(text);
+                StartCoroutine(SetImage(e.image, textObj.GetComponentInChildren<Image>()));
+
+                Instantiate(textObj, _bottomLayout.transform);
+            }
+
+            _eventsLoaded = true;
+        }
+
+        private static string GenerateEventText(Event e)
+        {
+            var sb = new StringBuilder();
+
+            sb.Append(e.name + "\n\n");
+            sb.Append("<indent=45%><line-height=120%>" + e.listedLocation + "\n");
+            sb.Append("<line-height=120%>" + GenerateTime(e.dateTime) + "\n");
+            sb.Append("<line-height=120%>" + e.host + "\n\n");
+            sb.Append("<indent=0%>" + HtmlParser.RichParse(e.description));
+
+            return sb.ToString();
+        }
+
+        private static string GenerateTime(DateTime dt)
+        {
+            return $"{dt:h:mm tt - dddd, MMMM dd}";
+        }
+        
+        private static IEnumerator SetImage(string url, Graphic img)
+        {   
+            var request = UnityWebRequestTexture.GetTexture(url);
+            yield return request.SendWebRequest();
+            if (request.result != UnityWebRequest.Result.Success)
+            {
+                Debug.Log(request.error);
+            }
+            else
+            {
+                img.material.mainTexture = ((DownloadHandlerTexture)request.downloadHandler).texture;
+            }
         }
     }
 }

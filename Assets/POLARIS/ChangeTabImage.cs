@@ -13,7 +13,7 @@ public class ChangeTabImage : MonoBehaviour
 
 	private VisualElement _spacer;
 	private VisualElement _arrow;
-	private string _lastPressed;
+	public static string _lastPressed = "location";
 	private bool _menuOpen;
 
 	// Start is called before the first frame update

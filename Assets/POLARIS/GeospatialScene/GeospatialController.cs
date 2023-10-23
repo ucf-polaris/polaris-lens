@@ -18,8 +18,8 @@
 //-----------------------------------------------------------------------
 
 using POLARIS.GeospatialScene;
+using POLARIS.MainScene;
 using Unity.Mathematics;
-using Unity.VisualScripting;
 
 namespace Google.XR.ARCoreExtensions.Samples.Geospatial
 {
@@ -315,6 +315,8 @@ namespace Google.XR.ARCoreExtensions.Samples.Geospatial
         private IEnumerator _startLocationService = null;
         private IEnumerator _asyncCheck = null;
 
+        private bool _pathLoaded = false;
+
         /// <summary>
         /// Callback handling "Get Started" button click event in Privacy Prompt.
         /// </summary>
@@ -339,13 +341,13 @@ namespace Google.XR.ARCoreExtensions.Samples.Geospatial
         /// </summary>
         public void OnClearAllClicked()
         {
-            print("clickity clicked");
             foreach (var anchor in _anchorObjects)
             {
                 Destroy(anchor);
             }
 
             PathManager.ClearPathAnchors();
+            _pathLoaded = false;
             PanelManager.ClearPanels();
             _anchorObjects.Clear();
             _historyCollection.Collection.Clear();
@@ -537,6 +539,7 @@ namespace Google.XR.ARCoreExtensions.Samples.Geospatial
 
             _anchorObjects.Clear();
             PathManager.ClearPathAnchors();
+            _pathLoaded = false;
             PanelManager.ClearPanels();
             SaveGeospatialAnchorHistory();
 
@@ -728,19 +731,28 @@ namespace Google.XR.ARCoreExtensions.Samples.Geospatial
                     // PathManager.LoadPathAnchors(_anchorObjects, AnchorManager);
                 }
                 
-                // Load in nearby panels
-                var results = PanelManager.FetchNearbyIfNeeded(
-                    new double2(pose.Latitude, pose.Longitude), _anchorObjects);
-                if (results.Count > 0)
+                // Load in nearby panels (wait for locations array to be loaded)
+                if (Locations.LocationList is not null)
                 {
-                    foreach (var result in results)
+                    var results = PanelManager.FetchNearbyIfNeeded(
+                        new double2(pose.Latitude, pose.Longitude), _anchorObjects);
+                    if (results.Count > 0)
                     {
-                        _historyCollection.Collection.Add(result.History);
+                        foreach (var result in results)
+                        {
+                            _historyCollection.Collection.Add(result.History);
+                        }
                     }
                 }
-                
                 // Load/unload panels depending on distance
                 PanelManager.LoadNearby();
+                
+                // Load path
+                if (!_pathLoaded && PersistData.PathPoints != null)
+                {
+                    PathManager.LoadPathAnchors(_anchorObjects, AnchorManager);
+                    _pathLoaded = true;
+                }
 
                 // Hide anchor settings and toggles if the storage limit has been reached.
                 if (_anchorObjects.Count >= StorageLimit)
