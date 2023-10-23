@@ -117,6 +117,11 @@ public class PopulateValues : MonoBehaviour
         IDictionary<string, string> req = new Dictionary<string, string>();
         foreach (var entry in fieldList)
         {
+            //if entry hasn't changed
+            if (entry.isOriginalInput())
+            {
+                continue;
+            }
             //confirm input
             entry.changeInput();
             switch (entry.type)
@@ -137,7 +142,6 @@ public class PopulateValues : MonoBehaviour
             }
         }
 
-        Debug.Log(req["email"]);
         //not implemented
         instance.BackendCall(req);
         AnimDetermine();

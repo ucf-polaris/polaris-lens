@@ -1,6 +1,9 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Networking;
+using Newtonsoft.Json.Linq;
+using Newtonsoft.Json;
 
 public class UserManager : MonoBehaviour
 {
@@ -21,6 +24,8 @@ public class UserManager : MonoBehaviour
     [HideInInspector]
     public List<string> visited;
 
+    private const string updateCodeURL = "https://v21x6ajyg9.execute-api.us-east-2.amazonaws.com/dev/user/update";
+
     void Awake()
     {
         //create singleton
@@ -32,7 +37,7 @@ public class UserManager : MonoBehaviour
         {
             DontDestroyOnLoad(gameObject);
             Instance = this;
-            //LoadPlayerPrefs();
+            LoadPlayerPrefs();
         } 
     }
 
@@ -149,5 +154,32 @@ public class UserManager : MonoBehaviour
     public void BackendCall(IDictionary<string, string> request)
     {
         //make backend call to update here (or implement system to avoid spams to backend)
+        request["UserID"] = UserID;
+        StartCoroutine(SendUpdateRequest(request));
+    }
+
+    IEnumerator SendUpdateRequest(IDictionary<string, string> request)
+    {
+        string reqBody = JsonConvert.SerializeObject(request);
+        var www = UnityWebRequest.Put(updateCodeURL, reqBody);
+        www.SetRequestHeader("authorizationToken", "{\"token\":\"" + token + "\", \"refreshToken\":\"" + refreshToken + "\"}");
+
+        yield return www.SendWebRequest();
+
+        if (www.result != UnityWebRequest.Result.Success)
+        {
+            Debug.Log(www.error);
+        }
+        else
+        {
+            Debug.Log("Form upload complete!");
+            Debug.Log("Status Code: " + www.responseCode);
+            Debug.Log(www.result);
+            Debug.Log("Response: " + www.downloadHandler.text);
+
+            var jsonResponse = JObject.Parse(www.downloadHandler.text);
+
+
+        }
     }
 }

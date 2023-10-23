@@ -1,0 +1,23 @@
+#Title > Label {
+    font-size: 1100%;
+}
+
+#UserInput > TextInput {
+    background-color: rgba(0, 0, 0, 0);
+    background-image: resource('Assets/POLARIS/Register/text box.png');
+    border-width: 0;
+    height: 80%;
+}
+
+.unity-base-text-field__input {
+    padding-left: 40px;
+}
+
+.userField {
+    flex-grow: 0;
+    flex-shrink: 0;
+    margin-top: 0;
+    margin-right: 0;
+    margin-bottom: 20px;
+    margin-left: 0;
+}
