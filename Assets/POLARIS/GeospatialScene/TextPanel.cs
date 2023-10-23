@@ -29,6 +29,7 @@ namespace POLARIS.GeospatialScene
 
         private GameObject _bottomPanel;
         private GameObject _bottomLayout;
+        private GameObject _visitedIndicator;
 
         private string _lastPressed;
         private bool _bottomPanelShown;
@@ -38,7 +39,7 @@ namespace POLARIS.GeospatialScene
         {
             Content = content;
             PanelPrefab = Resources.Load("Polaris/PanelParent") as GameObject;
-            LoadingPrefab = Resources.Load("Polaris/stand") as GameObject;
+            LoadingPrefab = Resources.Load("Polaris/Capsule") as GameObject;
         }
 
         public ARGeospatialAnchor PlacePanelGeospatialAnchor(
@@ -84,9 +85,19 @@ namespace POLARIS.GeospatialScene
             CurrentPrefab.GetChildGameObjects(goList);
             _bottomPanel = goList.Find(go => go.name.Equals("BottomPanel"));
             _bottomLayout = _bottomPanel.GetComponentInChildren<VerticalLayoutGroup>().gameObject;
-            print("botttom " + _bottomLayout);
-
+            
             // Check for favorited / visited
+            if (Favorited)
+            {
+                GetComponentInChildren<FavButton>().UpdateSprite();
+            }
+
+            if (!Visited)
+            {
+                _visitedIndicator =
+                    Instantiate(Resources.Load("Polaris/simplearrow") as GameObject, CurrentPrefab.transform);
+                _visitedIndicator.transform.localPosition = Vector3.up;
+            }
         }
 
         public void UnloadPanel()
@@ -99,10 +110,10 @@ namespace POLARIS.GeospatialScene
 
         public void VisitedPanel()
         {
-            print("visited!");
             if (Visited) return;
             
             Visited = true;
+            Destroy(_visitedIndicator);
             // Update API
         }
 
@@ -110,6 +121,7 @@ namespace POLARIS.GeospatialScene
         {
             Favorited = !Favorited;
             print("zz favorited? " + Favorited);
+            GetComponentInChildren<FavButton>().UpdateSprite();
             
             // Update API
         }
@@ -123,7 +135,6 @@ namespace POLARIS.GeospatialScene
             else
             {
                 _bottomPanelShown = true;
-                // _bottomText.SetText("Information points of interest wow");
             }
             _lastPressed = "poi";
             
@@ -139,7 +150,6 @@ namespace POLARIS.GeospatialScene
             else
             {
                 _bottomPanelShown = true;
-                // _bottomText.SetText("But I must explain to you how all this mistaken idea of denouncing pleasure and praising pain was born and I will give you a complete account of the system, and expound the actual teachings of the great explorer of the truth, the master-builder of human happiness. No one rejects, dislikes, or avoids pleasure itself, because it is pleasure, but because those who do not know how to pursue pleasure rationally encounter consequences that are extre");
             }
             _lastPressed = "events";
 
@@ -193,7 +203,7 @@ namespace POLARIS.GeospatialScene
                                                              -81.20044219923692) < // this.Content.History.Longitude
                                                     0.000001);
             
-            // APPEND HEADER somehow
+            // TODO: APPEND HEADER somehow
 
             foreach (var e in events)
             {
@@ -201,7 +211,7 @@ namespace POLARIS.GeospatialScene
 
                 var text = GenerateEventText(e);
                 textObj.GetComponent<TextMeshProUGUI>().SetText(text);
-                 // _ = SetImage(e.image, textObj.GetComponentInChildren<Image>());
+                StartCoroutine(SetImage(e.image, textObj.GetComponentInChildren<Image>()));
 
                 Instantiate(textObj, _bottomLayout.transform);
             }

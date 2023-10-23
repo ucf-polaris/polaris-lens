@@ -136,7 +136,7 @@ namespace POLARIS.GeospatialScene
                 var withinThresh =
                     Vector3.Distance(panel.CurrentPrefab.transform.position, Camera.transform.position) <
                     RenderDistance;
-                
+
                 switch (panel.Loaded)
                 {
                     case false when withinThresh:
