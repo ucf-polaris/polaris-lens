@@ -20,6 +20,13 @@
     translate: -50% -100%;
 }
 
+#ListedElement {
+    font-size: 40px;
+    flex-grow: 1;
+    flex-shrink: 0;
+    color: rgb(255, 255, 255);
+}
+
 .SearchBox {
     -unity-font: resource('FlatSkin/Font/Roboto-Light');
     align-items: center;
@@ -28,13 +35,13 @@
     flex-basis: auto;
     font-size: 20px;
     margin: 0;
-    /*flex: 1;*/
 }
 
 #SearchBar > TextInput {
     background-color: rgba(0, 0, 0, 0);
-    background-image: resource("Assets/POLARIS/Rectangle 16.png");
+    background-image: resource('Assets/POLARIS/Rectangle 16.png');
     border-width: 0;
+    -unity-background-image-tint-color: rgb(25, 25, 32);
 }
 
 #SearchBar > TextInput > TextElement {
@@ -53,11 +60,11 @@
 }
 
 .SearchButton {
-    background-color: rgba(56, 56, 56, 255);
+    background-color: rgb(56, 56, 56);
     -unity-font: resource('FlatSkin/Font/Roboto-LightItalic');
     font-size: 24px;
     flex-basis: 17%;
-    color: rgba(255, 255, 255, 255);
+    color: rgb(255, 255, 255);
     margin: 0;
     padding: 0;
 }
@@ -79,17 +86,22 @@
 
 .AutoSuggestionBigLabel {
     flex-basis: auto;
-    /*background-color: dimgrey;*/
 }
 
 .SearchAndSuggest {
-    /*background-color: dimgrey;*/
-}
-
-.unity-list-view__empty-label {
-    display: none;
 }
 
 #SearchBox .unity-text-field__input {
     margin: 0;
+}
+
+.unity-base-text-field__input {
+    padding-left: 150px;
+}
+
+#SearchResultBigLabel > ListView {
+}
+
+.unity-list-view__empty-label {
+    display: none;
 }

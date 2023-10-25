@@ -10,10 +10,10 @@
             <ui:Button display-tooltip-when-elided="true" name="Loc" style="-unity-background-scale-mode: scale-to-fit; background-image: resource(&apos;Polaris/UI tabs/locationlight&apos;); margin-left: 0; margin-right: 0; margin-top: 0; margin-bottom: 0; padding-left: 0; padding-right: 0; padding-top: 0; padding-bottom: 0; border-top-left-radius: 0; border-bottom-left-radius: 0; border-top-right-radius: 0; border-bottom-right-radius: 0; border-left-width: 0; border-right-width: 0; border-top-width: 0; border-bottom-width: 0; background-color: rgba(0, 0, 0, 0); transition-property: background-image; transition-duration: 0.2s; position: absolute; left: 0; top: 0; right: 0; bottom: 0;" />
         </ui:GroupBox>
     </ui:GroupBox>
-    <ui:ScrollView name="ScrollView" horizontal-scroller-visibility="Hidden" vertical-scroller-visibility="Hidden" style="flex-grow: 1; background-color: rgb(46, 48, 82);">
-        <ui:TextField picking-mode="Ignore" keyboard-type="Search" name="SearchBar" style="width: 90%; align-self: center; padding-top: 0; padding-right: 0; padding-bottom: 0; padding-left: 0; margin-top: 4%; margin-right: 2%; margin-bottom: 2%; margin-left: 2%; height: auto; min-height: auto;" />
-        <ui:VisualElement name="SearchResults" class="SearchResults" style="flex-direction: column; align-items: flex-start; justify-content: flex-end; height: 40%; align-self: auto;">
-            <ui:ListView name="SearchResultBigLabel" class="SearchResultBigLabel" />
+    <ui:ScrollView name="ScrollView" horizontal-scroller-visibility="Hidden" vertical-scroller-visibility="Hidden" focusable="false" elasticity="0" style="flex-grow: 1; background-color: rgb(46, 48, 82);">
+        <ui:TextField picking-mode="Ignore" keyboard-type="Search" name="SearchBar" style="width: 90%; align-self: center; padding-top: 0; padding-right: 0; padding-bottom: 0; padding-left: 0; margin-top: 4%; margin-right: 2%; margin-bottom: 2%; margin-left: 2%; height: 150px; min-height: auto; font-size: 80px;" />
+        <ui:VisualElement name="SearchResults" class="SearchResults" style="flex-direction: column; align-items: center; justify-content: flex-end; height: 40%; align-self: auto;">
+            <ui:ListView name="SearchResultBigLabel" fixed-item-height="60" virtualization-method="DynamicHeight" show-foldout-header="false" class="SearchResultBigLabel" style="flex-grow: 1; height: auto; width: auto; max-height: 2500px; min-height: 5px; background-color: rgb(0, 0, 0); position: relative;" />
         </ui:VisualElement>
     </ui:ScrollView>
 </ui:UXML>

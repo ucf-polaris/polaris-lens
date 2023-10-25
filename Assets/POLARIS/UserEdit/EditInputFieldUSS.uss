@@ -21,3 +21,11 @@
     margin-bottom: 20px;
     margin-left: 0;
 }
+
+.show-edit-UI {
+    bottom: 0%;
+}
+
+.hide-edit-UI {
+    bottom: 120%;
+}

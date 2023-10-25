@@ -86,9 +86,12 @@ namespace POLARIS.MainScene
             bindLocationItem = (VisualElement element, int index) => {
                 (element as Label).text = _buildingSearchList[index].BuildingName;
                 (element as Label).RegisterCallback<ClickEvent>(_ => OnBuildingSearchClick(_buildingSearchList[index]));
-                element.style.flexGrow = 1;
-                element.style.color = Color.black;
-                element.style.backgroundColor = Color.white;
+                //element.style.flexGrow = 1;
+                //element.style.color = Color.white;
+                //element.style.backgroundColor = Color.white;
+                //element.style.fontSize = 40f;
+                element.name = "ListedElement";
+                Debug.Log("yes");
             };
             bindEventItem = (VisualElement element, int index) => {
                 (element as Label).text = _eventSearchList[index].name;
@@ -96,12 +99,21 @@ namespace POLARIS.MainScene
                 element.style.flexGrow = 1;
                 element.style.color = Color.black;
                 element.style.backgroundColor = Color.white;
+                element.style.fontSize = 110f;
             };
             _buildingOrEventListView = rootVisual.Q<ListView>("SearchResultBigLabel");
             _buildingOrEventListView.fixedItemHeight = 20;
+            _buildingOrEventListView.virtualizationMethod = CollectionVirtualizationMethod.DynamicHeight;
             _buildingOrEventListView.makeItem = makeItem;
-            _buildingOrEventListView.selectionType = SelectionType.Single;
+
+            ScrollView SV = _buildingOrEventListView.Q<ScrollView>();
+
+            SV.verticalScrollerVisibility = ScrollerVisibility.Hidden;
+            _buildingOrEventListView.selectionType = SelectionType.Multiple;
             _buildingOrEventListView.style.flexGrow = 1;
+            SV.touchScrollBehavior = ScrollView.TouchScrollBehavior.Clamped;
+            SV.scrollDecelerationRate = 0.25f;
+            SV.elasticity = 0.01f;
         }
 
         private void Update()
@@ -211,7 +223,7 @@ namespace POLARIS.MainScene
 
             return buildings;
         }
-        
+
         private List<Event> GetEventsFromSearch(string query, bool fuzzySearch)
         {
             const int TOLERANCE = 1;
