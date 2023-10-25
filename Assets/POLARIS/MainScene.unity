@@ -1082,7 +1082,6 @@ GameObject:
   m_Component:
   - component: {fileID: 1006044604}
   - component: {fileID: 1006044606}
-  - component: {fileID: 1006044607}
   - component: {fileID: 1006044608}
   m_Layer: 5
   m_Name: EditUserUI
@@ -1127,20 +1126,6 @@ MonoBehaviour:
   sourceAsset: {fileID: 9197481963319205126, guid: 072238b3e1966da4a849928afb13bc1b,
     type: 3}
   m_SortingOrder: 0
---- !u!114 &1006044607
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1006044603}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 2e52626fc652bbc4da6517a2b4fc1717, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  enterName: SettingsWheel
-  exitName: Arrow
 --- !u!114 &1006044608
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1155,6 +1140,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   blockingScreen: {fileID: 1482851210}
   closed: 0
+  enterName: SettingsWheel
+  exitName: Arrow
 --- !u!1 &1079395654
 GameObject:
   m_ObjectHideFlags: 0

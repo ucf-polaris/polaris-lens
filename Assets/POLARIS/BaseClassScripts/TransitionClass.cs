@@ -11,11 +11,10 @@ abstract public class TransitionClass : MonoBehaviour
     public abstract void TransitionInAction();
     public abstract void TransitionOutAction();
 
-    public void PreTransition(TransitionStartEvent evt)
+    public void PreTransition(TransitionRunEvent evt)
     {
         //Block the screen
         if (!blockingScreen.activeSelf) blockingScreen.SetActive(true);
-        Debug.Log(blockingScreen.activeSelf);
 
         //unfocus on current element
         EventSystem e = EventSystem.current;
