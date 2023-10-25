@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using TMPro;
 using System;
+using POLARIS.Managers;
 
 public class PopulateValues : MonoBehaviour
 {
@@ -57,13 +58,13 @@ public class PopulateValues : MonoBehaviour
             switch (entry.type)
             {
                 case Fields.email:
-                    entry.setInput(instance.GetEmail());
+                    entry.setInput(instance.data.Email);
                     break;
                 case Fields.username:
-                    entry.setInput(instance.GetUserName());
+                    entry.setInput(instance.data.Username);
                     break;
                 case Fields.realname:
-                    entry.setInput(instance.GetRealName());
+                    entry.setInput(instance.data.Realname);
                     break;
             }
         }
@@ -128,22 +129,22 @@ public class PopulateValues : MonoBehaviour
             {
                 //get from all input fields (if multiple of one field one will overwrite rest)
                 case Fields.email:
-                    instance.SetEmail(entry.input.text);
+                    instance.data.Email = entry.input.text;
                     req["email"] = entry.input.text;
                     break;
                 case Fields.username:
-                    instance.SetUserName(entry.input.text);
+                    instance.data.Username = entry.input.text;
                     req["username"] = entry.input.text;
                     break;
                 case Fields.realname:
-                    instance.SetRealName(entry.input.text);
+                    instance.data.Realname = entry.input.text;
                     req["name"] = entry.input.text;
                     break;
             }
         }
 
         //not implemented
-        instance.BackendCall(req);
+        instance.UpdateBackendCall(req);
         AnimDetermine();
     }
 

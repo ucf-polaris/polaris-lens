@@ -1,0 +1,138 @@
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+using UnityEngine.Networking;
+using Newtonsoft.Json.Linq;
+using Newtonsoft.Json;
+
+namespace POLARIS.Managers{
+    public class UserManager : BaseManager
+    {
+        private static UserManager Instance = null;
+
+        public UserData data;
+        private IEnumerator currentCall;
+        private const string updateCodeURL = "https://v21x6ajyg9.execute-api.us-east-2.amazonaws.com/dev/user/update";
+
+        void Awake()
+        {
+            //create singleton
+            if (Instance != this && Instance != null)
+            {
+                Destroy(gameObject);
+            }
+            else
+            {
+                DontDestroyOnLoad(gameObject);
+                Instance = this;
+                data = new UserData();
+            } 
+        }
+
+        static public UserManager getInstance()
+        {
+            return Instance;
+        }
+        //On log out destroy player prefs
+        public void Logout()
+        {
+            PlayerPrefs.DeleteKey("email");
+            PlayerPrefs.DeleteKey("UserID");
+            PlayerPrefs.DeleteKey("RefreshToken");
+            PlayerPrefs.DeleteKey("AuthToken");
+            PlayerPrefs.DeleteKey("realName");
+            PlayerPrefs.DeleteKey("username");
+
+            /*
+            PlayerPrefs.DeleteKey("favorites");
+            PlayerPrefs.DeleteKey("schedule");
+            PlayerPrefs.DeleteKey("visited");
+            */
+        }
+
+        public void UpdateBackendCall(IDictionary<string, string> request)
+        {
+            //make backend call to update here (or implement system to avoid spams to backend)
+            request["UserID"] = data.UserID1;
+            if(currentCall == null)
+            {
+                currentCall = UpdateFields(request);
+                StartCoroutine(currentCall);
+            }
+        }
+
+        override protected IEnumerator UpdateFields(IDictionary<string, string> request)
+        {
+            string reqBody = JsonConvert.SerializeObject(request);
+            var www = UnityWebRequest.Put(updateCodeURL, reqBody);
+            www.SetRequestHeader("authorizationToken", "{\"token\":\"" + data.Token + "\", \"refreshToken\":\"" + data.RefreshToken + "\"}");
+
+            yield return www.SendWebRequest();
+
+            if (www.result != UnityWebRequest.Result.Success)
+            {
+                Debug.Log(www.error);
+            }
+            else
+            {
+                Debug.Log("Form upload complete!");
+                Debug.Log("Status Code: " + www.responseCode);
+                Debug.Log(www.result);
+                Debug.Log("Response: " + www.downloadHandler.text);
+
+                var jsonResponse = JObject.Parse(www.downloadHandler.text);
+            }
+            currentCall = null;
+        }
+        override protected IEnumerator Get(IDictionary<string, string> request)
+        {
+            yield return null;
+            Debug.LogWarning("Could implement this, or not");
+        }
+        //could implement this as login though
+        override protected IEnumerator Scan(IDictionary<string, string> request)
+        {
+            yield return null;
+            Debug.LogWarning("This should not be called or implemented");
+        }
+        public class UserData
+        {
+            private string username;
+            private string UserID;
+            private string email;
+            private string realname;
+            private string token;
+            private string refreshToken;
+            public List<string> favorite;
+            public List<string> schedule;
+            public List<string> visited;
+
+            public UserData()
+            {
+                LoadPlayerPrefs();
+            }
+
+            public bool LoadPlayerPrefs()
+            {
+                email = PlayerPrefs.GetString("email");
+                UserID = PlayerPrefs.GetString("UserID");
+                refreshToken = PlayerPrefs.GetString("RefreshToken");
+                token = PlayerPrefs.GetString("AuthToken");
+                realname = PlayerPrefs.GetString("realName");
+                username = PlayerPrefs.GetString("username");
+
+                return UserID != "" && token != "";
+            }
+
+            #region Setters and Getters
+            public string Username { get => username; set { username = value; PlayerPrefs.SetString("email", value); } }
+            public string UserID1 { get => UserID; set { UserID = value; PlayerPrefs.SetString("UserID", value); } }
+            public string Email { get => email; set { email = value; PlayerPrefs.SetString("email", value); } }
+            public string Realname { get => realname; set { realname = value; PlayerPrefs.SetString("realName", value); } }
+            public string Token { get => token; set { token = value; PlayerPrefs.SetString("AuthToken", value); } }
+            public string RefreshToken { get => refreshToken; set { refreshToken = value; PlayerPrefs.SetString("RefreshToken", value); } }
+            #endregion
+        }
+
+    }
+}

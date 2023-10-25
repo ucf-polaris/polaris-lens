@@ -10,6 +10,7 @@ using UnityEngine;
 using UnityEngine.Networking;
 using UnityEngine.UI;
 using UnityEngine.XR.ARFoundation;
+using POLARIS.Managers;
 
 namespace POLARIS.GeospatialScene
 {
@@ -34,6 +35,13 @@ namespace POLARIS.GeospatialScene
         private string _lastPressed;
         private bool _bottomPanelShown;
         private bool _eventsLoaded;
+
+        private EventManager eventManager;
+
+        private void Start()
+        {
+            eventManager = EventManager.getInstance();
+        }
 
         public void Instantiate(GeospatialAnchorContent content)
         {
@@ -193,13 +201,13 @@ namespace POLARIS.GeospatialScene
         private void AddEvents()
         {
             // Mock using student union coords 28.601927704512025, -81.20044219923692
-            if (Events.EventList is null) return;
+            if (eventManager is null || eventManager.dataList is null) return;
             
-            var events = Events.EventList.Where(e =>
-                                                    Math.Abs(e.location.BuildingLat -
+            var events = eventManager.dataList.Where(e =>
+                                                    Math.Abs(e.Location.BuildingLat -
                                                              28.601927704512025) < // this.Content.History.Latitude
                                                     0.000001 &&
-                                                    Math.Abs(e.location.BuildingLong -
+                                                    Math.Abs(e.Location.BuildingLong -
                                                              -81.20044219923692) < // this.Content.History.Longitude
                                                     0.000001);
             
@@ -211,7 +219,7 @@ namespace POLARIS.GeospatialScene
 
                 var text = GenerateEventText(e);
                 textObj.GetComponent<TextMeshProUGUI>().SetText(text);
-                StartCoroutine(SetImage(e.image, textObj.GetComponentInChildren<Image>()));
+                StartCoroutine(SetImage(e.Image, textObj.GetComponentInChildren<Image>()));
 
                 Instantiate(textObj, _bottomLayout.transform);
             }
@@ -219,15 +227,15 @@ namespace POLARIS.GeospatialScene
             _eventsLoaded = true;
         }
 
-        private static string GenerateEventText(Event e)
+        private static string GenerateEventText(EventData e)
         {
             var sb = new StringBuilder();
 
-            sb.Append(e.name + "\n\n");
-            sb.Append("<indent=45%><line-height=120%>" + e.listedLocation + "\n");
-            sb.Append("<line-height=120%>" + GenerateTime(e.dateTime) + "\n");
-            sb.Append("<line-height=120%>" + e.host + "\n\n");
-            sb.Append("<indent=0%>" + HtmlParser.RichParse(e.description));
+            sb.Append(e.Name + "\n\n");
+            sb.Append("<indent=45%><line-height=120%>" + e.ListedLocation + "\n");
+            sb.Append("<line-height=120%>" + GenerateTime(e.DateTime) + "\n");
+            sb.Append("<line-height=120%>" + e.Host + "\n\n");
+            sb.Append("<indent=0%>" + HtmlParser.RichParse(e.Description));
 
             return sb.ToString();
         }

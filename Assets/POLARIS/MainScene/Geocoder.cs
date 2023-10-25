@@ -25,6 +25,7 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.Serialization;
 using UnityEngine.UIElements;
+using POLARIS.Managers;
 
 namespace POLARIS.MainScene
 {
@@ -58,14 +59,16 @@ namespace POLARIS.MainScene
         private const float SlowLoadFactor = 1;
         
         private List<Building> _buildingSearchList = new List<Building>();
-        private List<Event> _eventSearchList = new List<Event>();
+        private List<EventData> _eventSearchList = new List<EventData>();
         private ListView _buildingOrEventListView;
         private Action<VisualElement, int> bindLocationItem;
         private Action<VisualElement, int> bindEventItem;
         
         private string currentTab;
+        private EventManager eventManager;
         private void Start()
         {
+            eventManager = EventManager.getInstance();
             _arcGisMapComponent = FindObjectOfType<ArcGISMapComponent>();
             _mainCamera = Camera.main;
             _cameraLocation = _mainCamera.GetComponent<ArcGISLocationComponent>();
@@ -86,30 +89,29 @@ namespace POLARIS.MainScene
             bindLocationItem = (VisualElement element, int index) => {
                 (element as Label).text = _buildingSearchList[index].BuildingName;
                 (element as Label).RegisterCallback<ClickEvent>(_ => OnBuildingSearchClick(_buildingSearchList[index]));
-                //element.style.flexGrow = 1;
-                //element.style.color = Color.white;
-                //element.style.backgroundColor = Color.white;
-                //element.style.fontSize = 40f;
-                element.name = "ListedElement";
-                Debug.Log("yes");
+                element.style.flexGrow = 0;
+                element.style.color = Color.black;
+                element.style.backgroundColor = Color.white;
+                element.style.fontSize = 100f;
+                element.style.marginBottom = 50f;
             };
             bindEventItem = (VisualElement element, int index) => {
-                (element as Label).text = _eventSearchList[index].name;
+                (element as Label).text = _eventSearchList[index].Name;
                 (element as Label).RegisterCallback<ClickEvent>(_ => OnEventSearchClick(_eventSearchList[index]));
                 element.style.flexGrow = 1;
                 element.style.color = Color.black;
                 element.style.backgroundColor = Color.white;
-                element.style.fontSize = 110f;
+                element.style.fontSize = 40f;
             };
             _buildingOrEventListView = rootVisual.Q<ListView>("SearchResultBigLabel");
-            _buildingOrEventListView.fixedItemHeight = 20;
-            _buildingOrEventListView.virtualizationMethod = CollectionVirtualizationMethod.DynamicHeight;
+            _buildingOrEventListView.fixedItemHeight = 150f;
+            _buildingOrEventListView.virtualizationMethod = CollectionVirtualizationMethod.FixedHeight;
             _buildingOrEventListView.makeItem = makeItem;
 
             ScrollView SV = _buildingOrEventListView.Q<ScrollView>();
 
             SV.verticalScrollerVisibility = ScrollerVisibility.Hidden;
-            _buildingOrEventListView.selectionType = SelectionType.Multiple;
+            _buildingOrEventListView.selectionType = SelectionType.Single;
             _buildingOrEventListView.style.flexGrow = 1;
             SV.touchScrollBehavior = ScrollView.TouchScrollBehavior.Clamped;
             SV.scrollDecelerationRate = 0.25f;
@@ -157,6 +159,7 @@ namespace POLARIS.MainScene
 
         private void OnSearchValueChanged(ChangeEvent<string> evt)
         {
+            Debug.Log("p");
             if (currentTab == "location")
             {
                 _buildingOrEventListView.itemsSource = _buildingSearchList;
@@ -185,14 +188,22 @@ namespace POLARIS.MainScene
                 }
                 else
                 {
-                    List<Event> events = GetEventsFromSearch(newText, newText[0] == '~');
+                    Debug.Log("ALLs");
+                    List<EventData> events = eventManager.GetEventsFromSearch(newText, newText[0] == '~');
                     UpdateEventSearchUI(events);
+                    Debug.Log("ALL");
                 }
             }
             else
             {
                 ClearSearchResults();
             }
+        }
+
+
+        private bool FuzzyMatch(string source, string target, int tolerance)
+        {
+            return LongestCommonSubsequence(source, target).Length >= target.Length - tolerance;
         }
 
         private List<Building> GetBuildingsFromSearch(string query, bool fuzzySearch)
@@ -224,22 +235,7 @@ namespace POLARIS.MainScene
             return buildings;
         }
 
-        private List<Event> GetEventsFromSearch(string query, bool fuzzySearch)
-        {
-            const int TOLERANCE = 1;
-            
-            List<Event> events = new List<Event>();
-            foreach (Event UCFEvent in Events.EventList)
-            {
-                if (UCFEvent.name.IndexOf(query, StringComparison.OrdinalIgnoreCase) >= 0 || 
-                    (fuzzySearch && FuzzyMatch(UCFEvent.name, query, TOLERANCE)))
-                {
-                    events.Add(UCFEvent);
-                }
-            }
-
-            return events;
-        }
+        
 
         private void UpdateBuildingSearchUI(List<Building> buildings)
         {
@@ -254,11 +250,11 @@ namespace POLARIS.MainScene
             }
         }
         
-        private void UpdateEventSearchUI(List<Event> events)
+        private void UpdateEventSearchUI(List<EventData> events)
         {
             // Clear previous suggestions
             ClearSearchResults();
-            
+
             // Display the new suggestions in the AutoSuggestionText
             foreach (var UCFEvent in events)
             {
@@ -286,21 +282,21 @@ namespace POLARIS.MainScene
             _waitingForResponse = false;
         }
 
-        private void OnEventSearchClick(Event selectedEvent)
+        private void OnEventSearchClick(EventData selectedEvent)
         {
             if (_waitingForResponse) return;
             _waitingForResponse = true;
             Deselect();
             Debug.Log(
-                $"Name: {selectedEvent.name ?? ""}\n" +
-                $"Description: {selectedEvent.description ?? ""}\n" +
-                $"Longitude: {selectedEvent.location.BuildingLong}\n" +
-                $"Latitude: {selectedEvent.location.BuildingLat}\n" +
-                $"Host: {selectedEvent.host ?? ""}\n" +
-                $"Start Time: {selectedEvent.dateTime}\n" +
-                $"End Time: {selectedEvent.endsOn}\n" +
-                $"Image Path: {selectedEvent.image ?? ""}\n" +
-                $"Location: {selectedEvent.listedLocation ?? ""}\n");
+                $"Name: {selectedEvent.Name ?? ""}\n" +
+                $"Description: {selectedEvent.Description ?? ""}\n" +
+                $"Longitude: {selectedEvent.Location.BuildingLong}\n" +
+                $"Latitude: {selectedEvent.Location.BuildingLat}\n" +
+                $"Host: {selectedEvent.Host ?? ""}\n" +
+                $"Start Time: {selectedEvent.DateTime}\n" +
+                $"End Time: {selectedEvent.EndsOn}\n" +
+                $"Image Path: {selectedEvent.Image ?? ""}\n" +
+                $"Location: {selectedEvent.ListedLocation ?? ""}\n");
             // ClearSearchResults();
             _waitingForResponse = false;
         }
@@ -463,12 +459,7 @@ namespace POLARIS.MainScene
             {
                 t.text = _responseAddress;
             }
-        }
-
-        private bool FuzzyMatch(string source, string target, int tolerance)
-        {
-            return LongestCommonSubsequence(source, target).Length >= target.Length - tolerance;
-        }
+        }  
         
         private string LongestCommonSubsequence(string source, string target)
         {
