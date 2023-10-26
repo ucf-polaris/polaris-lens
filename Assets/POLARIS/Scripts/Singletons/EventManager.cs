@@ -48,7 +48,7 @@ namespace POLARIS.Managers
         //scans all elements right away
         public void CallScan()
         {
-            if(running == null)
+            if(running == null && Testing == false)
             {
                 running = Scan(null);
                 StartCoroutine(running);
@@ -59,7 +59,7 @@ namespace POLARIS.Managers
         {
             string Token = TestingToken;
             string RefreshToken = TestingRefreshToken;
-            if (Testing)
+            if (!Testing && UserManager.isNotNull())
             {
                 Token = userAccess.data.Token;
                 RefreshToken = userAccess.data.RefreshToken;

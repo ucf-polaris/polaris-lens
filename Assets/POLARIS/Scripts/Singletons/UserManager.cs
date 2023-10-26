@@ -4,6 +4,7 @@ using UnityEngine;
 using UnityEngine.Networking;
 using Newtonsoft.Json.Linq;
 using Newtonsoft.Json;
+using System;
 
 namespace POLARIS.Managers{
     public class UserManager : BaseManager
@@ -26,12 +27,50 @@ namespace POLARIS.Managers{
                 DontDestroyOnLoad(gameObject);
                 Instance = this;
                 data = new UserData();
+                LoadPlayerPrefs(data);
             } 
+        }
+
+        [Serializable]
+        public class UserData
+        {
+            [SerializeField]
+            private string username;
+            [SerializeField]
+            private string UserID;
+            [SerializeField]
+            private string email;
+            [SerializeField]
+            private string realname;
+            [SerializeField]
+            private string token;
+            [SerializeField]
+            private string refreshToken;
+            [SerializeField]
+            public List<string> favorite;
+            [SerializeField]
+            public List<string> schedule;
+            [SerializeField]
+            public List<string> visited;
+
+            #region Setters and Getters
+            public string Username { get => username; set { username = value; PlayerPrefs.SetString("email", value); } }
+            public string UserID1 { get => UserID; set { UserID = value; PlayerPrefs.SetString("UserID", value); } }
+            public string Email { get => email; set { email = value; PlayerPrefs.SetString("email", value); } }
+            public string Realname { get => realname; set { realname = value; PlayerPrefs.SetString("realName", value); } }
+            public string Token { get => token; set { token = value; PlayerPrefs.SetString("AuthToken", value); } }
+            public string RefreshToken { get => refreshToken; set { refreshToken = value; PlayerPrefs.SetString("RefreshToken", value); } }
+            #endregion
         }
 
         static public UserManager getInstance()
         {
             return Instance;
+        }
+
+        static public bool isNotNull()
+        {
+            return Instance != null && Instance.data != null;
         }
         //On log out destroy player prefs
         public void Logout()
@@ -48,6 +87,20 @@ namespace POLARIS.Managers{
             PlayerPrefs.DeleteKey("schedule");
             PlayerPrefs.DeleteKey("visited");
             */
+        }
+
+        public bool LoadPlayerPrefs(UserData data)
+        {
+            if (data == null) return false;
+
+            data.Email = PlayerPrefs.GetString("email");
+            data.UserID1 = PlayerPrefs.GetString("UserID");
+            data.RefreshToken = PlayerPrefs.GetString("RefreshToken");
+            data.Token = PlayerPrefs.GetString("AuthToken");
+            data.Realname = PlayerPrefs.GetString("realName");
+            data.Username = PlayerPrefs.GetString("username");
+
+            return data.UserID1 != "" && data.Token != "";
         }
 
         public void UpdateBackendCall(IDictionary<string, string> request)
@@ -95,44 +148,7 @@ namespace POLARIS.Managers{
             yield return null;
             Debug.LogWarning("This should not be called or implemented");
         }
-        public class UserData
-        {
-            private string username;
-            private string UserID;
-            private string email;
-            private string realname;
-            private string token;
-            private string refreshToken;
-            public List<string> favorite;
-            public List<string> schedule;
-            public List<string> visited;
-
-            public UserData()
-            {
-                LoadPlayerPrefs();
-            }
-
-            public bool LoadPlayerPrefs()
-            {
-                email = PlayerPrefs.GetString("email");
-                UserID = PlayerPrefs.GetString("UserID");
-                refreshToken = PlayerPrefs.GetString("RefreshToken");
-                token = PlayerPrefs.GetString("AuthToken");
-                realname = PlayerPrefs.GetString("realName");
-                username = PlayerPrefs.GetString("username");
-
-                return UserID != "" && token != "";
-            }
-
-            #region Setters and Getters
-            public string Username { get => username; set { username = value; PlayerPrefs.SetString("email", value); } }
-            public string UserID1 { get => UserID; set { UserID = value; PlayerPrefs.SetString("UserID", value); } }
-            public string Email { get => email; set { email = value; PlayerPrefs.SetString("email", value); } }
-            public string Realname { get => realname; set { realname = value; PlayerPrefs.SetString("realName", value); } }
-            public string Token { get => token; set { token = value; PlayerPrefs.SetString("AuthToken", value); } }
-            public string RefreshToken { get => refreshToken; set { refreshToken = value; PlayerPrefs.SetString("RefreshToken", value); } }
-            #endregion
-        }
 
     }
+    
 }
