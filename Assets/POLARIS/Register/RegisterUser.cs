@@ -22,6 +22,7 @@ public class RegistrationScript : MonoBehaviour
 
     IEnumerator SendRegistrationRequest(string email, string password)
     {
+        password = Hashing.HashPassword(password);
         JObject payload =
             new JObject(
                 new JProperty("email", email),

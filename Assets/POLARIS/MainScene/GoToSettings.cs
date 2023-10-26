@@ -4,9 +4,13 @@ using UnityEngine.SceneManagement;
 
 public class GoToSettings : MonoBehaviour
 {
-    public void LoadUserSettings()
+    public void OnUserSettingsClick()
     {
-        StartCoroutine(LoadSceneAsync("UserEdit"));
+        LoadUserSettings("UserEdit");
+    }
+    private void LoadUserSettings(string sceneName)
+    {
+        StartCoroutine(LoadSceneAsync(sceneName));
     }
 
     private IEnumerator LoadSceneAsync(string sceneName)
@@ -17,5 +21,6 @@ public class GoToSettings : MonoBehaviour
         {
             yield return null;
         }
+        
     }
 }
