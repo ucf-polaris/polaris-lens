@@ -16,6 +16,7 @@ namespace POLARIS.Managers
         private const string TestingRefreshToken = "eyJhbGciOiJIUzUxMiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3Mjg1NDUxMzN9.M8YQeGM6m4WNh4TDK4mgVLbUH3whGa64tpi78IwVQIm8L2_VBG-PlxTPBbBcem6236b_1Sfsk20H6W2VqN_oRQ";
         private const string BaseApiUrl = "https://api.ucfpolaris.com";
         private const string EventQueryURL = BaseApiUrl + "/event/scan";
+        private const string EventGetURL = BaseApiUrl + "/event/get";
 
         public List<EventData> dataList;
         public bool Testing;
@@ -94,7 +95,34 @@ namespace POLARIS.Managers
 
         override protected IEnumerator Get(IDictionary<string, string> request)
         {
-            yield return null;
+            string Token = TestingToken;
+            string RefreshToken = TestingRefreshToken;
+            if (Testing)
+            {
+                Token = userAccess.data.Token;
+                RefreshToken = userAccess.data.RefreshToken;
+            }
+
+            JObject payload =
+                new(
+                    new JProperty("name", request["name"]),
+                    new JProperty("dateTime", request["dateTime"])
+                );
+            UnityWebRequest www = UnityWebRequest.Post(EventGetURL, payload.ToString(), "application/json");
+            www.SetRequestHeader("authorizationToken", "{\"token\":\"" + Token + "\",\"refreshToken\":\"" + RefreshToken + "\"}");
+            yield return www.SendWebRequest();
+            if (www.result != UnityWebRequest.Result.Success)
+            {
+                Debug.Log(www.error);
+            }
+            else
+            {
+                Debug.Log("Form upload complete!");
+                Debug.Log("Status Code: " + www.responseCode);
+                Debug.Log(www.result);
+                JObject jsonResponse = JObject.Parse(www.downloadHandler.text);
+                Debug.Log("Response: " + jsonResponse);
+            }
             Debug.LogWarning("Implement this");
         }
 

@@ -13,6 +13,8 @@ namespace POLARIS.Managers{
         public UserData data;
         private IEnumerator currentCall;
         private const string updateCodeURL = "https://v21x6ajyg9.execute-api.us-east-2.amazonaws.com/dev/user/update";
+        private const string BaseApiURL = "https://api.ucfpolaris.com";
+        private const string UserGetURL = BaseApiURL + "/user/get";
 
         void Awake()
         {
@@ -86,8 +88,29 @@ namespace POLARIS.Managers{
         }
         override protected IEnumerator Get(IDictionary<string, string> request)
         {
-            yield return null;
-            Debug.LogWarning("Could implement this, or not");
+            string Token = data.Token;
+            string RefreshToken = data.RefreshToken;
+
+            JObject payload =
+                new(
+                    new JProperty("email", request["email"])
+                );
+            UnityWebRequest www = UnityWebRequest.Post(UserGetURL, payload.ToString(), "application/json");
+            www.SetRequestHeader("authorizationToken", "{\"token\":\"" + Token + "\",\"refreshToken\":\"" + RefreshToken + "\"}");
+            yield return www.SendWebRequest();
+            if (www.result != UnityWebRequest.Result.Success)
+            {
+                Debug.Log(www.error);
+            }
+            else
+            {
+                Debug.Log("Form upload complete!");
+                Debug.Log("Status Code: " + www.responseCode);
+                Debug.Log(www.result);
+                JObject jsonResponse = JObject.Parse(www.downloadHandler.text);
+                Debug.Log("Response: " + jsonResponse);
+            }
+            Debug.LogWarning("Implement this");
         }
         //could implement this as login though
         override protected IEnumerator Scan(IDictionary<string, string> request)
