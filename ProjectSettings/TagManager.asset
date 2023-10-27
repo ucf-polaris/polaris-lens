@@ -7,6 +7,7 @@ TagManager:
   - Location
   - PanelManager
   - EventPanel
+  - Arrow
   layers:
   - Default
   - TransparentFX

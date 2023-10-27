@@ -1,8 +1,12 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using Google.XR.ARCoreExtensions;
 using POLARIS.MainScene;
+using Unity.XR.CoreUtils;
 using UnityEngine;
+using UnityEngine.InputSystem.Controls;
 using UnityEngine.XR.ARFoundation;
 
 namespace POLARIS.GeospatialScene
@@ -11,6 +15,9 @@ namespace POLARIS.GeospatialScene
     {
         private readonly List<GameObject> _pathAnchorObjects = new();
         private LineRenderer _lineRenderer;
+        private ArrowPoint _arrow;
+        
+        public Camera Camera;
         public GameObject PathPrefab;
 
         private void Start()
@@ -21,9 +28,14 @@ namespace POLARIS.GeospatialScene
             _lineRenderer.startColor = Color.blue;
             _lineRenderer.endColor = Color.cyan;
             _lineRenderer.positionCount = 0;
-            _lineRenderer.numCapVertices = 12;
+            _lineRenderer.numCapVertices = 6;
             _lineRenderer.numCornerVertices = 6;
-            PathPrefab = Resources.Load("Polaris/simplearrow") as GameObject;
+            
+            PathPrefab = Resources.Load("Polaris/RaisedArrow") as GameObject;
+            
+            var goList = new List<GameObject>();
+            Camera.gameObject.GetChildGameObjects(goList);
+            _arrow = goList.Find(go => go.name.Equals("Arrow")).GetComponent<ArrowPoint>();
         }
 
         // Update is called once per frame
@@ -34,15 +46,24 @@ namespace POLARIS.GeospatialScene
                 return;
             }
 
-            _lineRenderer.SetPositions(_pathAnchorObjects.ConvertAll(anchor => anchor.transform.position).ToArray());
-            
-            for (var i = 0; i < _pathAnchorObjects.Count - 1; i++)
+            var closest = GetClosestPathPoint();
+
+            _lineRenderer.positionCount = _pathAnchorObjects.Count - closest;
+            _lineRenderer.SetPositions(_pathAnchorObjects.Skip(closest).Select(anchor => anchor.transform.position).ToArray());
+
+            for (var i = 0; i < closest; i++)
+            {
+                _pathAnchorObjects[i].gameObject.SetActive(false);
+            }
+
+            // Set arrows
+            for (var i = closest; i < _pathAnchorObjects.Count - 1; i++)
             {
                 var direction = _pathAnchorObjects[i + 1].transform.position -
                                 _pathAnchorObjects[i].transform.position;
-                var lookRot = Quaternion.LookRotation(direction, Vector3.forward);
+                var lookRot = Quaternion.LookRotation(direction, Vector3.up);
                 
-                _pathAnchorObjects[i].transform.rotation = Quaternion.Euler(0, lookRot.eulerAngles.y + 90, -90);
+                _pathAnchorObjects[i].transform.rotation = Quaternion.Euler(lookRot.eulerAngles.x, lookRot.eulerAngles.y, lookRot.eulerAngles.z);
             }
         }
 
@@ -54,27 +75,13 @@ namespace POLARIS.GeospatialScene
             }
             _pathAnchorObjects.Clear();
             _lineRenderer.positionCount = 0;
+            _arrow.SetEnabled(false);
         }
 
-        public void ClearPathAnchors()
-        {
-            _pathAnchorObjects.Clear();
-            _lineRenderer.positionCount = 0;
-        }
-        
-    
         public void LoadPathAnchors(List<GameObject> anchorObjects, ARAnchorManager anchorManager)
         {
             // remove old anchors
             ClearPath(anchorObjects);
-
-            // mock fetch for now
-            // var pathPoints = new List<double[]>
-            // {
-            //     new[]{28.614402, -81.195860},
-            //     new[]{28.614469, -81.195702},
-            //     new[]{28.614369, -81.195760}
-            // };
             
             foreach (var point in PersistData.PathPoints)
             {
@@ -82,6 +89,8 @@ namespace POLARIS.GeospatialScene
             }
 
             _lineRenderer.positionCount = PersistData.PathPoints.Count;
+            
+            _arrow.SetEnabled(true);
         }
 
         private ARGeospatialAnchor PlacePathGeospatialAnchor(
@@ -115,6 +124,30 @@ namespace POLARIS.GeospatialScene
 
             anchorObjects.Add(resultGo);
             _pathAnchorObjects.Add(anchorGo);
+        }
+
+        private int GetClosestPathPoint()
+        {
+            var smallestDist = float.MaxValue;
+            var smallestIndex = 0;
+            for (var i = 0; i < _pathAnchorObjects.Count; i++)
+            {
+                var dist = Vector3.Distance(_pathAnchorObjects[i].transform.position,
+                                            Camera.transform.position);
+                if (dist < smallestDist)
+                {
+                    smallestDist = dist;
+                    smallestIndex = i;
+                }
+            }
+
+            if (smallestDist > 50)
+            {
+                // TODO: Auto reroute
+                Debug.Log("Should recalculate route!");
+            }
+
+            return smallestIndex;
         }
     }
 }
