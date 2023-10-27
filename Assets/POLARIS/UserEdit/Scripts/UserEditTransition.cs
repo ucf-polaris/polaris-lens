@@ -11,6 +11,7 @@ public class UserEditTransition : TransitionClass
     private VisualElement background;
     private Press enter;
     private Press exit;
+    private UserEditFunc function;
 
     public string enterName;
     public string exitName;
@@ -18,6 +19,7 @@ public class UserEditTransition : TransitionClass
     {
         UIDocument uiDoc = gameObject.GetComponent<UIDocument>();
         background = uiDoc.rootVisualElement.Q<VisualElement>("Background");
+        function = GetComponent<UserEditFunc>();
 
         //set values with transition buttons
         enter = new Press(uiDoc, enterName);
@@ -36,34 +38,6 @@ public class UserEditTransition : TransitionClass
         background.RegisterCallback<TransitionEndEvent>(PostTransition);
     }
 
-    [Serializable]
-    public class Press
-    {
-        private UIDocument uidoc;
-        private string search;
-        public Press(UIDocument uidoc, string search)
-        {
-            this.uidoc = uidoc;
-            this.search = search;
-        }
-
-        public void AddEvent(Action a)
-        {
-            Button Clickable = uidoc.rootVisualElement.Q<Button>(search);
-            if (Clickable != null)
-            {
-                Clickable.clickable.clicked += a;
-            }
-        }
-        public void AddEvent(EventCallback<ClickEvent> a)
-        {
-            VisualElement Clickable = uidoc.rootVisualElement.Q(search);
-            if (Clickable != null)
-            {
-                Clickable.RegisterCallback(a);
-            }
-        }
-    }
     override public void TransitionInAction()
     {
         if (background == null)
@@ -73,6 +47,9 @@ public class UserEditTransition : TransitionClass
         }
         background.style.bottom = Length.Percent(0);
         closed = false;
+
+        //populate the fields
+        if (function != null) function.Initialize();
     }
 
     override public void TransitionOutAction()
@@ -84,6 +61,8 @@ public class UserEditTransition : TransitionClass
         }
         background.style.bottom = Length.Percent(120);
         closed = true;
+        //empty the fields
+        if (function != null) function.EmptyFields();
     }
 
     private void OnOpenClick(ClickEvent evt)
@@ -104,5 +83,33 @@ public class UserEditTransition : TransitionClass
     public bool GetClosed()
     {
         return closed;
+    }
+}
+
+public class Press
+{
+    private UIDocument uidoc;
+    private string search;
+    public Press(UIDocument uidoc, string search)
+    {
+        this.uidoc = uidoc;
+        this.search = search;
+    }
+
+    public void AddEvent(Action a)
+    {
+        Button Clickable = uidoc.rootVisualElement.Q<Button>(search);
+        if (Clickable != null)
+        {
+            Clickable.clickable.clicked += a;
+        }
+    }
+    public void AddEvent(EventCallback<ClickEvent> a)
+    {
+        VisualElement Clickable = uidoc.rootVisualElement.Q(search);
+        if (Clickable != null)
+        {
+            Clickable.RegisterCallback(a);
+        }
     }
 }

@@ -98,10 +98,11 @@ namespace POLARIS.MainScene
             bindEventItem = (VisualElement element, int index) => {
                 (element as Label).text = _eventSearchList[index].Name;
                 (element as Label).RegisterCallback<ClickEvent>(_ => OnEventSearchClick(_eventSearchList[index]));
-                element.style.flexGrow = 1;
+                element.style.flexGrow = 0;
                 element.style.color = Color.black;
                 element.style.backgroundColor = Color.white;
-                element.style.fontSize = 40f;
+                element.style.fontSize = 100f;
+                element.style.marginBottom = 50f;
             };
             _buildingOrEventListView = rootVisual.Q<ListView>("SearchResultBigLabel");
             _buildingOrEventListView.fixedItemHeight = 150f;

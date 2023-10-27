@@ -20,8 +20,12 @@ public class LoginUser : MonoBehaviour
         StartCoroutine(SendLoginRequest(emailInput.text, passwordInput.text));
     }
     
+    
+    
     IEnumerator SendLoginRequest(string email, string password)
     {
+        password = Hashing.HashPassword(password);
+        
         JObject payload =
             new JObject(
                 new JProperty("email", email),
