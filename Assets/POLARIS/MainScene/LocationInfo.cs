@@ -18,7 +18,7 @@ public class LocationInfo : MonoBehaviour
             StartCoroutine(RequestLocations());
         else
         {
-            Locations.LocationList = new Building[20];
+            Locations.LocationList = new Building[2];
             for(int i = 0; i < Locations.LocationList.Length; i++)
             {
                 Locations.LocationList[i] = new Building();
@@ -74,7 +74,7 @@ public class Building
     //testing constructor
     public Building()
     {
-        BuildingName = "blah blah";
+        BuildingName = "Nicholson School of Communication and Media";
         BuildingAllias = new string[] { "bb", "ba" };
         BuildingAbbreviation = new string[] { "bb", "ba" };
         BuildingDesc = "A historic building";

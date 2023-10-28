@@ -87,13 +87,76 @@ namespace POLARIS.MainScene
             
             Func<VisualElement> makeItem = () => new Label();
             bindLocationItem = (VisualElement element, int index) => {
-                (element as Label).text = _buildingSearchList[index].BuildingName;
+                //top visual element
+                element.AddToClassList("panelEntity");
+
+                //panel drop shadow
+                //Shadow panelShadow = new Shadow();
+                //panelShadow.AddToClassList("panelShadow");
+                //element.Add(panelShadow);
+
+                //panel (CHILD OF panel entity)
+                VisualElement panel = new VisualElement();
+                panel.AddToClassList("panel");
+                element.Add(panel);
+
+                //image in panel (CHILD OF panel)
+                VisualElement image = new VisualElement();
+                image.AddToClassList("panelImage");
+                panel.Add(image);
+
+                //blocker in panel (CHILD OF panel)
+                VisualElement blocker = new VisualElement();
+                blocker.AddToClassList("panelBlocker");
+                panel.Add(blocker);
+
+                //text area in panel (CHILD OF panel)
+                VisualElement textarea = new VisualElement();
+                textarea.AddToClassList("panelTextArea");
+                panel.Add(textarea);
+
+                //building name (CHILD OF text area)
+                Label location = new Label(_buildingSearchList[index].BuildingName);
+                location.AddToClassList("panelTextLocation");
+                textarea.Add(location);
+
+                //location area in text area (CHILD OF text area)
+                VisualElement locationArea = new VisualElement();
+                locationArea.AddToClassList("panelLocationGroup");
+                textarea.Add(locationArea);
+
+                //address (CHILD OF location area)
+                Label address = new Label(_buildingSearchList[index].BuildingAddress);
+                address.AddToClassList("panelTextAddress");
+                locationArea.Add(address);
+
+                //how far building is from current location (update dynamically?) (CHILD OF location area)
+                Label distance = new Label("- N miles");
+                distance.AddToClassList("panelTextDistance");
+                locationArea.Add(distance);
+
+                //how many events exist (CHILD OF text area)
+                Label events = new Label(_buildingSearchList[index].BuildingEvents.Length.ToString() + " Events");
+                events.AddToClassList("panelTextEvents");
+                textarea.Add(events);
+
+                //icon for favorites (CHILD OF panel)
+                VisualElement favoritesIcon = new VisualElement();
+                favoritesIcon.AddToClassList("panelFavoritesIcon");
+                panel.Add(favoritesIcon);
+
+                //icon for navigation to (CHILD OF panel)
+                VisualElement navIcon = new VisualElement();
+                navIcon.AddToClassList("panelNavigationIcon");
+                panel.Add(navIcon);
+
+                /*(element as Label).text = _buildingSearchList[index].BuildingName;
                 (element as Label).RegisterCallback<ClickEvent>(_ => OnBuildingSearchClick(_buildingSearchList[index]));
                 element.style.flexGrow = 0;
                 element.style.color = Color.black;
                 element.style.backgroundColor = Color.white;
                 element.style.fontSize = 100f;
-                element.style.marginBottom = 50f;
+                element.style.marginBottom = 50f;*/
             };
             bindEventItem = (VisualElement element, int index) => {
                 (element as Label).text = _eventSearchList[index].Name;
@@ -105,15 +168,15 @@ namespace POLARIS.MainScene
                 element.style.marginBottom = 50f;
             };
             _buildingOrEventListView = rootVisual.Q<ListView>("SearchResultBigLabel");
-            _buildingOrEventListView.fixedItemHeight = 150f;
-            _buildingOrEventListView.virtualizationMethod = CollectionVirtualizationMethod.FixedHeight;
+            //_buildingOrEventListView.fixedItemHeight = 600f;
+            _buildingOrEventListView.virtualizationMethod = CollectionVirtualizationMethod.DynamicHeight;
             _buildingOrEventListView.makeItem = makeItem;
 
             ScrollView SV = _buildingOrEventListView.Q<ScrollView>();
 
             SV.verticalScrollerVisibility = ScrollerVisibility.Hidden;
-            _buildingOrEventListView.selectionType = SelectionType.Single;
-            _buildingOrEventListView.style.flexGrow = 1;
+            _buildingOrEventListView.selectionType = SelectionType.None;
+            //_buildingOrEventListView.style.flexGrow = 1;
             SV.touchScrollBehavior = ScrollView.TouchScrollBehavior.Clamped;
             SV.scrollDecelerationRate = 0.25f;
             SV.elasticity = 0.01f;
@@ -160,7 +223,6 @@ namespace POLARIS.MainScene
 
         private void OnSearchValueChanged(ChangeEvent<string> evt)
         {
-            Debug.Log("p");
             if (currentTab == "location")
             {
                 _buildingOrEventListView.itemsSource = _buildingSearchList;
