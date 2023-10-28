@@ -90,12 +90,17 @@ namespace POLARIS.MainScene
                 //top visual element
                 element.AddToClassList("panelEntity");
 
+                //panel spacing (CHILD OF panel entity)
+                //VisualElement spacing = new VisualElement();
+                //spacing.AddToClassList("spacing");
+                //element.Add(spacing);
+
                 //panel drop shadow
                 //Shadow panelShadow = new Shadow();
                 //panelShadow.AddToClassList("panelShadow");
                 //element.Add(panelShadow);
 
-                //panel (CHILD OF panel entity)
+                //panel (CHILD OF panel shadow)
                 VisualElement panel = new VisualElement();
                 panel.AddToClassList("panel");
                 element.Add(panel);
@@ -168,8 +173,8 @@ namespace POLARIS.MainScene
                 element.style.marginBottom = 50f;
             };
             _buildingOrEventListView = rootVisual.Q<ListView>("SearchResultBigLabel");
-            //_buildingOrEventListView.fixedItemHeight = 600f;
-            _buildingOrEventListView.virtualizationMethod = CollectionVirtualizationMethod.DynamicHeight;
+            //_buildingOrEventListView.fixedItemHeight = 800f;
+            _buildingOrEventListView.virtualizationMethod = CollectionVirtualizationMethod.FixedHeight;
             _buildingOrEventListView.makeItem = makeItem;
 
             ScrollView SV = _buildingOrEventListView.Q<ScrollView>();

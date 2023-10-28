@@ -104,18 +104,22 @@
     position: absolute;
     top: auto;
     left: auto;
-    opacity: 0.6;
-    height: 100%;
-    width: 100%;
+    opacity: 0.42;
+    height: 850px;
+    width: 1050px;
+    right: auto;
+    flex-shrink: 0;
+    justify-content: center;
+    flex-grow: 1;
 }
 
 .panel {
     flex-grow: 0;
     position: relative;
-    width: 1050px;
+    width: 950px;
     bottom: auto;
     background-color: rgb(255, 255, 255);
-    height: 800px;
+    height: 650px;
     left: auto;
     border-top-left-radius: 20px;
     border-top-right-radius: 20px;
@@ -124,7 +128,7 @@
     -unity-background-scale-mode: stretch-to-fill;
     justify-content: center;
     align-items: auto;
-    top: auto;
+    top: 30px;
     flex-shrink: 0;
     padding-top: 0;
     padding-right: 0;
@@ -134,12 +138,13 @@
     margin-right: 0;
     margin-bottom: 0;
     margin-left: 0;
+    align-self: center;
 }
 
 .panelEntity {
     flex-grow: 0;
     position: relative;
-    top: 2%;
+    top: auto;
     left: auto;
     height: auto;
     width: auto;
@@ -150,7 +155,7 @@
     min-width: auto;
     right: auto;
     align-self: center;
-    margin-top: 0;
+    padding-top: 20px;
     margin-right: 0;
     margin-left: 0;
     padding-top: 0;
@@ -211,7 +216,7 @@
     left: auto;
     align-self: flex-start;
     bottom: auto;
-    top: -6px;
+    top: -10px;
     font-size: 30px;
     position: relative;
     -unity-font-style: normal;
@@ -222,7 +227,7 @@
 
 .panelTextEvents {
     align-self: flex-start;
-    bottom: 9px;
+    bottom: 24px;
     top: auto;
     font-size: 30px;
     position: relative;
@@ -235,7 +240,7 @@
 .panelTextAddress {
     align-self: flex-start;
     bottom: auto;
-    top: -6px;
+    top: -10px;
     font-size: 30px;
     position: relative;
     -unity-font-style: normal;
@@ -263,7 +268,7 @@
 
 .panelTextLocation {
     width: 88%;
-    font-size: 45px;
+    font-size: 40px;
     -unity-font: resource('Polaris/fonts/Poppins-SemiBold');
     white-space: normal;
     -unity-font-style: bold;
@@ -273,8 +278,8 @@
     flex-grow: 0;
     flex-shrink: 0;
     position: absolute;
-    width: 90px;
-    height: 60px;
+    width: 70px;
+    height: 40px;
     background-image: url('project://database/Assets/POLARIS/arrow.png?fileID=2800000&guid=d01daccc5e8044ce09b187ecdcf84c3d&type=3#arrow');
     -unity-background-image-tint-color: rgb(0, 0, 0);
     top: 87%;
@@ -286,20 +291,18 @@
     flex-grow: 0;
     position: absolute;
     background-image: resource('Polaris/star-outline');
-    height: 110px;
-    width: 130px;
+    height: 90px;
+    width: 110px;
     top: 70%;
     left: 85%;
     flex-shrink: 0;
 }
 
-.panelFavoritesIconTest {
+.spacing {
     flex-grow: 0;
-    position: absolute;
-    background-image: resource('Polaris/star-outline');
-    height: 110px;
-    width: 130px;
-    top: 70%;
-    left: 85%;
+    width: 100%;
+    height: 20px;
     flex-shrink: 0;
+    position: relative;
+    -unity-background-image-tint-color: rgba(255, 255, 255, 0);
 }

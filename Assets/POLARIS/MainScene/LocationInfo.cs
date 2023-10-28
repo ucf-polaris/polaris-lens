@@ -18,7 +18,7 @@ public class LocationInfo : MonoBehaviour
             StartCoroutine(RequestLocations());
         else
         {
-            Locations.LocationList = new Building[2];
+            Locations.LocationList = new Building[20];
             for(int i = 0; i < Locations.LocationList.Length; i++)
             {
                 Locations.LocationList[i] = new Building();
