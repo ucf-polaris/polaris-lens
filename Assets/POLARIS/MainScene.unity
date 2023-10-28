@@ -428,7 +428,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9a067df3cf121744da839189bb49759b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  testing: 1
+  testing: 0
 --- !u!4 &355669367
 Transform:
   m_ObjectHideFlags: 0
@@ -528,6 +528,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 29c2c16a04aaa4e4bbbb601f66d8d3a9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  baseBuildingColor:
+    serializedVersion: 2
+    rgba: 4290930455
   FeatureLayerURL: https://services.arcgis.com/dVL5xxth19juhrDY/ArcGIS/rest/services/MainCampus_RPbldgs/FeatureServer/0
   ArcGisMapComponent: {fileID: 1548223581}
 --- !u!4 &607878209

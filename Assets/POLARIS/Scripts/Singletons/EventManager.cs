@@ -84,10 +84,10 @@ namespace POLARIS.Managers
                 var events = jsonResponse["locations"]!.ToObject<List<EventData>>();
                 dataList = events;
 
-                foreach (EventData UCFEvent in dataList)
-                {
-                    Debug.Log($"{UCFEvent.Name} has description {UCFEvent.Description}");
-                }
+                // foreach (EventData UCFEvent in dataList)
+                // {
+                    // Debug.Log($"Event {UCFEvent.Name} has description {UCFEvent.Description}");
+                // }
             }
             running = null;
         }

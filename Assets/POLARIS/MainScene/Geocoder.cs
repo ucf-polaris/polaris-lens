@@ -85,71 +85,77 @@ namespace POLARIS.MainScene
             _searchField.selectAllOnFocus = true;
             SetPlaceholderText(_searchField, currentTab == "location" ? "Search for locations" : "Search for events");
             
-            Func<VisualElement> makeItem = () => new Label();
+            Func<VisualElement> makeItem = () =>
+            {
+                // Debug.Log("I just made an item!");
+                return new VisualElement();
+            };
             bindLocationItem = (VisualElement element, int index) => {
+                Debug.Log("I just binded an item!");
+                
                 //top visual element
                 element.AddToClassList("panelEntity");
-
+                
                 //panel spacing (CHILD OF panel entity)
                 //VisualElement spacing = new VisualElement();
                 //spacing.AddToClassList("spacing");
                 //element.Add(spacing);
-
+                
                 //panel drop shadow
                 //Shadow panelShadow = new Shadow();
                 //panelShadow.AddToClassList("panelShadow");
                 //element.Add(panelShadow);
-
+                
                 //panel (CHILD OF panel shadow)
                 VisualElement panel = new VisualElement();
                 panel.AddToClassList("panel");
                 element.Add(panel);
-
+                
                 //image in panel (CHILD OF panel)
                 VisualElement image = new VisualElement();
                 image.AddToClassList("panelImage");
                 panel.Add(image);
-
+                
                 //blocker in panel (CHILD OF panel)
                 VisualElement blocker = new VisualElement();
                 blocker.AddToClassList("panelBlocker");
                 panel.Add(blocker);
-
+                
                 //text area in panel (CHILD OF panel)
                 VisualElement textarea = new VisualElement();
                 textarea.AddToClassList("panelTextArea");
                 panel.Add(textarea);
-
+                
                 //building name (CHILD OF text area)
                 Label location = new Label(_buildingSearchList[index].BuildingName);
                 location.AddToClassList("panelTextLocation");
                 textarea.Add(location);
-
+                
                 //location area in text area (CHILD OF text area)
                 VisualElement locationArea = new VisualElement();
                 locationArea.AddToClassList("panelLocationGroup");
                 textarea.Add(locationArea);
-
+                
                 //address (CHILD OF location area)
                 Label address = new Label(_buildingSearchList[index].BuildingAddress);
                 address.AddToClassList("panelTextAddress");
                 locationArea.Add(address);
-
+                
                 //how far building is from current location (update dynamically?) (CHILD OF location area)
                 Label distance = new Label("- N miles");
                 distance.AddToClassList("panelTextDistance");
                 locationArea.Add(distance);
-
+                
                 //how many events exist (CHILD OF text area)
-                Label events = new Label(_buildingSearchList[index].BuildingEvents.Length.ToString() + " Events");
+                Label events = new Label(_buildingSearchList[index].BuildingEvents.Length + " Events");
                 events.AddToClassList("panelTextEvents");
                 textarea.Add(events);
-
+                
                 //icon for favorites (CHILD OF panel)
                 VisualElement favoritesIcon = new VisualElement();
                 favoritesIcon.AddToClassList("panelFavoritesIcon");
                 panel.Add(favoritesIcon);
-
+                
                 //icon for navigation to (CHILD OF panel)
                 VisualElement navIcon = new VisualElement();
                 navIcon.AddToClassList("panelNavigationIcon");
@@ -173,7 +179,7 @@ namespace POLARIS.MainScene
                 element.style.marginBottom = 50f;
             };
             _buildingOrEventListView = rootVisual.Q<ListView>("SearchResultBigLabel");
-            //_buildingOrEventListView.fixedItemHeight = 800f;
+            // _buildingOrEventListView.fixedItemHeight = 800f;
             _buildingOrEventListView.virtualizationMethod = CollectionVirtualizationMethod.FixedHeight;
             _buildingOrEventListView.makeItem = makeItem;
 
@@ -181,7 +187,7 @@ namespace POLARIS.MainScene
 
             SV.verticalScrollerVisibility = ScrollerVisibility.Hidden;
             _buildingOrEventListView.selectionType = SelectionType.None;
-            //_buildingOrEventListView.style.flexGrow = 1;
+            // _buildingOrEventListView.style.flexGrow = 1;
             SV.touchScrollBehavior = ScrollView.TouchScrollBehavior.Clamped;
             SV.scrollDecelerationRate = 0.25f;
             SV.elasticity = 0.01f;
@@ -194,7 +200,7 @@ namespace POLARIS.MainScene
                 currentTab = ChangeTabImage._lastPressed;
                 _searchField.value = "";
                 ClearSearchResults();
-                SetPlaceholderText(_searchField, ChangeTabImage._lastPressed == "location" ? "Search for locations" : "Search for events");
+                SetPlaceholderText(_searchField,  currentTab == "location" ? "Search for locations" : "Search for events");
             }
             
             // Create a marker and address card after an address lookup
@@ -268,7 +274,6 @@ namespace POLARIS.MainScene
             }
         }
 
-
         private bool FuzzyMatch(string source, string target, int tolerance)
         {
             return LongestCommonSubsequence(source, target).Length >= target.Length - tolerance;
@@ -302,9 +307,7 @@ namespace POLARIS.MainScene
 
             return buildings;
         }
-
         
-
         private void UpdateBuildingSearchUI(List<Building> buildings)
         {
             // Clear previous suggestions
@@ -314,8 +317,8 @@ namespace POLARIS.MainScene
             foreach (var building in buildings)
             {
                 _buildingOrEventListView.itemsSource.Add(building);
-                _buildingOrEventListView.Rebuild();
             }
+            _buildingOrEventListView.Rebuild();
         }
         
         private void UpdateEventSearchUI(List<EventData> events)
@@ -327,8 +330,8 @@ namespace POLARIS.MainScene
             foreach (var UCFEvent in events)
             {
                 _buildingOrEventListView.itemsSource.Add(UCFEvent);
-                _buildingOrEventListView.Rebuild();
             }
+            _buildingOrEventListView.Rebuild();
         }
 
         private void OnBuildingSearchClick(Building selectedBuilding)
