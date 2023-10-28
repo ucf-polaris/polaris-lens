@@ -131,32 +131,32 @@ namespace Google.XR.ARCoreExtensions.Samples.Geospatial
         /// <summary>
         /// UI element that enables streetscape geometry visibility.
         /// </summary>
-        public Toggle GeometryToggle;
+        // public Toggle GeometryToggle;
 
         /// <summary>
         /// UI element to display or hide the Anchor Settings panel.
         /// </summary>
-        public Button AnchorSettingButton;
+        // public Button AnchorSettingButton;
 
         /// <summary>
         /// UI element for the Anchor Settings panel.
         /// </summary>
-        public GameObject AnchorSettingPanel;
+        // public GameObject AnchorSettingPanel;
 
         /// <summary>
         /// UI element that toggles anchor type to Geometry.
         /// </summary>
-        public Toggle GeospatialAnchorToggle;
+        // public Toggle GeospatialAnchorToggle;
 
         /// <summary>
         /// UI element that toggles anchor type to Terrain.
         /// </summary>
-        public Toggle TerrainAnchorToggle;
+        // public Toggle TerrainAnchorToggle;
 
         /// <summary>
         /// UI element that toggles anchor type to Rooftop.
         /// </summary>
-        public Toggle RooftopAnchorToggle;
+        // public Toggle RooftopAnchorToggle;
 
         /// <summary>
         /// UI element to display information at runtime.
@@ -176,7 +176,7 @@ namespace Google.XR.ARCoreExtensions.Samples.Geospatial
         /// <summary>
         /// Text displaying debug information, only activated in debug build.
         /// </summary>
-        public Text DebugText;
+        // public Text DebugText;
 
         /// <summary>
         /// Help message shown while localizing.
@@ -310,7 +310,7 @@ namespace Google.XR.ARCoreExtensions.Samples.Geospatial
         private bool _shouldResolvingHistory = false;
         private float _localizationPassedTime = 0f;
         private float _configurePrepareTime = 3f;
-        private GeospatialAnchorHistoryCollection _historyCollection = null;
+        // private GeospatialAnchorHistoryCollection _historyCollection = null;
         private readonly List<GameObject> _anchorObjects = new List<GameObject>();
         private IEnumerator _startLocationService = null;
         private IEnumerator _asyncCheck = null;
@@ -346,14 +346,14 @@ namespace Google.XR.ARCoreExtensions.Samples.Geospatial
                 Destroy(anchor);
             }
 
-            PathManager.ClearPathAnchors();
+            PathManager.ClearPath(_anchorObjects);
             _pathLoaded = false;
             PanelManager.ClearPanels();
             _anchorObjects.Clear();
-            _historyCollection.Collection.Clear();
+            // _historyCollection.Collection.Clear();
             SnackBarText.text = "Anchor(s) cleared!";
             ClearAllButton.gameObject.SetActive(false);
-            SaveGeospatialAnchorHistory();
+            // SaveGeospatialAnchorHistory();
         }
 
         /// <summary>
@@ -380,51 +380,51 @@ namespace Google.XR.ARCoreExtensions.Samples.Geospatial
         /// <summary>
         /// Callback handling the  "Anchor Setting" panel display or hide event in AR View.
         /// </summary>
-        public void OnAnchorSettingButtonClicked()
-        {
-            _showAnchorSettingsPanel = !_showAnchorSettingsPanel;
-            if (_showAnchorSettingsPanel)
-            {
-                SetAnchorPanelState(true);
-            }
-            else
-            {
-                SetAnchorPanelState(false);
-            }
-        }
+        // public void OnAnchorSettingButtonClicked()
+        // {
+        //     _showAnchorSettingsPanel = !_showAnchorSettingsPanel;
+        //     if (_showAnchorSettingsPanel)
+        //     {
+        //         SetAnchorPanelState(true);
+        //     }
+        //     else
+        //     {
+        //         SetAnchorPanelState(false);
+        //     }
+        // }
 
         /// <summary>
         /// Callback handling Geospatial anchor toggle event in AR View.
         /// </summary>
         /// <param name="enable">Whether to enable Geospatial anchors.</param>
-        public void OnGeospatialAnchorToggled(bool enable)
-        {
-            // GeospatialAnchorToggle.GetComponent<Toggle>().isOn = true;;
-            _anchorType = AnchorType.Geospatial;
-            SetAnchorPanelState(false);
-        }
+        // public void OnGeospatialAnchorToggled(bool enable)
+        // {
+        //     // GeospatialAnchorToggle.GetComponent<Toggle>().isOn = true;;
+        //     _anchorType = AnchorType.Geospatial;
+        //     SetAnchorPanelState(false);
+        // }
 
         /// <summary>
         /// Callback handling Terrain anchor toggle event in AR View.
         /// </summary>
         /// <param name="enable">Whether to enable Terrain anchors.</param>
-        public void OnTerrainAnchorToggled(bool enable)
-        {
-            // TerrainAnchorToggle.GetComponent<Toggle>().isOn = true;
-            _anchorType = AnchorType.Terrain;
-            SetAnchorPanelState(false);
-        }
+        // public void OnTerrainAnchorToggled(bool enable)
+        // {
+        //     // TerrainAnchorToggle.GetComponent<Toggle>().isOn = true;
+        //     _anchorType = AnchorType.Terrain;
+        //     SetAnchorPanelState(false);
+        // }
 
         /// <summary>
         /// Callback handling Rooftop anchor toggle event in AR View.
         /// </summary>
         /// <param name="enable">Whether to enable Rooftop anchors.</param>
-        public void OnRooftopAnchorToggled(bool enable)
-        {
-            // RooftopAnchorToggle.GetComponent<Toggle>().isOn = true;
-            _anchorType = AnchorType.Rooftop;
-            SetAnchorPanelState(false);
-        }
+        // public void OnRooftopAnchorToggled(bool enable)
+        // {
+        //     // RooftopAnchorToggle.GetComponent<Toggle>().isOn = true;
+        //     _anchorType = AnchorType.Rooftop;
+        //     SetAnchorPanelState(false);
+        // }
 
         /// <summary>
         /// Unity's Awake() method.
@@ -469,26 +469,26 @@ namespace Google.XR.ARCoreExtensions.Samples.Geospatial
             _isReturning = false;
             _enablingGeospatial = false;
             InfoPanel.SetActive(false);
-            GeometryToggle.gameObject.SetActive(false);
-            AnchorSettingButton.gameObject.SetActive(false);
-            AnchorSettingPanel.gameObject.SetActive(false);
-            GeospatialAnchorToggle.gameObject.SetActive(false);
-            TerrainAnchorToggle.gameObject.SetActive(false);
-            RooftopAnchorToggle.gameObject.SetActive(false);
+            // GeometryToggle.gameObject.SetActive(false);
+            // AnchorSettingButton.gameObject.SetActive(false);
+            // AnchorSettingPanel.gameObject.SetActive(false);
+            // GeospatialAnchorToggle.gameObject.SetActive(false);
+            // TerrainAnchorToggle.gameObject.SetActive(false);
+            // RooftopAnchorToggle.gameObject.SetActive(false);
             ClearAllButton.gameObject.SetActive(false);
-            DebugText.gameObject.SetActive(Debug.isDebugBuild && EarthManager != null);
-            GeometryToggle.onValueChanged.AddListener(OnGeometryToggled);
-            AnchorSettingButton.onClick.AddListener(OnAnchorSettingButtonClicked);
-            GeospatialAnchorToggle.onValueChanged.AddListener(OnGeospatialAnchorToggled);
-            TerrainAnchorToggle.onValueChanged.AddListener(OnTerrainAnchorToggled);
-            RooftopAnchorToggle.onValueChanged.AddListener(OnRooftopAnchorToggled);
+            // DebugText.gameObject.SetActive(Debug.isDebugBuild && EarthManager != null);
+            // GeometryToggle.onValueChanged.AddListener(OnGeometryToggled);
+            // AnchorSettingButton.onClick.AddListener(OnAnchorSettingButtonClicked);
+            // GeospatialAnchorToggle.onValueChanged.AddListener(OnGeospatialAnchorToggled);
+            // TerrainAnchorToggle.onValueChanged.AddListener(OnTerrainAnchorToggled);
+            // RooftopAnchorToggle.onValueChanged.AddListener(OnRooftopAnchorToggled);
 
             _localizationPassedTime = 0f;
             _isLocalizing = true;
             SnackBarText.text = LocalizingMessage;
 
-            LoadGeospatialAnchorHistory();
-            _shouldResolvingHistory = _historyCollection.Collection.Count > 0;
+            // LoadGeospatialAnchorHistory();
+            // _shouldResolvingHistory = _historyCollection.Collection.Count > 0;
 
             SwitchToARView(PlayerPrefs.HasKey(HasDisplayedPrivacyPromptKey));
 
@@ -538,10 +538,10 @@ namespace Google.XR.ARCoreExtensions.Samples.Geospatial
             }
 
             _anchorObjects.Clear();
-            PathManager.ClearPathAnchors();
+            PathManager.ClearPath(_anchorObjects);;
             _pathLoaded = false;
             PanelManager.ClearPanels();
-            SaveGeospatialAnchorHistory();
+            // SaveGeospatialAnchorHistory();
 
             if (StreetscapeGeometryManager)
             {
@@ -648,12 +648,12 @@ namespace Google.XR.ARCoreExtensions.Samples.Geospatial
                 {
                     _isLocalizing = true;
                     _localizationPassedTime = 0f;
-                    GeometryToggle.gameObject.SetActive(false);
-                    AnchorSettingButton.gameObject.SetActive(false);
-                    AnchorSettingPanel.gameObject.SetActive(false);
-                    GeospatialAnchorToggle.gameObject.SetActive(false);
-                    TerrainAnchorToggle.gameObject.SetActive(false);
-                    RooftopAnchorToggle.gameObject.SetActive(false);
+                    // GeometryToggle.gameObject.SetActive(false);
+                    // AnchorSettingButton.gameObject.SetActive(false);
+                    // AnchorSettingPanel.gameObject.SetActive(false);
+                    // GeospatialAnchorToggle.gameObject.SetActive(false);
+                    // TerrainAnchorToggle.gameObject.SetActive(false);
+                    // RooftopAnchorToggle.gameObject.SetActive(false);
                     ClearAllButton.gameObject.SetActive(false);
                     foreach (var go in _anchorObjects)
                     {
@@ -677,8 +677,8 @@ namespace Google.XR.ARCoreExtensions.Samples.Geospatial
                 // Finished localization.
                 _isLocalizing = false;
                 _localizationPassedTime = 0f;
-                GeometryToggle.gameObject.SetActive(true);
-                AnchorSettingButton.gameObject.SetActive(true);
+                // GeometryToggle.gameObject.SetActive(true);
+                // AnchorSettingButton.gameObject.SetActive(true);
                 ClearAllButton.gameObject.SetActive(_anchorObjects.Count > 0);
                 SnackBarText.text = LocalizationSuccessMessage;
                 foreach (var go in _anchorObjects)
@@ -726,9 +726,6 @@ namespace Google.XR.ARCoreExtensions.Samples.Geospatial
                 {
                     // Set anchor on screen tap.
                     PlaceAnchorByScreenTap(Input.GetTouch(0).position);
-                    
-                    // LOAD PATH
-                    // PathManager.LoadPathAnchors(_anchorObjects, AnchorManager);
                 }
                 
                 // Load in nearby panels (wait for locations array to be loaded)
@@ -736,13 +733,13 @@ namespace Google.XR.ARCoreExtensions.Samples.Geospatial
                 {
                     var results = PanelManager.FetchNearbyIfNeeded(
                         new double2(pose.Latitude, pose.Longitude), _anchorObjects);
-                    if (results.Count > 0)
-                    {
-                        foreach (var result in results)
-                        {
-                            _historyCollection.Collection.Add(result.History);
-                        }
-                    }
+                    // if (results.Count > 0)
+                    // {
+                    //     foreach (var result in results)
+                    //     {
+                    //         _historyCollection.Collection.Add(result.History);
+                    //     }
+                    // }
                 }
                 // Load/unload panels depending on distance
                 PanelManager.LoadNearby();
@@ -755,30 +752,29 @@ namespace Google.XR.ARCoreExtensions.Samples.Geospatial
                 }
 
                 // Hide anchor settings and toggles if the storage limit has been reached.
-                if (_anchorObjects.Count >= StorageLimit)
-                {
-                    AnchorSettingButton.gameObject.SetActive(false);
-                    AnchorSettingPanel.gameObject.SetActive(false);
-                    GeospatialAnchorToggle.gameObject.SetActive(false);
-                    TerrainAnchorToggle.gameObject.SetActive(false);
-                    RooftopAnchorToggle.gameObject.SetActive(false);
-                }
-                else
-                {
-                    AnchorSettingButton.gameObject.SetActive(true);
-                }
+                // if (_anchorObjects.Count >= StorageLimit)
+                // {
+                //     AnchorSettingButton.gameObject.SetActive(false);
+                //     AnchorSettingPanel.gameObject.SetActive(false);
+                //     GeospatialAnchorToggle.gameObject.SetActive(false);
+                //     TerrainAnchorToggle.gameObject.SetActive(false);
+                //     RooftopAnchorToggle.gameObject.SetActive(false);
+                // }
+                // else
+                // {
+                //     AnchorSettingButton.gameObject.SetActive(true);
+                // }
             }
 
             InfoPanel.SetActive(true);
             if (earthTrackingState == TrackingState.Tracking)
             {
                 InfoText.text = string.Format(
-                "Latitude/Longitude: {1:F6}°, {2:F6}°{0}" +
-                "Horizontal Accuracy: {3:F6}m{0}" +
-                "Altitude: {4:F2}m{0}" +
-                "Vertical Accuracy: {5:F2}m{0}" +
-                "Eun Rotation: {6}{0}" +
-                "Orientation Yaw Accuracy: {7:F1}°",
+                "Latitude/Longitude: {1:F6}°, {2:F6}° (+/- {3:F6}m) {0}" +
+                // "Altitude: {4:F2}m{0}" +
+                // "Vertical Accuracy: {5:F2}m{0}" +
+                "Eun Rotation: {6}{0} (+/- {7:F1}°)",
+                // "Yaw Accuracy: {7:F1}°",
                 Environment.NewLine, pose.Latitude, pose.Longitude, 
                 pose.HorizontalAccuracy, pose.Altitude, pose.VerticalAccuracy,
                 pose.EunRotation.ToString("F1"), pose.OrientationYawAccuracy);
@@ -901,13 +897,13 @@ namespace Google.XR.ARCoreExtensions.Samples.Geospatial
         /// Activate or deactivate all UI elements on the anchor setting Panel.
         /// </summary>
         /// <param name="state">A bool value to determine if the anchor settings panel is visible.
-        private void SetAnchorPanelState(bool state)
-        {
-            AnchorSettingPanel.gameObject.SetActive(state);
-            GeospatialAnchorToggle.gameObject.SetActive(state);
-            TerrainAnchorToggle.gameObject.SetActive(state);
-            RooftopAnchorToggle.gameObject.SetActive(state);
-        }
+        // private void SetAnchorPanelState(bool state)
+        // {
+        //     AnchorSettingPanel.gameObject.SetActive(state);
+        //     GeospatialAnchorToggle.gameObject.SetActive(state);
+        //     TerrainAnchorToggle.gameObject.SetActive(state);
+        //     RooftopAnchorToggle.gameObject.SetActive(state);
+        // }
 
         private IEnumerator CheckRooftopPromise(ResolveAnchorOnRooftopPromise promise,
             GeospatialAnchorHistory history)
@@ -928,12 +924,12 @@ namespace Google.XR.ARCoreExtensions.Samples.Geospatial
                 anchorGo.transform.parent = result.Anchor.gameObject.transform;
 
                 _anchorObjects.Add(result.Anchor.gameObject);
-                _historyCollection.Collection.Add(history);
+                // _historyCollection.Collection.Add(history);
 
                 SnackBarText.text = GetDisplayStringForAnchorPlacedSuccess();
 
                 ClearAllButton.gameObject.SetActive(_anchorObjects.Count > 0);
-                SaveGeospatialAnchorHistory();
+                // SaveGeospatialAnchorHistory();
             }
             else
             {
@@ -957,12 +953,12 @@ namespace Google.XR.ARCoreExtensions.Samples.Geospatial
                 anchorGo.transform.parent = result.Anchor.gameObject.transform;
 
                 _anchorObjects.Add(result.Anchor.gameObject);
-                _historyCollection.Collection.Add(history);
+                // _historyCollection.Collection.Add(history);
 
                 SnackBarText.text = GetDisplayStringForAnchorPlacedSuccess();
 
                 ClearAllButton.gameObject.SetActive(_anchorObjects.Count > 0);
-                SaveGeospatialAnchorHistory();
+                // SaveGeospatialAnchorHistory();
             }
             else
             {
@@ -1021,13 +1017,13 @@ namespace Google.XR.ARCoreExtensions.Samples.Geospatial
                                                 _anchorType);
                     var anchor = PlaceARAnchor(history, hitResults[0].pose,
                                                hitResults[0].trackableId);
-                    if (anchor != null)
-                    {
-                        _historyCollection.Collection.Add(history);
-                    }
+                    // if (anchor != null)
+                    // {
+                    //     _historyCollection.Collection.Add(history);
+                    // }
                     
                     ClearAllButton.gameObject.SetActive(_anchorObjects.Count > 0);
-                    SaveGeospatialAnchorHistory();
+                    // SaveGeospatialAnchorHistory();
                 }
 
                 return;
@@ -1058,13 +1054,13 @@ namespace Google.XR.ARCoreExtensions.Samples.Geospatial
                 
                 var anchor = PanelManager.PlacePanel(_anchorObjects, history);
                 
-                if (anchor != null)
-                {
-                    _historyCollection.Collection.Add(history);
-                }
+                // if (anchor != null)
+                // {
+                //     _historyCollection.Collection.Add(history);
+                // }
 
                 ClearAllButton.gameObject.SetActive(_anchorObjects.Count > 0);
-                SaveGeospatialAnchorHistory();
+                // SaveGeospatialAnchorHistory();
             }
         }
 
@@ -1128,9 +1124,9 @@ namespace Google.XR.ARCoreExtensions.Samples.Geospatial
                     if (anchor != null)
                     {
                         _anchorObjects.Add(anchor.gameObject);
-                        _historyCollection.Collection.Add(history);
+                        // _historyCollection.Collection.Add(history);
                         ClearAllButton.gameObject.SetActive(_anchorObjects.Count > 0);
-                        SaveGeospatialAnchorHistory();
+                        // SaveGeospatialAnchorHistory();
 
                         SnackBarText.text = GetDisplayStringForAnchorPlacedSuccess();
                     }
@@ -1190,73 +1186,73 @@ namespace Google.XR.ARCoreExtensions.Samples.Geospatial
             return anchor;
         }
 
-        private void ResolveHistory()
-        {
-            if (!_shouldResolvingHistory)
-            {
-                return;
-            }
+        // private void ResolveHistory()
+        // {
+        //     if (!_shouldResolvingHistory)
+        //     {
+        //         return;
+        //     }
+        //
+        //     _shouldResolvingHistory = false;
+        //     foreach (var history in _historyCollection.Collection)
+        //     {
+        //         switch (history.AnchorType)
+        //         {
+        //             case AnchorType.Rooftop:
+        //                 PlaceARAnchor(history);
+        //                 break;
+        //             case AnchorType.Terrain:
+        //                 PlaceARAnchor(history);
+        //                 break;
+        //             case AnchorType.Geospatial:
+        //             default:
+        //                 PlaceGeospatialAnchor(history);
+        //                 break;
+        //         }
+        //     }
+        //
+        //     ClearAllButton.gameObject.SetActive(_anchorObjects.Count > 0);
+        //     SnackBarText.text = $"{_anchorObjects.Count} anchor(s) set from history.";
+        // }
 
-            _shouldResolvingHistory = false;
-            foreach (var history in _historyCollection.Collection)
-            {
-                switch (history.AnchorType)
-                {
-                    case AnchorType.Rooftop:
-                        PlaceARAnchor(history);
-                        break;
-                    case AnchorType.Terrain:
-                        PlaceARAnchor(history);
-                        break;
-                    case AnchorType.Geospatial:
-                    default:
-                        PlaceGeospatialAnchor(history);
-                        break;
-                }
-            }
+        // private void LoadGeospatialAnchorHistory()
+        // {
+        //     if (PlayerPrefs.HasKey(PersistentGeospatialAnchorsStorageKey))
+        //     {
+        //         _historyCollection = JsonUtility.FromJson<GeospatialAnchorHistoryCollection>(
+        //             PlayerPrefs.GetString(PersistentGeospatialAnchorsStorageKey));
+        //
+        //         // Remove all records created more than 24 hours and update stored history.
+        //         var current = DateTime.Now;
+        //         _historyCollection.Collection.RemoveAll(
+        //             data => current.Subtract(data.CreatedTime).Days > 0);
+        //         PlayerPrefs.SetString(PersistentGeospatialAnchorsStorageKey,
+        //             JsonUtility.ToJson(_historyCollection));
+        //         PlayerPrefs.Save();
+        //     }
+        //     else
+        //     {
+        //         _historyCollection = new GeospatialAnchorHistoryCollection();
+        //     }
+        // }
 
-            ClearAllButton.gameObject.SetActive(_anchorObjects.Count > 0);
-            SnackBarText.text = $"{_anchorObjects.Count} anchor(s) set from history.";
-        }
-
-        private void LoadGeospatialAnchorHistory()
-        {
-            if (PlayerPrefs.HasKey(PersistentGeospatialAnchorsStorageKey))
-            {
-                _historyCollection = JsonUtility.FromJson<GeospatialAnchorHistoryCollection>(
-                    PlayerPrefs.GetString(PersistentGeospatialAnchorsStorageKey));
-
-                // Remove all records created more than 24 hours and update stored history.
-                var current = DateTime.Now;
-                _historyCollection.Collection.RemoveAll(
-                    data => current.Subtract(data.CreatedTime).Days > 0);
-                PlayerPrefs.SetString(PersistentGeospatialAnchorsStorageKey,
-                    JsonUtility.ToJson(_historyCollection));
-                PlayerPrefs.Save();
-            }
-            else
-            {
-                _historyCollection = new GeospatialAnchorHistoryCollection();
-            }
-        }
-
-        private void SaveGeospatialAnchorHistory()
-        {
-            // Sort the data from latest record to earliest record.
-            _historyCollection.Collection.Sort((left, right) =>
-                right.CreatedTime.CompareTo(left.CreatedTime));
-
-            // Remove the earliest data if the capacity exceeds storage limit.
-            if (_historyCollection.Collection.Count > StorageLimit)
-            {
-                _historyCollection.Collection.RemoveRange(
-                    StorageLimit, _historyCollection.Collection.Count - StorageLimit);
-            }
-
-            PlayerPrefs.SetString(
-                PersistentGeospatialAnchorsStorageKey, JsonUtility.ToJson(_historyCollection));
-            PlayerPrefs.Save();
-        }
+        // private void SaveGeospatialAnchorHistory()
+        // {
+        //     // Sort the data from latest record to earliest record.
+        //     _historyCollection.Collection.Sort((left, right) =>
+        //         right.CreatedTime.CompareTo(left.CreatedTime));
+        //
+        //     // Remove the earliest data if the capacity exceeds storage limit.
+        //     if (_historyCollection.Collection.Count > StorageLimit)
+        //     {
+        //         _historyCollection.Collection.RemoveRange(
+        //             StorageLimit, _historyCollection.Collection.Count - StorageLimit);
+        //     }
+        //
+        //     PlayerPrefs.SetString(
+        //         PersistentGeospatialAnchorsStorageKey, JsonUtility.ToJson(_historyCollection));
+        //     PlayerPrefs.Save();
+        // }
 
         private void SwitchToARView(bool enable)
         {
@@ -1426,12 +1422,12 @@ namespace Google.XR.ARCoreExtensions.Samples.Geospatial
                 return;
             }
 
-            GeometryToggle.gameObject.SetActive(false);
-            AnchorSettingButton.gameObject.SetActive(false);
-            AnchorSettingPanel.gameObject.SetActive(false);
-            GeospatialAnchorToggle.gameObject.SetActive(false);
-            TerrainAnchorToggle.gameObject.SetActive(false);
-            RooftopAnchorToggle.gameObject.SetActive(false);
+            // GeometryToggle.gameObject.SetActive(false);
+            // AnchorSettingButton.gameObject.SetActive(false);
+            // AnchorSettingPanel.gameObject.SetActive(false);
+            // GeospatialAnchorToggle.gameObject.SetActive(false);
+            // TerrainAnchorToggle.gameObject.SetActive(false);
+            // RooftopAnchorToggle.gameObject.SetActive(false);
             ClearAllButton.gameObject.SetActive(false);
             InfoPanel.SetActive(false);
 
@@ -1457,20 +1453,20 @@ namespace Google.XR.ARCoreExtensions.Samples.Geospatial
                 EarthManager.EarthTrackingState == TrackingState.Tracking ?
                 EarthManager.CameraGeospatialPose : new GeospatialPose();
             var supported = EarthManager.IsGeospatialModeSupported(GeospatialMode.Enabled);
-            DebugText.text =
-                $"IsReturning: {_isReturning}\n" +
-                $"IsLocalizing: {_isLocalizing}\n" +
-                $"SessionState: {ARSession.state}\n" +
-                $"LocationServiceStatus: {Input.location.status}\n" +
-                $"FeatureSupported: {supported}\n" +
-                $"EarthState: {EarthManager.EarthState}\n" +
-                $"EarthTrackingState: {EarthManager.EarthTrackingState}\n" +
-                $"  LAT/LNG: {pose.Latitude:F6}, {pose.Longitude:F6}\n" +
-                $"  HorizontalAcc: {pose.HorizontalAccuracy:F6}\n" +
-                $"  ALT: {pose.Altitude:F2}\n" +
-                $"  VerticalAcc: {pose.VerticalAccuracy:F2}\n" +
-                $". EunRotation: {pose.EunRotation:F2}\n" +
-                $"  OrientationYawAcc: {pose.OrientationYawAccuracy:F2}";
+            // DebugText.text =
+            //     $"IsReturning: {_isReturning}\n" +
+            //     $"IsLocalizing: {_isLocalizing}\n" +
+            //     $"SessionState: {ARSession.state}\n" +
+            //     $"LocationServiceStatus: {Input.location.status}\n" +
+            //     $"FeatureSupported: {supported}\n" +
+            //     $"EarthState: {EarthManager.EarthState}\n" +
+            //     $"EarthTrackingState: {EarthManager.EarthTrackingState}\n" +
+            //     $"  LAT/LNG: {pose.Latitude:F6}, {pose.Longitude:F6}\n" +
+            //     $"  HorizontalAcc: {pose.HorizontalAccuracy:F6}\n" +
+            //     $"  ALT: {pose.Altitude:F2}\n" +
+            //     $"  VerticalAcc: {pose.VerticalAccuracy:F2}\n" +
+            //     $". EunRotation: {pose.EunRotation:F2}\n" +
+            //     $"  OrientationYawAcc: {pose.OrientationYawAccuracy:F2}";
         }
 
         /// <summary>

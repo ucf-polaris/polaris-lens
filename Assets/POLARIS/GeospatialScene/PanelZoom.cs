@@ -14,7 +14,7 @@ namespace POLARIS.GeospatialScene
         private Transform _grandparent;
         private FaceCamera _faceCamera;
 
-        private BoxCollider _poiButton;
+        // private BoxCollider _poiButton;
         private BoxCollider _eventsButton;
         private BoxCollider _favButton;
 
@@ -26,7 +26,7 @@ namespace POLARIS.GeospatialScene
             _grandparent = gameObject.transform.parent.parent;
             AddPhysics2DRaycaster(_arCamera);
 
-            _poiButton = gameObject.GetNamedChild("PoiButton").GetComponent<BoxCollider>();
+            // _poiButton = gameObject.GetNamedChild("PoiButton").GetComponent<BoxCollider>();
             _eventsButton = gameObject.GetNamedChild("EventsButton").GetComponent<BoxCollider>();
             _favButton = gameObject.GetNamedChild("FavButton").GetComponent<BoxCollider>();
         }
@@ -66,7 +66,7 @@ namespace POLARIS.GeospatialScene
             }
             
             // enable colliders
-            _poiButton.enabled = true;
+            // _poiButton.enabled = true;
             _eventsButton.enabled = true;
             _favButton.enabled = true;
 
@@ -79,7 +79,7 @@ namespace POLARIS.GeospatialScene
         public void DisableZoom()
         {
             // disable colliders
-            _poiButton.enabled = false;
+            // _poiButton.enabled = false;
             _eventsButton.enabled = false;
             _favButton.enabled = false;
             
