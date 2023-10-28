@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Google.XR.ARCoreExtensions;
+using Google.XR.ARCoreExtensions.Samples.Geospatial;
 using TMPro;
 using Unity.XR.CoreUtils;
 using UnityEngine;
@@ -53,6 +54,11 @@ namespace POLARIS.GeospatialScene
         public ARGeospatialAnchor PlacePanelGeospatialAnchor(
             List<GameObject> anchorObjects, ARAnchorManager anchorManager)
         {
+            if (Content.History.AnchorType == AnchorType.Terrain)
+            {
+                return PlacePanelGeospatialTerrainAnchor(anchorObjects, anchorManager);
+            }
+            
             _anchor = anchorManager.AddAnchor(
                 Content.History.Latitude,
                 Content.History.Longitude,
@@ -77,6 +83,49 @@ namespace POLARIS.GeospatialScene
             }
 
             return _anchor;
+        }
+        
+        private ARGeospatialAnchor PlacePanelGeospatialTerrainAnchor(
+            ICollection<GameObject> anchorObjects,
+            ARAnchorManager anchorManager)
+        {
+            if (LoadingPrefab == null || PanelPrefab == null)
+            {
+                Debug.LogError("Panel prefab is null!");
+            }
+            
+            var promise =
+                anchorManager.ResolveAnchorOnTerrainAsync(
+                    Content.History.Latitude,
+                    Content.History.Longitude,
+                    Content.History.Altitude,
+                    Content.History.EunRotation);
+
+            StartCoroutine(CheckTerrainPromise(promise, anchorObjects));
+            return null;
+        }
+
+        private IEnumerator CheckTerrainPromise(ResolveAnchorOnTerrainPromise promise,
+                                                ICollection<GameObject> anchorObjects)
+        {
+            yield return promise;
+
+            var result = promise.Result;
+
+            if (result.TerrainAnchorState != TerrainAnchorState.Success ||
+                result.Anchor == null)
+            {
+                Debug.LogError("Failed to set a terrain anchor!");
+                yield break;
+            }
+
+            var resultGo = result.Anchor.gameObject;
+            var anchorGo = Instantiate(LoadingPrefab,
+                                       resultGo.transform);
+            anchorObjects.Add(resultGo);
+
+            _anchor = result.Anchor;
+            print("Anchor Set!");
         }
 
         public void LoadPanel()
@@ -105,6 +154,7 @@ namespace POLARIS.GeospatialScene
                 _visitedIndicator =
                     Instantiate(Resources.Load("Polaris/simplearrow") as GameObject, CurrentPrefab.transform);
                 _visitedIndicator.transform.localPosition = Vector3.up;
+                _visitedIndicator.transform.localScale = new Vector3(0.2f, 0.2f, 0.2f);
             }
         }
 
@@ -201,14 +251,16 @@ namespace POLARIS.GeospatialScene
         private void AddEvents()
         {
             // Mock using student union coords 28.601927704512025, -81.20044219923692
-            if (eventManager is null || eventManager.dataList is null) return;
+            if (eventManager?.dataList is null) return;
             
             var events = eventManager.dataList.Where(e =>
                                                     Math.Abs(e.Location.BuildingLat -
-                                                             28.601927704512025) < // this.Content.History.Latitude
+                                                             28.601927704512025) <
+                                                             // Content.History.Latitude) <
                                                     0.000001 &&
                                                     Math.Abs(e.Location.BuildingLong -
-                                                             -81.20044219923692) < // this.Content.History.Longitude
+                                                             -81.20044219923692) <
+                                                             // Content.History.Longitude) <
                                                     0.000001);
             
             // TODO: APPEND HEADER somehow
@@ -256,6 +308,7 @@ namespace POLARIS.GeospatialScene
             else
             {
                 img.material.mainTexture = ((DownloadHandlerTexture)request.downloadHandler).texture;
+                Debug.Log("maybe success");
             }
         }
     }
