@@ -12,6 +12,7 @@ namespace POLARIS.Managers{
         private static UserManager Instance = null;
 
         public UserData data;
+        public UserCodeData codeData;
         private IEnumerator currentCall;
         private const string updateCodeURL = "https://v21x6ajyg9.execute-api.us-east-2.amazonaws.com/dev/user/update";
         private const string BaseApiURL = "https://api.ucfpolaris.com";
@@ -60,6 +61,20 @@ namespace POLARIS.Managers{
             public string UserID1 { get => UserID; set { UserID = value; PlayerPrefs.SetString("UserID", value); } }
             public string Email { get => email; set { email = value; PlayerPrefs.SetString("email", value); } }
             public string Realname { get => realname; set { realname = value; PlayerPrefs.SetString("realName", value); } }
+            public string Token { get => token; set { token = value; PlayerPrefs.SetString("AuthToken", value); } }
+            public string RefreshToken { get => refreshToken; set { refreshToken = value; PlayerPrefs.SetString("RefreshToken", value); } }
+            #endregion
+        }
+
+        [Serializable]
+        public class UserCodeData
+        {
+            [SerializeField]
+            private string token;
+            [SerializeField]
+            private string refreshToken;
+
+            #region Setters and Getters
             public string Token { get => token; set { token = value; PlayerPrefs.SetString("AuthToken", value); } }
             public string RefreshToken { get => refreshToken; set { refreshToken = value; PlayerPrefs.SetString("RefreshToken", value); } }
             #endregion
@@ -155,6 +170,10 @@ namespace POLARIS.Managers{
             {
                 Debug.Log(www.error);
             }
+            else if (www.downloadHandler.text.Contains("ERROR"))
+            {
+                Debug.Log(www.downloadHandler.text);
+            }
             else
             {
                 Debug.Log("Form upload complete!");
@@ -163,7 +182,101 @@ namespace POLARIS.Managers{
                 JObject jsonResponse = JObject.Parse(www.downloadHandler.text);
                 Debug.Log("Response: " + jsonResponse);
             }
-            Debug.LogWarning("Implement this");
+        }
+        public IEnumerator ResetPasswordCode(IDictionary<string, string> request, Action<JObject> onSuccess, Action<string> onError)
+        {
+            JObject payload =
+                new(
+                    new JProperty("code", request["code"]),
+                    new JProperty("UserID", request["UserID"])
+                );
+            UnityWebRequest www = UnityWebRequest.Post(BaseApiURL + "/user/passwordresetcode", payload.ToString(), "application/json");
+            www.SetRequestHeader("authorizationToken", "{\"token\":\"" + request["token"] + "\"}");
+            yield return www.SendWebRequest();
+            if (www.result != UnityWebRequest.Result.Success)
+            {
+                Debug.Log(www.error);
+                onError?.Invoke(www.error);
+            }
+            else if (www.downloadHandler.text.Contains("ERROR"))
+            {
+                Debug.Log(www.downloadHandler.text);
+                onError?.Invoke(www.error);
+            }
+            else
+            {
+                Debug.Log("Form upload complete!");
+                Debug.Log("Status Code: " + www.responseCode);
+                Debug.Log(www.result);
+                JObject jsonResponse = JObject.Parse(www.downloadHandler.text);
+                Debug.Log("Response: " + jsonResponse);
+
+                onSuccess?.Invoke(jsonResponse);
+            }
+        }
+        public IEnumerator ResetPassword(IDictionary<string, string> request, Action<JObject> onSuccess, Action<string> onError)
+        {
+            JObject payload =
+                new(
+                    new JProperty("email", request["email"])
+                );
+            UnityWebRequest www = UnityWebRequest.Post(BaseApiURL + "/user/passwordreset", payload.ToString(), "application/json");
+            yield return www.SendWebRequest();
+            if (www.result != UnityWebRequest.Result.Success)
+            {
+                Debug.Log(www.error);
+                onError?.Invoke(www.error);
+            }
+            else if (www.downloadHandler.text.Contains("ERROR"))
+            {
+                Debug.Log(www.downloadHandler.text);
+                onError?.Invoke(www.error);
+            }
+            else
+            {
+                Debug.Log("Form upload complete!");
+                Debug.Log("Status Code: " + www.responseCode);
+                Debug.Log(www.result);
+                JObject jsonResponse = JObject.Parse(www.downloadHandler.text);
+                Debug.Log("Response: " + jsonResponse);
+
+                onSuccess?.Invoke(jsonResponse);
+            }
+        }
+        public IEnumerator UpdatePassword(IDictionary<string, string> request, Action<JObject> onSuccess, Action<string> onError)
+        {
+            string Token = data.Token;
+            string RefreshToken = data.RefreshToken;
+            Debug.Log(Token);
+            JObject payload =
+                new(
+                    new JProperty("password", request["new_password"]),
+                    new JProperty("UserID", request["UserID"])
+                );
+            UnityWebRequest www = UnityWebRequest.Put(BaseApiURL + "/user/update", payload.ToString());
+            www.SetRequestHeader("Content-Type", "application/json");
+            www.SetRequestHeader("authorizationToken", "{\"token\":\"" + Token + "\",\"refreshToken\":\"" + RefreshToken + "\"}");
+            yield return www.SendWebRequest();
+            if (www.result != UnityWebRequest.Result.Success)
+            {
+                Debug.Log(www.error);
+                onError?.Invoke(www.error);
+            }
+            else if (www.downloadHandler.text.Contains("ERROR"))
+            {
+                Debug.Log(www.downloadHandler.text);
+                onError?.Invoke(www.error);
+            }
+            else
+            {
+                Debug.Log("Form upload complete!");
+                Debug.Log("Status Code: " + www.responseCode);
+                Debug.Log(www.result);
+                JObject jsonResponse = JObject.Parse(www.downloadHandler.text);
+                Debug.Log("Response: " + jsonResponse);
+
+                onSuccess?.Invoke(jsonResponse);
+            }
         }
         //could implement this as login though
         override protected IEnumerator Scan(IDictionary<string, string> request)
