@@ -15,9 +15,13 @@ namespace POLARIS.Managers{
         public UserCodeData codeData;
         private IEnumerator currentCall;
         private const string updateCodeURL = "https://v21x6ajyg9.execute-api.us-east-2.amazonaws.com/dev/user/update";
+<<<<<<< HEAD
         private const string BaseApiURL = "https://api.ucfpolaris.com";
         private const string UserGetURL = BaseApiURL + "/user/get";
 
+=======
+        
+>>>>>>> bbf832cf33af62cc99178fc867b4594af14b83cd
         void Awake()
         {
             //create singleton
@@ -31,6 +35,7 @@ namespace POLARIS.Managers{
                 Instance = this;
                 data = new UserData();
                 LoadPlayerPrefs(data);
+                Debug.Log(data.UserID1);
             } 
         }
 
@@ -57,7 +62,7 @@ namespace POLARIS.Managers{
             public List<string> visited;
 
             #region Setters and Getters
-            public string Username { get => username; set { username = value; PlayerPrefs.SetString("email", value); } }
+            public string Username { get => username; set { username = value; PlayerPrefs.SetString("username", value); } }
             public string UserID1 { get => UserID; set { UserID = value; PlayerPrefs.SetString("UserID", value); } }
             public string Email { get => email; set { email = value; PlayerPrefs.SetString("email", value); } }
             public string Realname { get => realname; set { realname = value; PlayerPrefs.SetString("realName", value); } }
@@ -131,7 +136,7 @@ namespace POLARIS.Managers{
             }
         }
 
-        override protected IEnumerator UpdateFields(IDictionary<string, string> request)
+        override public IEnumerator UpdateFields(IDictionary<string, string> request)
         {
             string reqBody = JsonConvert.SerializeObject(request);
             var www = UnityWebRequest.Put(updateCodeURL, reqBody);
@@ -143,6 +148,10 @@ namespace POLARIS.Managers{
             {
                 Debug.Log(www.error);
             }
+            else if (www.downloadHandler.text.Contains("ERROR"))
+            {
+                Debug.Log(www.downloadHandler.text);
+            }
             else
             {
                 Debug.Log("Form upload complete!");
@@ -151,6 +160,14 @@ namespace POLARIS.Managers{
                 Debug.Log("Response: " + www.downloadHandler.text);
 
                 var jsonResponse = JObject.Parse(www.downloadHandler.text);
+
+                //update the fields here
+                data.Email = jsonResponse["email"] != null ? jsonResponse["email"].Value<string>() : data.Email;
+                data.Username = jsonResponse["username"] != null ? jsonResponse["username"].Value<string>() : data.Username;
+                data.Realname = jsonResponse["name"] != null ? jsonResponse["name"].Value<string>() : data.Realname;
+                data.schedule = jsonResponse["schedule"] != null ? jsonResponse["schedule"].Value<List<string>>() : data.schedule;
+                data.favorite = jsonResponse["favorite"] != null ? jsonResponse["favorite"].Value<List<string>>() : data.favorite;
+                data.visited = jsonResponse["visited"] != null ? jsonResponse["visited"].Value<List<string>>() : data.visited;
             }
             currentCall = null;
         }

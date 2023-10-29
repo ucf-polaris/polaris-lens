@@ -126,7 +126,7 @@ namespace POLARIS.Managers
             Debug.LogWarning("Implement this");
         }
 
-        override protected IEnumerator UpdateFields(IDictionary<string, string> request)
+        override public IEnumerator UpdateFields(IDictionary<string, string> request)
         {
             yield return null;
             Debug.LogWarning("Should not be implement");

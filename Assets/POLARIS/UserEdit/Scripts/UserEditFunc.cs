@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using POLARIS.Managers;
 using UnityEngine.UIElements;
-
+using UnityEngine.SceneManagement;
 public class UserEditFunc : MonoBehaviour
 {
     public class FullTextField
@@ -27,8 +27,13 @@ public class UserEditFunc : MonoBehaviour
         {
             return field.value != currentValue;
         }
+
+        public void matchValues()
+        {
+            currentValue = field.value;
+        }
     }
-    private UserManager instance;
+    private UserManager UserInstance;
     [SerializeField]
     private string[] buttonNameList;
     private IDictionary<string, Press> buttonList;
@@ -36,11 +41,15 @@ public class UserEditFunc : MonoBehaviour
     private string[] fieldNames;
     private IDictionary<string, FullTextField> fieldsMap;
     private Button confirmButton;
+    private Press confirmPress;
+    private Press logOutPress;
+    private Press resetPasswordPress;
+    private IEnumerator callingFunction;
 
     private void Start()
     {
         //define the needed variables
-        instance = UserManager.getInstance();
+        UserInstance = UserManager.getInstance();
         UiDoc = gameObject.GetComponent<UIDocument>();
         buttonNameList = new string[] { "Confirm", "ResetPassword", "LogOut" };
         fieldNames = new string[] { "Email", "Username", "Name" };
@@ -54,12 +63,19 @@ public class UserEditFunc : MonoBehaviour
 
         //confirm field set
         confirmButton = UiDoc.rootVisualElement.Q<Button>("Confirm");
+        confirmPress = new Press(UiDoc, "Confirm");
+        confirmPress.AddEvent(OnConfirmClick);
 
+        logOutPress = new Press(UiDoc, "LogOut");
+        logOutPress.AddEvent(OnLogOutClick);
+
+        resetPasswordPress = new Press(UiDoc, "ResetPassowrd");
+        //resetPasswordPress.AddEvent(OnConfirmClick);
         //1. Update Placeholder correctly (once)
         //2. Update confirm button correctly (once)
         //3. Handle confirm button (once)
         //4. Handle logout button (once)
-        //5. Handle reset password button (once)@
+        //5. Handle reset password button (once)
 
         //initialize text input fields
         fieldsMap = new Dictionary<string, FullTextField>();
@@ -100,9 +116,10 @@ public class UserEditFunc : MonoBehaviour
         //populate if UserManager not null
         if (UserManager.isNotNull())
         {
-            fieldsMap["Email"].CurrentValue = (instance.data.Email);
-            fieldsMap["Username"].CurrentValue = (instance.data.Username);
-            fieldsMap["Name"].CurrentValue = (instance.data.Realname);
+            fieldsMap["Email"].CurrentValue = (UserInstance.data.Email);
+            fieldsMap["Username"].CurrentValue = (UserInstance.data.Username);
+            fieldsMap["Name"].CurrentValue = (UserInstance.data.Realname);
+            //set initial value
         }
         else
         {
@@ -111,6 +128,11 @@ public class UserEditFunc : MonoBehaviour
     }
 
     private void OnChangedField(ChangeEvent<string> evt)
+    {
+        renderConfirmButton();
+    }
+
+    private void renderConfirmButton()
     {
         bool flag = false;
         //checks if all the field names were same from inital
@@ -139,35 +161,67 @@ public class UserEditFunc : MonoBehaviour
         string placeholderClass = TextField.ussClassName + "__placeholder";
 
         //set initial value
-        if (string.IsNullOrEmpty(textField.text))
-            onFocusOut();
-        else
-            placeholder.text = string.Empty;
-            
-        textField.RegisterCallback<FocusInEvent>(_ => onFocusIn());
-        textField.RegisterCallback<FocusOutEvent>(_ => onFocusOut());
+        onChange();
+        textField.RegisterCallback<ChangeEvent<string>>(_ => onChange());
 
-        void onFocusIn()
+        void onChange()
         {
-            if (textField.ClassListContains(placeholderClass))
-            {
-                placeholder.text = string.Empty;
-                textField.RemoveFromClassList(placeholderClass);
-            }
-        }
-
-        void onFocusOut()
-        {
+            //check if place holder should be empty
             if (string.IsNullOrEmpty(textField.text))
-            {
                 placeholder.text = text;
-                textField.AddToClassList(placeholderClass);
-            }
+            else
+                placeholder.text = string.Empty;
         }
     }
 
-    public void OnConfirmClick(ClickEvent evt)
+    public IEnumerator CallBackend(IDictionary<string, string> req)
     {
+        yield return StartCoroutine(UserInstance.UpdateFields(req));
+        //correct confirm
+        if (UserInstance.data.Email == fieldsMap["Email"].field.value)
+            fieldsMap["Email"].matchValues();
 
+        if (UserInstance.data.Username == fieldsMap["Username"].field.value)
+        {
+            Debug.Log(fieldsMap["Username"].field.value);
+            Debug.Log(UserInstance.data.Username);
+            fieldsMap["Username"].matchValues();
+            Debug.Log("yes");
+        }
+            
+        if (UserInstance.data.Realname == fieldsMap["Name"].field.value)
+            fieldsMap["Name"].matchValues();
+
+        renderConfirmButton();
+        Debug.Log("Made it");
+        callingFunction = null;
+    }
+
+    public void OnConfirmClick()
+    {
+        //create request. Only put field in request if it's changed
+        IDictionary<string, string> request = new Dictionary<string, string>();
+        foreach (string name in fieldNames)
+        {
+            //if the field has changed, pack into request
+            if (fieldsMap[name].valueHasChanged())
+            {
+                //can use to lower as the names used as keys match the request name
+                request[name.ToLower()] = fieldsMap[name].field.value;
+            }
+        }
+
+        if(callingFunction == null)
+        {
+            request["UserID"] = UserInstance.data.UserID1;
+            callingFunction = CallBackend(request);
+            StartCoroutine(callingFunction);
+        }
+    }
+
+    public void OnLogOutClick()
+    {
+        UserInstance.Logout();
+        SceneManager.LoadScene("Login");
     }
 }

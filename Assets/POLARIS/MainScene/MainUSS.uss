@@ -90,6 +90,7 @@
 
 .unity-base-text-field__input {
     padding-left: 150px;
+    justify-content: flex-start;
 }
 
 #SearchResultBigLabel > ListView {
@@ -97,4 +98,208 @@
 
 .unity-list-view__empty-label {
     display: none;
+}
+
+.panelShadow {
+    position: absolute;
+    top: auto;
+    left: auto;
+    opacity: 0.6;
+    height: 100%;
+    width: 100%;
+}
+
+.panel {
+    flex-grow: 0;
+    position: relative;
+    width: 1050px;
+    bottom: auto;
+    background-color: rgb(255, 255, 255);
+    height: 800px;
+    left: auto;
+    border-top-left-radius: 20px;
+    border-top-right-radius: 20px;
+    border-bottom-right-radius: 20px;
+    border-bottom-left-radius: 20px;
+    -unity-background-scale-mode: stretch-to-fill;
+    justify-content: center;
+    align-items: auto;
+    top: auto;
+    flex-shrink: 0;
+    padding-top: 0;
+    padding-right: 0;
+    padding-bottom: 0;
+    padding-left: 0;
+    margin-top: 0;
+    margin-right: 0;
+    margin-bottom: 0;
+    margin-left: 0;
+}
+
+.panelEntity {
+    flex-grow: 0;
+    position: relative;
+    top: 2%;
+    left: auto;
+    height: auto;
+    width: auto;
+    flex-shrink: 0;
+    margin-bottom: 0;
+    padding-bottom: 100px;
+    min-height: auto;
+    min-width: auto;
+    right: auto;
+    align-self: center;
+    margin-top: 0;
+    margin-right: 0;
+    margin-left: 0;
+    padding-top: 0;
+    padding-right: 0;
+    padding-left: 0;
+}
+
+.panelImage {
+    flex-grow: 0;
+    background-image: url('project://database/Assets/POLARIS/UI%20Assets/UCF_Logo.png?fileID=21300000&guid=d6e2ed841dbad5744bf8102c99e72680&type=3#UCF_Logo');
+    -unity-background-scale-mode: stretch-to-fill;
+    height: 90%;
+    flex-shrink: 0;
+    width: 100%;
+    position: absolute;
+    top: auto;
+    left: auto;
+    visibility: visible;
+    overflow: visible;
+    flex-basis: auto;
+    bottom: 15%;
+    border-top-left-radius: 20px;
+    border-top-right-radius: 20px;
+    border-bottom-right-radius: 20px;
+    border-bottom-left-radius: 20px;
+    justify-content: flex-start;
+    align-items: auto;
+    align-self: auto;
+    padding-top: 0;
+    padding-right: 0;
+    padding-left: 0;
+    padding-bottom: 0;
+}
+
+.panelBlocker {
+    flex-grow: 0;
+    flex-shrink: 0;
+    width: 100%;
+    background-color: rgb(255, 255, 255);
+    height: 20%;
+    top: 70%;
+    position: absolute;
+}
+
+.panelTextArea {
+    flex-grow: 1;
+    position: absolute;
+    min-height: auto;
+    min-width: auto;
+    width: 94%;
+    height: 170px;
+    left: 3%;
+    top: 72%;
+    align-self: auto;
+}
+
+.panelTextDistance {
+    left: auto;
+    align-self: flex-start;
+    bottom: auto;
+    top: -6px;
+    font-size: 30px;
+    position: relative;
+    -unity-font-style: normal;
+    -unity-font: resource('Polaris/fonts/Poppins-Regular');
+    right: auto;
+    color: rgb(65, 65, 65);
+}
+
+.panelTextEvents {
+    align-self: flex-start;
+    bottom: 9px;
+    top: auto;
+    font-size: 30px;
+    position: relative;
+    -unity-font-style: normal;
+    -unity-font: resource('Polaris/fonts/Poppins-SemiBold');
+    right: auto;
+    color: rgb(120, 0, 0);
+}
+
+.panelTextAddress {
+    align-self: flex-start;
+    bottom: auto;
+    top: -6px;
+    font-size: 30px;
+    position: relative;
+    -unity-font-style: normal;
+    -unity-font: resource('Polaris/fonts/Poppins-SemiBold');
+    right: auto;
+    color: rgb(96, 96, 96);
+}
+
+.unity-list-view__item {
+    background-color: rgba(255, 0, 0, 0);
+}
+
+.unity-list-view__item:hover {
+    background-color: rgba(0, 0, 255, 0);
+}
+
+.panelLocationGroup {
+    flex-grow: 0;
+    position: relative;
+    flex-direction: row;
+    font-size: 14px;
+    flex-shrink: 0;
+    -unity-font-style: normal;
+}
+
+.panelTextLocation {
+    width: 88%;
+    font-size: 45px;
+    -unity-font: resource('Polaris/fonts/Poppins-SemiBold');
+    white-space: normal;
+    -unity-font-style: bold;
+}
+
+.panelNavigationIcon {
+    flex-grow: 0;
+    flex-shrink: 0;
+    position: absolute;
+    width: 90px;
+    height: 60px;
+    background-image: url('project://database/Assets/POLARIS/arrow.png?fileID=2800000&guid=d01daccc5e8044ce09b187ecdcf84c3d&type=3#arrow');
+    -unity-background-image-tint-color: rgb(0, 0, 0);
+    top: 87%;
+    left: 87%;
+    rotate: 90deg;
+}
+
+.panelFavoritesIcon {
+    flex-grow: 0;
+    position: absolute;
+    background-image: resource('Polaris/star-outline');
+    height: 110px;
+    width: 130px;
+    top: 70%;
+    left: 85%;
+    flex-shrink: 0;
+}
+
+.panelFavoritesIconTest {
+    flex-grow: 0;
+    position: absolute;
+    background-image: resource('Polaris/star-outline');
+    height: 110px;
+    width: 130px;
+    top: 70%;
+    left: 85%;
+    flex-shrink: 0;
 }

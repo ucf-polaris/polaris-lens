@@ -9,6 +9,21 @@
     height: 80%;
 }
 
+#Confirm:active {
+    -unity-background-image-tint-color: rgb(0, 63, 17);
+    -unity-text-outline-width: 8px;
+}
+
+#ResetPassword:active {
+    -unity-background-image-tint-color: rgb(0, 63, 17);
+    -unity-text-outline-width: 8px;
+}
+
+#LogOut:active {
+    -unity-background-image-tint-color: rgb(0, 63, 17);
+    -unity-text-outline-width: 8px;
+}
+
 .unity-base-text-field__input {
     padding-left: 40px;
 }
@@ -23,7 +38,7 @@
 }
 
 .show-edit-UI {
-    bottom: 0%;
+    bottom: 0;
 }
 
 .hide-edit-UI {

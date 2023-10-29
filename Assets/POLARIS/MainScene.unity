@@ -1034,7 +1034,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   data:
     username: 
-    UserID: 
+    UserID: d0e274c9-173c-4021-b529-57fa8710029a
     email: 
     realname: 
     token: 
@@ -1089,6 +1089,7 @@ RectTransform:
   - {fileID: 1571180758}
   - {fileID: 2103678089}
   - {fileID: 454771659}
+  - {fileID: 706520877}
   m_Father: {fileID: 1939349958}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
@@ -1510,6 +1511,7 @@ MonoBehaviour:
   m_LocalPosition:
     x: -9039162.689922158
     y: 1000
+    z: 3325135.872468732
     z: 3325135.872468732
   m_LocalRotation:
     value:

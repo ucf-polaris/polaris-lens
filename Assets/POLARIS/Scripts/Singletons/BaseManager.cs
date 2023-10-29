@@ -9,7 +9,7 @@ public abstract class BaseManager : MonoBehaviour
     protected IEnumerator running;
     protected abstract IEnumerator Scan(IDictionary<string, string> request);
     protected abstract IEnumerator Get(IDictionary<string, string> request);
-    protected abstract IEnumerator UpdateFields(IDictionary<string, string> request);
+    public abstract IEnumerator UpdateFields(IDictionary<string, string> request);
 
     protected string LongestCommonSubsequence(string source, string target)
     {
