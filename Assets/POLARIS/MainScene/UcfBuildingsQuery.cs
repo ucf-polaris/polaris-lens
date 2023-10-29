@@ -16,6 +16,7 @@ using UnityEngine.Networking;
 using Newtonsoft.Json;
 using Unity.Mathematics;
 using TMPro;
+using POLARIS.Managers;
 
 namespace POLARIS
 { 
@@ -55,6 +56,7 @@ namespace POLARIS
     // with correct property values. This is a good starting point if you are looking to parse your own feature layer into Unity.
     public class UcfBuildingsQuery : MonoBehaviour
     {
+        [SerializeField] private Color32 baseBuildingColor = new Color32(23, 103, 194, 255);
         // The feature layer we are going to query
         public string FeatureLayerURL = "https://services.arcgis.com/dVL5xxth19juhrDY/ArcGIS/rest/services/MainCampus_RPbldgs/FeatureServer/0";
 
@@ -73,7 +75,6 @@ namespace POLARIS
         private double3 _rootPos;
 
         private ArcGISCameraComponent _arcGisCamera;
-        private TMP_Dropdown _buildingSelector;
 
         private PolyExtruder _polyExtruder;
 
@@ -94,11 +95,6 @@ namespace POLARIS
             {
                 ArcGisMapComponent.View.SpatialReferenceChanged += () => _runCreate = true;
             }
-            
-            //    buildingSelector.onValueChanged.AddListener(delegate
-            //    {
-            //        buildingSelected();
-            //    });
         }
         
         private void Update()
@@ -107,15 +103,6 @@ namespace POLARIS
             
             StartCoroutine(GetFeatures());
             _runCreate = false;
-
-            // if (MouseOverUI())
-            // {
-            //     ArcGISCamera.GetComponent<ArcGISCameraControllerComponent>().enabled = false;
-            // }
-            // else
-            // {
-            //     ArcGISCamera.GetComponent<ArcGISCameraControllerComponent>().enabled = true;
-            // }
         }
 
         // Sends the Request to get features from the service
@@ -127,7 +114,6 @@ namespace POLARIS
             var queryRequestURL = FeatureLayerURL + "/Query?" + MakeRequestHeaders();
             Debug.Log(queryRequestURL);
             var request = UnityWebRequest.Get(queryRequestURL);
-
             
             yield return request.SendWebRequest();
             if (request.result != UnityWebRequest.Result.Success)
@@ -136,8 +122,10 @@ namespace POLARIS
             }
             else
             {
+                // Wait until locations are filled to use numEvents of each building for coloring
+                while (Locations.LocationList == null) yield return null;
+                
                 CreateGameObjectsFromResponse(request.downloadHandler.text);
-                // populateBuildingsDropdown();
             }
         }
 
@@ -215,57 +203,54 @@ namespace POLARIS
                 _polyExtruder = buildingObject.AddComponent<PolyExtruder>();
                 _polyExtruder.isOutlineRendered = false;
 
+                int numEventsOfBuilding = GetNumEventsBuilding(feature.attributes.BuildingNa);
+                Color32 colorOfBuilding = new Color32(
+                    (byte)(baseBuildingColor.r * (1.0f / (numEventsOfBuilding + 1))),
+                    (byte)(baseBuildingColor.g * (1.0f / (numEventsOfBuilding + 1))),
+                    (byte)(baseBuildingColor.b * (1.0f / (numEventsOfBuilding + 1))), 
+                    255);
+                // Debug.Log("calculated r: " + baseBuildingColor.r * (1.0f / (numEventsOfBuilding + 1)));
+                // Debug.Log("calculated g: " + baseBuildingColor.g * (1.0f / (numEventsOfBuilding + 1)));
+                // Debug.Log("calculated b: " + baseBuildingColor.b * (1.0f / (numEventsOfBuilding + 1)));
+                Debug.Log("Building " + feature.attributes.BuildingNa + " has new color: " + colorOfBuilding);
                 _polyExtruder.createPrism(feature.attributes.BuildingNa, 50.0f, vertices2D, 
-                                          new Color32(23, 103, 194, 255), true, false, true);
+                    colorOfBuilding, true, false, true);
                 // TODO: Add mesh collider to walls
                 // gameObject.AddComponent<MeshCollider>();
             }
+        }
+        
+        private int GetNumEventsBuilding(String buildingName)
+        {
+            Building foundBuilding = null;
+            foreach (Building building in Locations.LocationList)
+            {
+                if (String.Equals(buildingName, building.BuildingName,
+                        StringComparison.OrdinalIgnoreCase))
+                {
+                    foundBuilding = building;
+                    break;
+                }
+
+                if (building.BuildingAllias == null) continue;
+                foreach (string alias in building.BuildingAllias)
+                {
+                    if (String.Equals(buildingName, alias,
+                            StringComparison.OrdinalIgnoreCase))
+                    {
+                        foundBuilding = building;
+                        break;
+                    }
+                }
+            }
+
+            if (foundBuilding == null || foundBuilding.BuildingEvents == null) return 0;
+            return foundBuilding.BuildingEvents.Length;
         }
         
         private static GameObject FindChildWithTag(GameObject parent, string tag)
         {
             return (from Transform transform in parent.transform where transform.CompareTag(tag) select transform.gameObject).FirstOrDefault();
         }
-
-        //private void populateBuildingsDropdown()
-        //{
-        //    // Add from Transform transform in parent.transform where transform.CompareTag(tag) select transform.gameObject results
-        //    List<string> buildingNames = new List<string>();
-        //    foreach (GameObject building in Buildings)
-        //    {
-        //        buildingNames.Add(building.name);
-        //    }
-        //    buildingNames.Sort();
-        //    buildingSelector.AddOptions(buildingNames);
-        //}
-
-        //private void buildingSelected()
-        //{
-        //    var buildingName = buildingSelector.options[buildingSelector.value].text;
-        //    foreach (GameObject building in Buildings)
-        //    {
-        //        if (buildingName == building.name)
-        //        {
-        //            var buildingLocation = building.GetComponent<ArcGISLocationComponent>();
-        //            if (buildingLocation == null)
-        //            {
-        //                return;
-        //            }
-        //            var CameraLocation = ArcGISCamera.GetComponent<ArcGISLocationComponent>();
-        //            double Longitude = buildingLocation.Position.X;
-        //            double Latitude = buildingLocation.Position.Y;
-
-        //            ArcGISPoint NewPosition = new ArcGISPoint(Longitude, Latitude, BuildingSpawnHeight, buildingLocation.Position.SpatialReference);
-
-        //            CameraLocation.Position = NewPosition;
-        //            CameraLocation.Rotation = buildingLocation.Rotation;
-        //        }
-        //    }
-        //}
-
-        //private bool MouseOverUI()
-        //{
-        //    return EventSystem.current.IsPointerOverGameObject();
-        //}
     }
 }
