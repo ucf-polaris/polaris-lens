@@ -9,6 +9,7 @@ using POLARIS.Managers;
 public class ResetCode : MonoBehaviour
 {
     public TMP_InputField textBox;
+    public TMP_Text errorMessageText;
     public Button btn;
     private UserManager instance;
     private string Token;
@@ -49,6 +50,8 @@ public class ResetCode : MonoBehaviour
             if (!success)
             {
                 // display an error message saying code was wrong
+                errorMessageText.text = "Code was incorrect, please try again";
+                errorMessageText.color = Color.red;
                 return;
             }
             // switch to the next game object
@@ -56,6 +59,8 @@ public class ResetCode : MonoBehaviour
             next.SetActive(true);
         }, (error) => {
             Debug.Log("Error: " + error);
+            errorMessageText.text = "An error occurred while trying to validate your code, please try again later.";
+            errorMessageText.color = Color.red;
             // put up an error message saying an error occurred
             // no clue how to do this...
             return;

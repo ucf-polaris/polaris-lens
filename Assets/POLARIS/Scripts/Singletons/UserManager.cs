@@ -14,9 +14,10 @@ namespace POLARIS.Managers{
         public UserData data;
         public UserCodeData codeData;
         private IEnumerator currentCall;
-        private const string updateCodeURL = "https://v21x6ajyg9.execute-api.us-east-2.amazonaws.com/dev/user/update";
+        private const string updateCodeURL = "https://api.ucfpolaris.com/user/update";
         private const string BaseApiURL = "https://api.ucfpolaris.com";
         private const string UserGetURL = BaseApiURL + "/user/get";
+        public bool Testing = false;
 
         void Awake()
         {

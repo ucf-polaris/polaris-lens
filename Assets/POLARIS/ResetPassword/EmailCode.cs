@@ -9,6 +9,7 @@ using POLARIS.Managers;
 public class EmailCode : MonoBehaviour
 {
     public TMP_InputField textBox;
+    public TMP_Text errorMessageText;
     public Button btn;
     private UserManager instance;
     private string Token;
@@ -49,10 +50,9 @@ public class EmailCode : MonoBehaviour
             next.SetActive(true);
         }, (error) => {
             Debug.Log("Error: " + error);
+            errorMessageText.text = "An error occurred, please try again later";
+            errorMessageText.color = Color.red;
             return; // put up an error message first
         }));
-
-        // disable the email entry box and enable the next one
-        // no clue how to do this ngl..
     }
 }

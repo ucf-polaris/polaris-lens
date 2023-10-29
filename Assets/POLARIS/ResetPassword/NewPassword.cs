@@ -11,6 +11,7 @@ public class NewPassword : MonoBehaviour
     public TMP_InputField[] textBoxes;
     public TMP_InputField textBox;
     public TMP_InputField textBoxConfirm;
+    public TMP_Text errorMessageText;
     public Button btn;
     private UserManager instance;
     private string Token;
@@ -47,7 +48,13 @@ public class NewPassword : MonoBehaviour
         {
             // passwords didn't match, post up an error message
             Debug.Log("PASSWORDS DIDN'T MATCH");
+            errorMessageText.text = "Passwords do not match, please try again.";
+            errorMessageText.color = Color.red;
             return;
+        }
+        else
+        {
+            errorMessageText.text = ""; // just in case
         }
 
         // Next, build the request dictionary for the reset password endpoint
@@ -60,15 +67,16 @@ public class NewPassword : MonoBehaviour
         StartCoroutine(instance.UpdatePassword(request, (response) =>
         {
             Debug.Log("Received Response: " + response);
+            errorMessageText.text = "Password successfully updated!";
+            errorMessageText.color = Color.green;
             // display success message
         }, (error) =>
         {
             Debug.Log("Error: " + error);
+            errorMessageText.text = "An error occurred when resetting your password, please try again later.";
+            errorMessageText.color = Color.red;
             // display error message
             return;
         }));
-
-        // Now that user has been updated, display a success message
-        // no clue how to do this ngl....
     }
 }
