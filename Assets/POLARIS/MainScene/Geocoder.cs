@@ -36,11 +36,6 @@ namespace POLARIS.MainScene
         [FormerlySerializedAs("LocationMarkerTemplate")] public GameObject locationMarkerTemplate;
         [FormerlySerializedAs("LocationMarkerScale")] public float locationMarkerScale = 1;
         [FormerlySerializedAs("AddressCardTemplate")] public GameObject addressCardTemplate;
-        [FormerlySerializedAs("SearchBar")] public GameObject searchBar;
-        
-        private TextField _searchField;
-        private Button _searchButton;
-        private Button _clearButton;
 
         private Camera _mainCamera;
         private ArcGISLocationComponent _cameraLocation;
@@ -48,158 +43,30 @@ namespace POLARIS.MainScene
         private double3 _newCameraPosition;
         private double3 _oldCameraRotation;
         private double3 _newCameraRotation;
-        
+
         private GameObject _queryLocationGo;
         private ArcGISLocationComponent _queryLocationLocation;
         private ArcGISMapComponent _arcGisMapComponent;
         private string _responseAddress = "";
         private bool _shouldPlaceMarker = false;
-        private bool _waitingForResponse = false;
         private float _timer = 0;
         private const float SlowLoadFactor = 1;
-        
-        private List<Building> _buildingSearchList = new List<Building>();
-        private List<EventData> _eventSearchList = new List<EventData>();
-        private ListView _buildingOrEventListView;
-        private Action<VisualElement, int> bindLocationItem;
-        private Action<VisualElement, int> bindEventItem;
-        
-        private string currentTab;
-        private EventManager eventManager;
+
         private void Start()
         {
-            eventManager = EventManager.getInstance();
             _arcGisMapComponent = FindObjectOfType<ArcGISMapComponent>();
             _mainCamera = Camera.main;
             _cameraLocation = _mainCamera.GetComponent<ArcGISLocationComponent>();
-            
+
             SetupQueryLocationGameObject(addressMarkerTemplate, scale: new Vector3(addressMarkerScale, addressMarkerScale, addressMarkerScale));
             _queryLocationLocation = _queryLocationGo.GetComponent<ArcGISLocationComponent>();
-            
-            currentTab = ChangeTabImage._lastPressed;
-
-            var rootVisual = searchBar.GetComponent<UIDocument>().rootVisualElement;
-
-            _searchField = rootVisual.Q<TextField>("SearchBar");
-            _searchField.RegisterValueChangedCallback(OnSearchValueChanged);
-            _searchField.selectAllOnFocus = true;
-            SetPlaceholderText(_searchField, currentTab == "location" ? "Search for locations" : "Search for events");
-            
-            Func<VisualElement> makeItem = () => new Label();
-            bindLocationItem = (VisualElement element, int index) => {
-                //top visual element
-                element.AddToClassList("panelEntity");
-
-                //panel spacing (CHILD OF panel entity)
-                //VisualElement spacing = new VisualElement();
-                //spacing.AddToClassList("spacing");
-                //element.Add(spacing);
-
-                //panel drop shadow
-                //Shadow panelShadow = new Shadow();
-                //panelShadow.AddToClassList("panelShadow");
-                //element.Add(panelShadow);
-
-                //panel (CHILD OF panel shadow)
-                VisualElement panel = new VisualElement();
-                panel.AddToClassList("panel");
-                element.Add(panel);
-
-                //image in panel (CHILD OF panel)
-                VisualElement image = new VisualElement();
-                image.AddToClassList("panelImage");
-                panel.Add(image);
-
-                //blocker in panel (CHILD OF panel)
-                VisualElement blocker = new VisualElement();
-                blocker.AddToClassList("panelBlocker");
-                panel.Add(blocker);
-
-                //text area in panel (CHILD OF panel)
-                VisualElement textarea = new VisualElement();
-                textarea.AddToClassList("panelTextArea");
-                panel.Add(textarea);
-
-                //building name (CHILD OF text area)
-                Label location = new Label(_buildingSearchList[index].BuildingName);
-                location.AddToClassList("panelTextLocation");
-                textarea.Add(location);
-
-                //location area in text area (CHILD OF text area)
-                VisualElement locationArea = new VisualElement();
-                locationArea.AddToClassList("panelLocationGroup");
-                textarea.Add(locationArea);
-
-                //address (CHILD OF location area)
-                Label address = new Label(_buildingSearchList[index].BuildingAddress);
-                address.AddToClassList("panelTextAddress");
-                locationArea.Add(address);
-
-                //how far building is from current location (update dynamically?) (CHILD OF location area)
-                Label distance = new Label("- N miles");
-                distance.AddToClassList("panelTextDistance");
-                locationArea.Add(distance);
-
-                //how many events exist (CHILD OF text area)
-                Label events = new Label(_buildingSearchList[index].BuildingEvents.Length.ToString() + " Events");
-                events.AddToClassList("panelTextEvents");
-                textarea.Add(events);
-
-                //icon for favorites (CHILD OF panel)
-                VisualElement favoritesIcon = new VisualElement();
-                favoritesIcon.AddToClassList("panelFavoritesIcon");
-                panel.Add(favoritesIcon);
-
-                //icon for navigation to (CHILD OF panel)
-                VisualElement navIcon = new VisualElement();
-                navIcon.AddToClassList("panelNavigationIcon");
-                panel.Add(navIcon);
-
-                /*(element as Label).text = _buildingSearchList[index].BuildingName;
-                (element as Label).RegisterCallback<ClickEvent>(_ => OnBuildingSearchClick(_buildingSearchList[index]));
-                element.style.flexGrow = 0;
-                element.style.color = Color.black;
-                element.style.backgroundColor = Color.white;
-                element.style.fontSize = 100f;
-                element.style.marginBottom = 50f;*/
-            };
-            bindEventItem = (VisualElement element, int index) => {
-                (element as Label).text = _eventSearchList[index].Name;
-                (element as Label).RegisterCallback<ClickEvent>(_ => OnEventSearchClick(_eventSearchList[index]));
-                element.style.flexGrow = 0;
-                element.style.color = Color.black;
-                element.style.backgroundColor = Color.white;
-                element.style.fontSize = 100f;
-                element.style.marginBottom = 50f;
-            };
-            _buildingOrEventListView = rootVisual.Q<ListView>("SearchResultBigLabel");
-            //_buildingOrEventListView.fixedItemHeight = 800f;
-            _buildingOrEventListView.virtualizationMethod = CollectionVirtualizationMethod.FixedHeight;
-            _buildingOrEventListView.makeItem = makeItem;
-
-            ScrollView SV = _buildingOrEventListView.Q<ScrollView>();
-
-            SV.verticalScrollerVisibility = ScrollerVisibility.Hidden;
-            _buildingOrEventListView.selectionType = SelectionType.None;
-            //_buildingOrEventListView.style.flexGrow = 1;
-            SV.touchScrollBehavior = ScrollView.TouchScrollBehavior.Clamped;
-            SV.scrollDecelerationRate = 0.25f;
-            SV.elasticity = 0.01f;
         }
 
         private void Update()
         {
-            if (ChangeTabImage._lastPressed != currentTab)
-            {
-                currentTab = ChangeTabImage._lastPressed;
-                _searchField.value = "";
-                ClearSearchResults();
-                SetPlaceholderText(_searchField, ChangeTabImage._lastPressed == "location" ? "Search for locations" : "Search for events");
-            }
-            
             // Create a marker and address card after an address lookup
             if (!_shouldPlaceMarker) return;
-            
+
             // Wait for a fixed time for the map to load
             if (_timer < 1)
             {
@@ -226,211 +93,7 @@ namespace POLARIS.MainScene
             }
         }
 
-        private void OnSearchValueChanged(ChangeEvent<string> evt)
-        {
-            if (currentTab == "location")
-            {
-                _buildingOrEventListView.itemsSource = _buildingSearchList;
-                _buildingOrEventListView.bindItem = bindLocationItem;
-            }
-            else
-            {
-                _buildingOrEventListView.itemsSource = _eventSearchList;
-                _buildingOrEventListView.bindItem = bindEventItem;
-            }
-            string newText = evt.newValue;
 
-            if (newText.EndsWith("\n"))
-            {
-                Deselect();
-                _searchField.value = newText.TrimEnd('\n');
-                return;
-            }
-
-            if (!string.IsNullOrWhiteSpace(newText))
-            {
-                if (currentTab == "location")
-                {
-                    List<Building> buildings = GetBuildingsFromSearch(newText, newText[0] == '~');
-                    UpdateBuildingSearchUI(buildings);
-                }
-                else
-                {
-                    Debug.Log("ALLs");
-                    List<EventData> events = eventManager.GetEventsFromSearch(newText, newText[0] == '~');
-                    UpdateEventSearchUI(events);
-                    Debug.Log("ALL");
-                }
-            }
-            else
-            {
-                ClearSearchResults();
-            }
-        }
-
-
-        private bool FuzzyMatch(string source, string target, int tolerance)
-        {
-            return LongestCommonSubsequence(source, target).Length >= target.Length - tolerance;
-        }
-
-        private List<Building> GetBuildingsFromSearch(string query, bool fuzzySearch)
-        {
-            const int TOLERANCE = 1;
-            
-            List<Building> buildings = new List<Building>();
-            foreach (Building building in Locations.LocationList)
-            {
-                if (building.BuildingName.IndexOf(query, StringComparison.OrdinalIgnoreCase) >= 0 || 
-                    (fuzzySearch && FuzzyMatch(building.BuildingName, query, TOLERANCE)))
-                {
-                    buildings.Add(building);
-                    continue;
-                }
-
-                if (building.BuildingAllias == null) continue;
-                foreach (string alias in building.BuildingAllias)
-                {
-                    if (alias.IndexOf(query, StringComparison.OrdinalIgnoreCase) >= 0 || 
-                        (fuzzySearch && FuzzyMatch(alias, query, TOLERANCE)))
-                    {
-                        buildings.Add(building);
-                        break;
-                    }
-                }
-            }
-
-            return buildings;
-        }
-
-        
-
-        private void UpdateBuildingSearchUI(List<Building> buildings)
-        {
-            // Clear previous suggestions
-            ClearSearchResults();
-            
-            // Display the new suggestions in the AutoSuggestionText
-            foreach (var building in buildings)
-            {
-                _buildingOrEventListView.itemsSource.Add(building);
-                _buildingOrEventListView.Rebuild();
-            }
-        }
-        
-        private void UpdateEventSearchUI(List<EventData> events)
-        {
-            // Clear previous suggestions
-            ClearSearchResults();
-
-            // Display the new suggestions in the AutoSuggestionText
-            foreach (var UCFEvent in events)
-            {
-                _buildingOrEventListView.itemsSource.Add(UCFEvent);
-                _buildingOrEventListView.Rebuild();
-            }
-        }
-
-        private void OnBuildingSearchClick(Building selectedBuilding)
-        {
-            if (_waitingForResponse) return;
-            _waitingForResponse = true;
-            Deselect();
-            Debug.Log(
-                $"Name: {selectedBuilding.BuildingName ?? ""}\n" +
-                $"Aliases: {((selectedBuilding.BuildingAllias != null) ? string.Join(", ", selectedBuilding.BuildingAllias) : "")}\n" +
-                $"Abbreviations: {((selectedBuilding.BuildingAbbreviation != null) ? string.Join(", ", selectedBuilding.BuildingAbbreviation) : "")}\n" +
-                $"Description: {selectedBuilding.BuildingDesc ?? ""}\n" +
-                $"Longitude: {selectedBuilding.BuildingLong}\n" +
-                $"Latitude: {selectedBuilding.BuildingLat}\n" +
-                $"Address: {selectedBuilding.BuildingAddress ?? ""}\n" +
-                $"Events: {((selectedBuilding.BuildingEvents != null) ? string.Join(", ", selectedBuilding.BuildingEvents) : "")}\n");
-            SetStuff(selectedBuilding.BuildingLong, selectedBuilding.BuildingLat, selectedBuilding.BuildingAddress);
-            // ClearSearchResults();
-            _waitingForResponse = false;
-        }
-
-        private void OnEventSearchClick(EventData selectedEvent)
-        {
-            if (_waitingForResponse) return;
-            _waitingForResponse = true;
-            Deselect();
-            Debug.Log(
-                $"Name: {selectedEvent.Name ?? ""}\n" +
-                $"Description: {selectedEvent.Description ?? ""}\n" +
-                $"Longitude: {selectedEvent.Location.BuildingLong}\n" +
-                $"Latitude: {selectedEvent.Location.BuildingLat}\n" +
-                $"Host: {selectedEvent.Host ?? ""}\n" +
-                $"Start Time: {selectedEvent.DateTime}\n" +
-                $"End Time: {selectedEvent.EndsOn}\n" +
-                $"Image Path: {selectedEvent.Image ?? ""}\n" +
-                $"Location: {selectedEvent.ListedLocation ?? ""}\n");
-            // ClearSearchResults();
-            _waitingForResponse = false;
-        }
-        
-        private void Deselect()
-        {
-            // Deselect the text input field that was used to call this function. 
-            // It is required so that the camera controller can be enabled/disabled when the input field is deselected/selected 
-            var eventSystem = EventSystem.current;
-            if (!eventSystem.alreadySelecting)
-            {
-                eventSystem.SetSelectedGameObject(null);
-            }
-        }
-        
-        private void FillInputField(string searchText)
-        {
-            _searchField.value = searchText;
-        }
-
-        private void ClearSearchResults()
-        {
-            _buildingOrEventListView.itemsSource.Clear();
-            _buildingOrEventListView.Rebuild();
-        }
-
-        private void SetStuff(double lon, double lat, string address)
-        {
-            _responseAddress = address;
-            
-            _oldCameraPosition = new double3(_cameraLocation.Position.X, _cameraLocation.Position.Y, _cameraLocation.Position.Z);
-            _oldCameraRotation = new double3(_cameraLocation.Rotation.Heading, _cameraLocation.Rotation.Pitch, _cameraLocation.Rotation.Roll);
-
-            _newCameraRotation = new double3(0, 0, 0);
-            _newCameraPosition = new double3(lon, lat, _cameraLocation.Position.Z);
-
-            _shouldPlaceMarker = true;
-            _timer = 0;
-        }
-        
-        public static void SetPlaceholderText(TextField textField, string placeholder)
-        {
-            string placeholderClass = TextField.ussClassName + "__placeholder";
- 
-            onFocusOut();
-            textField.RegisterCallback<FocusInEvent>(_ => onFocusIn());
-            textField.RegisterCallback<FocusOutEvent>(_ => onFocusOut());
- 
-            void onFocusIn()
-            {
-                if (textField.ClassListContains(placeholderClass))
-                {
-                    textField.value = string.Empty;
-                    textField.RemoveFromClassList(placeholderClass);
-                }
-            }
- 
-            void onFocusOut()
-            {
-                if (string.IsNullOrEmpty(textField.text))
-                {
-                    textField.SetValueWithoutNotify(placeholder);
-                    textField.AddToClassList(placeholderClass);
-                }
-            }
-        }
 
         /// <summary>
         /// Perform a raycast from current camera location towards the map to determine the height of earth's surface at that point.
@@ -453,7 +116,7 @@ namespace POLARIS.MainScene
                 Debug.LogWarning("The elevation at the queried location could not be determined.");
             }
             // markerLocation.Position = new ArcGISPoint(markerLocation.Position.X, markerLocation.Position.Y
-                                                      // ,20, new ArcGISSpatialReference(4326));
+            // ,20, new ArcGISSpatialReference(4326));
 
             markerLocation.Rotation = new ArcGISRotation(0, 90, 0);
 
@@ -527,61 +190,20 @@ namespace POLARIS.MainScene
             {
                 t.text = _responseAddress;
             }
-        }  
-        
-        private string LongestCommonSubsequence(string source, string target)
-        {
-            int[,] C = LongestCommonSubsequenceLengthTable(source, target);
-
-            return Backtrack(C, source, target, source.Length, target.Length);
         }
-
-        private int[,] LongestCommonSubsequenceLengthTable(string source, string target)
+        public void SetStuff(double lon, double lat, string address)
         {
-            int[,] C = new int[source.Length + 1, target.Length + 1];
+            _responseAddress = address;
 
-            for (int i = 0; i < source.Length + 1; i++) { C[i, 0] = 0; }
-            for (int j = 0; j < target.Length + 1; j++) { C[0, j] = 0; }
+            _oldCameraPosition = new double3(_cameraLocation.Position.X, _cameraLocation.Position.Y, _cameraLocation.Position.Z);
+            _oldCameraRotation = new double3(_cameraLocation.Rotation.Heading, _cameraLocation.Rotation.Pitch, _cameraLocation.Rotation.Roll);
 
-            for (int i = 1; i < source.Length + 1; i++)
-            {
-                for (int j = 1; j < target.Length + 1; j++)
-                {
-                    if (source[i - 1].Equals(target[j - 1]))
-                    {
-                        C[i, j] = C[i - 1, j - 1] + 1;
-                    }
-                    else
-                    {
-                        C[i, j] = Math.Max(C[i, j - 1], C[i - 1, j]);
-                    }
-                }
-            }
+            _newCameraRotation = new double3(0, 0, 0);
+            _newCameraPosition = new double3(lon, lat, _cameraLocation.Position.Z);
 
-            return C;
-        }
-
-        private string Backtrack(int[,] C, string source, string target, int i, int j)
-        {
-            if (i == 0 || j == 0)
-            {
-                return "";
-            }
-            else if (source[i - 1].Equals(target[j - 1]))
-            {
-                return Backtrack(C, source, target, i - 1, j - 1) + source[i - 1];
-            }
-            else
-            {
-                if (C[i, j - 1] > C[i - 1, j])
-                {
-                    return Backtrack(C, source, target, i, j - 1);
-                }
-                else
-                {
-                    return Backtrack(C, source, target, i - 1, j);
-                }
-            }
+            _shouldPlaceMarker = true;
+            _timer = 0;
         }
     }
+
 }

@@ -822,6 +822,7 @@ GameObject:
   - component: {fileID: 985640669}
   - component: {fileID: 985640668}
   - component: {fileID: 985640670}
+  - component: {fileID: 985640671}
   m_Layer: 5
   m_Name: MenuUI
   m_TagString: Untagged
@@ -873,6 +874,21 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: dbf85519195344ec9897b8bba803bf0a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!114 &985640671
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 985640667}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6b021cc1d5d6d5146bbcbfc080d4d506, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  geo: {fileID: 2062164022}
+  ListEntryTemplate: {fileID: 9197481963319205126, guid: a6efed181fb96594d9670d265b13e76e,
+    type: 3}
 --- !u!1 &1006044603
 GameObject:
   m_ObjectHideFlags: 0
@@ -2052,7 +2068,6 @@ MonoBehaviour:
   locationMarkerScale: 1
   addressCardTemplate: {fileID: 8794308439353200324, guid: f732526b2a4912c43b3b6a5d0d19fc08,
     type: 3}
-  searchBar: {fileID: 985640667}
 --- !u!1 &2103678088
 GameObject:
   m_ObjectHideFlags: 0
