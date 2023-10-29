@@ -18,13 +18,12 @@ public class LocationInfo : MonoBehaviour
             StartCoroutine(RequestLocations());
         else
         {
-            Locations.LocationList = new Building[2];
+            Locations.LocationList = new Building[20];
             for(int i = 0; i < Locations.LocationList.Length; i++)
             {
                 Locations.LocationList[i] = new Building();
             }
         }
-            
     }
 
     private static IEnumerator RequestLocations()
@@ -49,10 +48,10 @@ public class LocationInfo : MonoBehaviour
             var buildings = jsonResponse["locations"]!.ToObject<Building[]>();
             Locations.LocationList = buildings;
 
-            foreach (Building building in Locations.LocationList)
-            {
-                Debug.Log($"{building.BuildingName} has description {building.BuildingDesc}");
-            }
+            // foreach (Building building in Locations.LocationList)
+            // {
+            //     Debug.Log($"Building {building.BuildingName} has description {building.BuildingDesc}");
+            // }
         }
     }
 }

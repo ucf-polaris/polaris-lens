@@ -1,112 +1,10 @@
-.switchButton {
-    margin: 10px;
-    -unity-text-align: middle-center;
-    white-space: normal;
-    background-color: rgba(52, 16, 75, 0.77);
-    border-radius: 10px;
-    width: 20%;
-    height: 20%;
-    position: absolute;
-    top: 10px;
-    right: 10px;
-    color: rgb(255, 255, 255);
-}
-
-.RaisedLabel {
-    translate: -50% 250%;
-}
-
-.BuildingTopLabel {
-    translate: -50% -100%;
-}
-
-.SearchBox {
-    -unity-font: resource('FlatSkin/Font/Roboto-Light');
-    align-items: center;
-    justify-content: center;
-    display: flex;
-    flex-basis: auto;
-    font-size: 20px;
-    margin: 0;
-}
-
-#SearchBar > TextInput {
-    background-color: rgba(0, 0, 0, 0);
-    background-image: resource('Assets/POLARIS/Rectangle 16.png');
-    border-width: 0;
-    -unity-background-image-tint-color: rgb(25, 25, 32);
-}
-
-#SearchBar > TextInput > TextElement {
-    color: whitesmoke;
-}
-
-.SearchDiv {
-    padding: 0;
-    margin: 0;
-    width: 60%;
-    left: 50px;
-    top: 80px;
-    height: 100%;
-    flex-direction: column;
-    flex-wrap: nowrap;
-}
-
-.SearchButton {
-    background-color: rgb(56, 56, 56);
-    -unity-font: resource('FlatSkin/Font/Roboto-LightItalic');
-    font-size: 24px;
-    flex-basis: 17%;
-    color: rgb(255, 255, 255);
-    margin: 0;
-    padding: 0;
-}
-
-.RoutingDest {
-    -unity-font: resource('FlatSkin/Font/Roboto-LightItalic');
-    font-size: 50px;
-}
-
-.RoutingInfos {
-    font-size: 40px;
-    -unity-font: resource('FlatSkin/Font/Roboto-Bold');
-    -unity-font-style: normal;
-}
-
-.sublabel {
-    font-size: 10px;
-}
-
-.AutoSuggestionBigLabel {
-    flex-basis: auto;
-}
-
-.SearchAndSuggest {
-}
-
-#SearchBox .unity-text-field__input {
-    margin: 0;
-}
-
-.unity-base-text-field__input {
-    padding-left: 150px;
-    justify-content: flex-start;
-}
-
-#SearchResultBigLabel > ListView {
-}
-
-.unity-list-view__empty-label {
-    display: none;
-}
-
 .panelShadow {
     position: absolute;
-    top: auto;
-    left: auto;
+    top: 71px;
+    left: 100px;
     opacity: 0.42;
-    height: 850px;
-    width: 1050px;
+    height: 646px;
+    width: 900px;
     right: auto;
     flex-shrink: 0;
     justify-content: center;
@@ -158,9 +56,9 @@
     padding-top: 20px;
     margin-right: 0;
     margin-left: 0;
-    padding-top: 0;
-    padding-right: 0;
-    padding-left: 0;
+    padding-top: 80px;
+    padding-right: 100px;
+    padding-left: 100px;
 }
 
 .panelImage {
@@ -282,8 +180,8 @@
     height: 40px;
     background-image: url('project://database/Assets/POLARIS/arrow.png?fileID=2800000&guid=d01daccc5e8044ce09b187ecdcf84c3d&type=3#arrow');
     -unity-background-image-tint-color: rgb(0, 0, 0);
-    top: 87%;
-    left: 87%;
+    top: 88%;
+    left: 88%;
     rotate: 90deg;
 }
 
@@ -292,16 +190,16 @@
     position: absolute;
     background-image: resource('Polaris/star-outline');
     height: 90px;
-    width: 110px;
+    width: 90px;
     top: 70%;
-    left: 85%;
+    left: 86%;
     flex-shrink: 0;
 }
 
 .spacing {
     flex-grow: 0;
     width: 100%;
-    height: 20px;
+    height: 50px;
     flex-shrink: 0;
     position: relative;
     -unity-background-image-tint-color: rgba(255, 255, 255, 0);

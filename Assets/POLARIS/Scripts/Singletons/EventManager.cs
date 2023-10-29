@@ -31,13 +31,13 @@ namespace POLARIS.Managers
             {
                 DontDestroyOnLoad(gameObject);
                 Instance = this;
-                userAccess = UserManager.getInstance();
             }
         }
 
         private void Start()
         {
             //populates dataList
+            userAccess = UserManager.getInstance();
             CallScan();
         }
 
@@ -60,10 +60,10 @@ namespace POLARIS.Managers
         {
             string Token = TestingToken;
             string RefreshToken = TestingRefreshToken;
-            if (!Testing && UserManager.isNotNull())
+            if (UserManager.isNotNull() && !userAccess.Testing)
             {
-                Token = userAccess.data.Token;
-                RefreshToken = userAccess.data.RefreshToken;
+                if(Token != "") Token = userAccess.data.Token;
+                if(RefreshToken != "") RefreshToken = userAccess.data.RefreshToken;
             }
             var www = UnityWebRequest.Post(EventQueryURL, null, "application/json");
             www.SetRequestHeader("authorizationToken", "{\"token\":\"" + Token + "\",\"refreshToken\":\"" + RefreshToken + "\"}");
@@ -85,10 +85,11 @@ namespace POLARIS.Managers
                 var events = jsonResponse["locations"]!.ToObject<List<EventData>>();
                 dataList = events;
 
-                foreach (EventData UCFEvent in dataList)
-                {
-                    Debug.Log($"{UCFEvent.Name} has description {UCFEvent.Description}");
-                }
+                // foreach (EventData UCFEvent in dataList)
+                // {
+                // Debug.Log($"Event {UCFEvent.Name} has description {UCFEvent.Description}");
+                // }
+                getAllRawImages();
             }
             running = null;
         }
@@ -130,6 +131,24 @@ namespace POLARIS.Managers
         {
             yield return null;
             Debug.LogWarning("Should not be implement");
+        }
+
+        public void getAllRawImages()
+        {
+            if (dataList == null) return;
+            foreach(var data in dataList)
+            {
+                //download if image exists (the ones with images are set, add boolean in backend from if it's from knights connect or ucf evetns)
+                if (!string.IsNullOrEmpty(data.Image))
+                {
+                    if (data.rawImage == null)
+                        StartCoroutine(data.DownloadImage("https://knightconnect.campuslabs.com/engage/image/" + data.Image));
+                }  
+                else
+                {
+                    data.rawImage = Resources.Load<Texture2D>("UCF_Logo_2");
+                }
+            }
         }
         public List<EventData> GetEventsFromSearch(string query, bool fuzzySearch)
         {
@@ -174,6 +193,7 @@ namespace POLARIS.Managers
         private string locationQueryID;
         [SerializeField]
         private long timeTilExpire;
+        public Texture2D rawImage = null;
 
         public EventData()
         {
@@ -188,6 +208,24 @@ namespace POLARIS.Managers
         public void SetPlayerPrefs()
         {
             //Up to you how you want to do this (if at all)
+        }
+
+        public IEnumerator DownloadImage(string MediaUrl)
+        {
+            UnityWebRequest request = UnityWebRequestTexture.GetTexture(MediaUrl);
+            Debug.Log("Downloading image from " + MediaUrl);
+            yield return request.SendWebRequest();
+            if (request.result == UnityWebRequest.Result.ConnectionError || request.result == UnityWebRequest.Result.ProtocolError)
+            {
+                Debug.Log("ERROR " + request.error);
+                Resources.Load<Texture2D>("UCF_Logo");
+            }   
+            else
+            {
+                rawImage = ((DownloadHandlerTexture)request.downloadHandler).texture;
+                Debug.Log(name + " successfully downloaded");
+            }
+                
         }
 
         #region Getters and Setters

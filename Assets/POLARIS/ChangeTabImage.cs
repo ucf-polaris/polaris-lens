@@ -13,6 +13,7 @@ public class ChangeTabImage : MonoBehaviour
 
 	private VisualElement _spacer;
 	private VisualElement _arrow;
+	private Label _header;
 	public static string _lastPressed = "location";
 	private bool _menuOpen = false;
 
@@ -34,11 +35,13 @@ public class ChangeTabImage : MonoBehaviour
 		
 		_spacer = uiDoc.rootVisualElement.Q<VisualElement>("Spacer");
 		_arrow = uiDoc.rootVisualElement.Q<VisualElement>("Arrow");
+		_header = uiDoc.rootVisualElement.Q<Label>("Identifier");
 		_arrow.RegisterCallback<ClickEvent>(OnClickArrow);
     }
 
     private void OnClickCalendar()
 	{
+		_header.text = "Events";
 		_locationButton.style.backgroundImage = _locationDark;
 		_calendarButton.style.backgroundImage = _calendar;
 		print("Hello calendar!");
@@ -47,6 +50,7 @@ public class ChangeTabImage : MonoBehaviour
 
     private void OnClickLocation()
 	{
+		_header.text = "Locations";
 		_locationButton.style.backgroundImage = _location;
 		_calendarButton.style.backgroundImage = _calendarDark;
 		print("Hello location!");

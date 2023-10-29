@@ -1,0 +1,20 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" xsi="http://www.w3.org/2001/XMLSchema-instance" engine="UnityEngine.UIElements" editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+    <Style src="project://database/Assets/POLARIS/UI%20Assets/EntryStyles.uss?fileID=7433441132597879392&amp;guid=629c839b3d5f78642bc3d93c6d881c59&amp;type=3#EntryStyles" />
+    <ui:VisualElement class="panelEntity" style="flex-grow: 0; position: relative;">
+        <Shadow class="panelShadow" />
+        <ui:VisualElement class="panel" style="flex-grow: 1;">
+            <ui:VisualElement class="panelImage" style="flex-grow: 1;" />
+            <ui:VisualElement class="panelBlocker" style="flex-grow: 1;" />
+            <ui:VisualElement class="panelTextArea" style="flex-grow: 1;">
+                <ui:Label tabindex="-1" text="Label" parse-escape-sequences="true" display-tooltip-when-elided="true" class="panelTextLocation" />
+                <ui:VisualElement class="panelLocationGroup" style="flex-grow: 1;">
+                    <ui:Label tabindex="-1" text="An Address - " parse-escape-sequences="true" display-tooltip-when-elided="true" class="panelTextAddress" />
+                    <ui:Label tabindex="-1" text="Label" parse-escape-sequences="true" display-tooltip-when-elided="true" class="panelTextDistance" style="left: -10px;" />
+                </ui:VisualElement>
+                <ui:Label tabindex="-1" text="Label" parse-escape-sequences="true" display-tooltip-when-elided="true" class="panelTextEvents" />
+            </ui:VisualElement>
+            <ui:VisualElement class="panelNavigationIcon" style="flex-grow: 1;" />
+            <ui:VisualElement class="panelFavoritesIcon" style="flex-grow: 1;" />
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

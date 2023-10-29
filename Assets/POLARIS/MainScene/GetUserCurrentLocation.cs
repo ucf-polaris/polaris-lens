@@ -1,17 +1,31 @@
 using UnityEngine;
 using System.Collections;
+using Esri.ArcGISMapsSDK.Components;
+using Esri.ArcGISMapsSDK.Utils.GeoCoord;
+using Esri.GameEngine.Geometry;
+using Esri.HPFramework;
+using POLARIS.MainScene;
+using Unity.Mathematics;
+using UnityEngine.Serialization;
 
 public class GetUserCurrentLocation : MonoBehaviour
 {
-    public GameObject currentLocationMarker;
+    public GameObject LocationMarker;
+    public float DesiredAccuracy;
+    
     private float _latitude = 0f;
     private float _longitude = 0f;
-    private double latMin = -81.209995;
-    private double longMin = 28.580255;
-    private double latMax = -81.181589;
-    private double longMax = 28.613986;
+    private double longMin = -81.209995;
+    private double latMin = 28.580255;
+    private double longMax = -81.181589;
+    private double latMax = 28.613986;
+    
+    private ArcGISMapComponent _arcGisMapComponent;
+    private HPRoot _hpRoot;
     private void Start()
     {
+        _hpRoot = FindObjectOfType<HPRoot>();
+        _arcGisMapComponent = FindObjectOfType<ArcGISMapComponent>();
         StartCoroutine(LocationCoroutine());
     }
 
@@ -50,7 +64,7 @@ public class GetUserCurrentLocation : MonoBehaviour
         }
 #endif
         // Start service before querying location
-        Input.location.Start(500f, 500f);
+        Input.location.Start(DesiredAccuracy, DesiredAccuracy);
                 
         // Wait until service initializes
         int maxWait = 15;
@@ -92,13 +106,53 @@ public class GetUserCurrentLocation : MonoBehaviour
                 + Input.location.lastData.altitude + " " 
                 + Input.location.lastData.horizontalAccuracy + " " 
                 + Input.location.lastData.timestamp);
-
+        
             _latitude = Input.location.lastData.latitude;
             _longitude = Input.location.lastData.longitude;
             // TODO DRAW LOCATION KEEP UPDATING
+
+            _latitude = 28.60127224209225f;
+            _longitude = -81.19913365264773f;
+
+            var locationMarker = CreateLocationMarker(_latitude, _longitude);
+            SetElevation(locationMarker);
         }
 
         // Stop service if there is no need to query location updates continuously
         Input.location.Stop();
+    }
+    
+    private GameObject CreateLocationMarker(float lat, float lon)
+    {
+        var location = LocationMarker.AddComponent<ArcGISLocationComponent>();
+        location.Position = new ArcGISPoint(lat, lon, 2f, new ArcGISSpatialReference(4326));
+
+        return LocationMarker;
+    }
+    
+    private void SetElevation(GameObject locationMarker)
+    {
+        // start the raycast in the air at an arbitrary to ensure it is above the ground
+        const int raycastHeight = 1000;
+        var position = locationMarker.transform.position;
+        var raycastStart = new Vector3(position.x, position.y + raycastHeight, position.z);
+            
+        if (!Physics.Raycast(raycastStart, Vector3.down, out var hitInfo)) return;
+            
+        var location = locationMarker.GetComponent<ArcGISLocationComponent>();
+        location.Position = HitToGeoPosition(hitInfo, 2f);
+    }
+    
+    private ArcGISPoint HitToGeoPosition(RaycastHit hit, float yOffset = 0)
+    {
+        var worldPosition = math.inverse(_arcGisMapComponent.WorldMatrix).HomogeneousTransformPoint(hit.point.ToDouble3());
+
+        var geoPosition = _arcGisMapComponent.View.WorldToGeographic(worldPosition);
+        var offsetPosition = new ArcGISPoint(geoPosition.X, geoPosition.Y, geoPosition.Z + yOffset, geoPosition.SpatialReference);
+
+        var spatialRef = GeoUtils.ProjectToSpatialReference(offsetPosition, new ArcGISSpatialReference(4326));
+        PersistData.DestinationPoint = spatialRef;
+                
+        return GeoUtils.ProjectToSpatialReference(offsetPosition, new ArcGISSpatialReference(4326));
     }
 }
