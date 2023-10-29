@@ -69,7 +69,7 @@ namespace POLARIS.MainScene {
             {
                 currentTab = ChangeTabImage._lastPressed;
                 _searchField.value = "";
-                ClearSearchResults();
+                ClearSearchResults(true);
                 SetPlaceholderText(_searchField, ChangeTabImage._lastPressed == "location" ? "Search for locations" : "Search for events");
             }
         }
@@ -99,7 +99,7 @@ namespace POLARIS.MainScene {
             }
             else
             {
-                ClearSearchResults();
+                ClearSearchResults(false);
             }
         }
 
@@ -202,9 +202,22 @@ namespace POLARIS.MainScene {
             _searchField.value = searchText;
         }
 
-        private void ClearSearchResults()
+        private void ClearSearchResults(bool swap)
         {
-            listController.Update(new List<Building>());
+            ListController.SwitchType type1 = ListController.SwitchType.locations;
+            ListController.SwitchType type2 = ListController.SwitchType.events;
+            if (swap)
+            {
+                type1 = ListController.SwitchType.events;
+                type2 = ListController.SwitchType.locations;
+            }
+
+            //clear with empty version of list type
+            if (listController.sw == type2)
+                listController.Update(new List<EventData>());
+            else if (listController.sw == type1)
+                listController.Update(new List<Building>());
+            
         }
 
         public static void SetPlaceholderText(TextField textField, string placeholder)
