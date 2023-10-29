@@ -4,7 +4,6 @@
 // You may obtain a copy of the License at: http://www.apache.org/licenses/LICENSE-2.0
 //
 
-using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Net.Http;
@@ -27,6 +26,11 @@ namespace POLARIS
         public GameObject RouteBreadcrumb;
         public GameObject Route;
         public GameObject RouteInfo;
+        public GameObject LocationMarker;
+
+        [Header("Path Colors")] 
+        public Color PathStart;
+        public Color PathEnd;
 
         private Label _routingDestLabel;
         private Label _routingInfoLabel;
@@ -66,6 +70,10 @@ namespace POLARIS
             _arcGisMapComponent = FindObjectOfType<ArcGISMapComponent>();
 
             _lineRenderer = Route.GetComponent<LineRenderer>();
+            _lineRenderer.widthMultiplier = 5;
+            _lineRenderer.numCapVertices = 6;
+            _lineRenderer.numCornerVertices = 4;
+            _lineRenderer.positionCount = 0;
 
             _lastRootPosition = _arcGisMapComponent.GetComponent<HPRoot>().RootUniversePosition;
 
@@ -325,9 +333,7 @@ namespace POLARIS
         private void RenderLine() 
         {
             if (_breadcrumbs.Count < 1) return;
-
-            _lineRenderer.widthMultiplier = 5;
-
+            
             var allPoints = new List<Vector3>();
 
             foreach (var breadcrumb in _breadcrumbs)
@@ -350,9 +356,14 @@ namespace POLARIS
         {
             var rootPosition = _arcGisMapComponent.GetComponent<HPRoot>().RootUniversePosition;
             var delta = (_lastRootPosition - rootPosition).ToVector3();
-            if (!(delta.magnitude > 1)) return; // 1km
-            
-            if (_lineRenderer != null)
+            // if (!(delta.magnitude > 1)) return; // 1km
+
+            if (LocationMarker == null)
+            {
+                Debug.LogError("No location marker!!");
+            }
+
+            if (_lineRenderer != null && _lineRenderer.positionCount > 1)
             {
                 var points = new Vector3[_lineRenderer.positionCount];
                 _lineRenderer.GetPositions(points);
@@ -361,8 +372,61 @@ namespace POLARIS
                     points[i] += delta;
                 }
                 _lineRenderer.SetPositions(points);
+                var closestPoint = GetClosestPathPoint(points);
+                var pointPercent = PointPercentage(points, closestPoint);
+
+                var gradient = new Gradient();
+                gradient.SetKeys(
+                    new[] {new GradientColorKey(PathStart, 0.0f), new GradientColorKey(PathStart, pointPercent - 0.01f), new GradientColorKey(PathEnd, pointPercent + 0.01f), new GradientColorKey(PathEnd, 1f)},
+                    new[] { new GradientAlphaKey(1.0f, 0.0f), new GradientAlphaKey(1.0f, 1.0f) }
+                    );
+                _lineRenderer.colorGradient = gradient;
             }
             _lastRootPosition = rootPosition;
+        }
+        
+        private int GetClosestPathPoint(Vector3[] points)
+        {
+            var smallestDist = float.MaxValue;
+            var smallestIndex = 0;
+            for (var i = 0; i < points.Length; i++)
+            {
+                var dist = Vector3.Distance(points[i], LocationMarker.transform.position);
+                if (dist < smallestDist)
+                {
+                    smallestDist = dist;
+                    smallestIndex = i;
+                }
+            }
+
+            if (smallestDist > 50) // Dont know what dist this is
+            {
+                // TODO: Auto reroute
+                Debug.Log("Should recalculate route! - Smallest dist is " + smallestDist);
+            }
+
+            return smallestIndex;
+        }
+        
+        private static float PointPercentage(IReadOnlyList<Vector3> linePositions, int point)
+        {
+            var totalDist = 0f;
+            var pointDist = 0f;
+            var lastPosition = linePositions[0];
+            for (var i = 1; i < linePositions.Count; i++)
+            {
+                var segDist = Vector3.Distance(lastPosition, linePositions[i]);
+                
+                if (i <= point)
+                {
+                    pointDist += segDist;
+                }
+                totalDist += segDist;
+                
+                lastPosition = linePositions[i];
+            }
+            
+            return pointDist / totalDist;
         }
     }
 }

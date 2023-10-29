@@ -6,10 +6,12 @@ using Esri.GameEngine.Geometry;
 using Esri.HPFramework;
 using POLARIS.MainScene;
 using Unity.Mathematics;
+using UnityEngine.Serialization;
 
 public class GetUserCurrentLocation : MonoBehaviour
 {
-    public GameObject currentLocationMarker;
+    public GameObject LocationMarker;
+    public float DesiredAccuracy;
     
     private float _latitude = 0f;
     private float _longitude = 0f;
@@ -62,7 +64,7 @@ public class GetUserCurrentLocation : MonoBehaviour
         }
 #endif
         // Start service before querying location
-        Input.location.Start(500f, 500f);
+        Input.location.Start(DesiredAccuracy, DesiredAccuracy);
                 
         // Wait until service initializes
         int maxWait = 15;
@@ -104,7 +106,7 @@ public class GetUserCurrentLocation : MonoBehaviour
                 + Input.location.lastData.altitude + " " 
                 + Input.location.lastData.horizontalAccuracy + " " 
                 + Input.location.lastData.timestamp);
-
+        
             _latitude = Input.location.lastData.latitude;
             _longitude = Input.location.lastData.longitude;
             // TODO DRAW LOCATION KEEP UPDATING
@@ -122,14 +124,10 @@ public class GetUserCurrentLocation : MonoBehaviour
     
     private GameObject CreateLocationMarker(float lat, float lon)
     {
-        var locationMarker = Instantiate(currentLocationMarker, _arcGisMapComponent.transform);
-
-        locationMarker.name = "locationMarker";
-
-        var location = locationMarker.AddComponent<ArcGISLocationComponent>();
+        var location = LocationMarker.AddComponent<ArcGISLocationComponent>();
         location.Position = new ArcGISPoint(lat, lon, 2f, new ArcGISSpatialReference(4326));
 
-        return locationMarker;
+        return LocationMarker;
     }
     
     private void SetElevation(GameObject locationMarker)
