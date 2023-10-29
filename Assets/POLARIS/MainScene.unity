@@ -428,7 +428,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9a067df3cf121744da839189bb49759b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  testing: 0
+  testing: 1
 --- !u!4 &355669367
 Transform:
   m_ObjectHideFlags: 0
@@ -890,7 +890,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   geo: {fileID: 2062164022}
-  ListEntryTemplate: {fileID: 9197481963319205126, guid: a6efed181fb96594d9670d265b13e76e,
+  LocationListEntryTemplate: {fileID: 9197481963319205126, guid: a6efed181fb96594d9670d265b13e76e,
+    type: 3}
+  EventListEntryTemplate: {fileID: 9197481963319205126, guid: 7aeb352b21f934d4e81a05dc8142be99,
     type: 3}
 --- !u!1 &1006044603
 GameObject:
@@ -1021,7 +1023,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   dataList: []
-  Testing: 1
+  Testing: 0
 --- !u!1 &1080807619
 GameObject:
   m_ObjectHideFlags: 0
@@ -1061,6 +1063,7 @@ MonoBehaviour:
     favorite: []
     schedule: []
     visited: []
+  Testing: 1
 --- !u!4 &1080807621
 Transform:
   m_ObjectHideFlags: 0

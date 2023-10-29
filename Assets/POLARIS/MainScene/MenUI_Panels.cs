@@ -36,8 +36,12 @@ namespace POLARIS.MainScene {
 
         //UI Toolkit Objects
         [SerializeField]
-        VisualTreeAsset ListEntryTemplate;
-        private ListController buildingListController;
+        VisualTreeAsset LocationListEntryTemplate;
+
+        [SerializeField]
+        VisualTreeAsset EventListEntryTemplate;
+
+        private ListController listController;
         // Start is called before the first frame update
         void Start()
         {
@@ -45,11 +49,11 @@ namespace POLARIS.MainScene {
 
             eventManager = EventManager.getInstance();
             currentTab = ChangeTabImage._lastPressed;
-            buildingListController = new ListController();
+            listController = new ListController();
 
             var uiDoc = GetComponent<UIDocument>();
             var rootVisual = uiDoc.rootVisualElement;
-            buildingListController.Initialize(rootVisual, ListEntryTemplate);
+            listController.Initialize(rootVisual, EventListEntryTemplate, LocationListEntryTemplate, ListController.SwitchType.locations);
 
             //set up the serach bar
             _searchField = rootVisual.Q<TextField>("SearchBar");
@@ -71,17 +75,6 @@ namespace POLARIS.MainScene {
         }
         private void OnSearchValueChanged(ChangeEvent<string> evt)
         {
-            /*if (currentTab == "location")
-            {
-                _buildingOrEventListView.itemsSource = _buildingSearchList;
-                _buildingOrEventListView.bindItem = bindLocationItem;
-            }
-            else
-            {
-                _buildingOrEventListView.itemsSource = _eventSearchList;
-                _buildingOrEventListView.bindItem = bindEventItem;
-            }*/
-
             string newText = evt.newValue;
 
             if (newText.EndsWith("\n"))
@@ -93,7 +86,7 @@ namespace POLARIS.MainScene {
 
             if (!string.IsNullOrWhiteSpace(newText))
             {
-                /*if (currentTab == "location")
+                if (currentTab == "location")
                 {
                     List<Building> buildings = GetBuildingsFromSearch(newText, newText[0] == '~');
                     UpdateBuildingSearchUI(buildings);
@@ -102,9 +95,7 @@ namespace POLARIS.MainScene {
                 {
                     List<EventData> events = eventManager.GetEventsFromSearch(newText, newText[0] == '~');
                     UpdateEventSearchUI(events);
-                }*/
-                List<Building> buildings = GetBuildingsFromSearch(newText, newText[0] == '~');
-                UpdateBuildingSearchUI(buildings);
+                }
             }
             else
             {
@@ -149,27 +140,12 @@ namespace POLARIS.MainScene {
 
         private void UpdateBuildingSearchUI(List<Building> buildings)
         {
-            // Clear previous suggestions
-            buildingListController.Update(buildings);
-            // Display the new suggestions in the AutoSuggestionText
-            /*foreach (var building in buildings)
-            {
-                _buildingOrEventListView.itemsSource.Add(building);
-                _buildingOrEventListView.Rebuild();
-            }*/
+            listController.Update(buildings);
         }
 
         private void UpdateEventSearchUI(List<EventData> events)
         {
-            // Clear previous suggestions
-            ClearSearchResults();
-
-            // Display the new suggestions in the AutoSuggestionText
-            /*foreach (var UCFEvent in events)
-            {
-                _buildingOrEventListView.itemsSource.Add(UCFEvent);
-                _buildingOrEventListView.Rebuild();
-            }*/
+            listController.Update(events);
         }
 
         private void OnBuildingSearchClick(Building selectedBuilding)
@@ -228,10 +204,8 @@ namespace POLARIS.MainScene {
 
         private void ClearSearchResults()
         {
-            buildingListController.Update(new List<Building>());
+            listController.Update(new List<Building>());
         }
-
-    
 
         public static void SetPlaceholderText(TextField textField, string placeholder)
         {

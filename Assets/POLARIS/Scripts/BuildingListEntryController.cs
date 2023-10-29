@@ -9,6 +9,7 @@ public class BuildingListEntryController
     Label DistanceLabel;
     Label AddressLabel;
     Label EventLabel;
+    public VisualElement image;
     VisualElement FavoriteElement;
     VisualElement NavigationElement;
 
@@ -20,6 +21,7 @@ public class BuildingListEntryController
         EventLabel = visualElement.Q<Label>(className: "panelTextEvents");
         FavoriteElement = visualElement.Q<Label>(className: "panelFavoritesIcon");
         NavigationElement = visualElement.Q<Label>(className: "panelNavigationIcon");
+        image = visualElement.Q<VisualElement>(className: "panelImage");
         /*
     .panelShadow
     .panel 
@@ -42,7 +44,7 @@ public class BuildingListEntryController
     {
         NameLabel.text = buildingData.BuildingName;
         DistanceLabel.text = "N miles";
-        AddressLabel.text = buildingData.BuildingAddress;
+        AddressLabel.text = buildingData.BuildingAddress == "none" ? "" : buildingData.BuildingAddress + " - ";
         EventLabel.text = buildingData.BuildingEvents.Length.ToString() + " Events";
         //FavoriteElement clickable event
         //NavigationElement clickable event

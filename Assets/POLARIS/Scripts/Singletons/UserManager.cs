@@ -14,22 +14,11 @@ namespace POLARIS.Managers{
         public UserData data;
         private IEnumerator currentCall;
         private const string updateCodeURL = "https://v21x6ajyg9.execute-api.us-east-2.amazonaws.com/dev/user/update";
-        
+        public bool Testing = false;
+
         void Awake()
         {
-            //create singleton
-            if (Instance != this && Instance != null)
-            {
-                Destroy(gameObject);
-            }
-            else
-            {
-                DontDestroyOnLoad(gameObject);
-                Instance = this;
-                data = new UserData();
-                LoadPlayerPrefs(data);
-                Debug.Log(data.UserID1);
-            } 
+            Initialize();
         }
 
         [Serializable]
@@ -67,6 +56,23 @@ namespace POLARIS.Managers{
         static public UserManager getInstance()
         {
             return Instance;
+        }
+
+        public void Initialize()
+        {
+            //create singleton
+            if (Instance != this && Instance != null)
+            {
+                Destroy(gameObject);
+            }
+            else
+            {
+                DontDestroyOnLoad(gameObject);
+                Instance = this;
+                data = new UserData();
+                LoadPlayerPrefs(data);
+                Debug.Log(data.UserID1);
+            }
         }
 
         static public bool isNotNull()

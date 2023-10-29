@@ -212,7 +212,7 @@ namespace POLARIS
                 // Debug.Log("calculated r: " + baseBuildingColor.r * (1.0f / (numEventsOfBuilding + 1)));
                 // Debug.Log("calculated g: " + baseBuildingColor.g * (1.0f / (numEventsOfBuilding + 1)));
                 // Debug.Log("calculated b: " + baseBuildingColor.b * (1.0f / (numEventsOfBuilding + 1)));
-                Debug.Log("Building " + feature.attributes.BuildingNa + " has new color: " + colorOfBuilding);
+                //Debug.Log("Building " + feature.attributes.BuildingNa + " has new color: " + colorOfBuilding);
                 _polyExtruder.createPrism(feature.attributes.BuildingNa, 50.0f, vertices2D, 
                     colorOfBuilding, true, false, true);
                 // TODO: Add mesh collider to walls

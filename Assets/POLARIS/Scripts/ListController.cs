@@ -10,38 +10,68 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.Serialization;
 using UnityEngine.UIElements;
+using POLARIS.Managers;
 
 public class ListController
 {
+    public enum SwitchType{
+        locations,
+        events
+    }
     //UMXL template used for all entries
-    VisualTreeAsset EntryTemplate;
+    VisualTreeAsset EventTemplate;
+    VisualTreeAsset LocationTemplate;
 
     //UI elements in main scene
     ListView EntryList;
+    
+    public SwitchType sw;
 
-    public void Initialize(VisualElement root, VisualTreeAsset template)
+    public void Initialize(VisualElement root, VisualTreeAsset eventEntry, VisualTreeAsset locationEntry, SwitchType type)
     {
+        sw = type;
+
+        //initialize variables
+        EntryList = root.Q<ListView>("SearchResultBigLabel");
         _buildingSearchList = new List<Building>();
+        _eventSearchList = new List<EventData>();
 
         //template
-        EntryTemplate = template;
+        EventTemplate = eventEntry;
+        LocationTemplate = locationEntry;
 
-        //get list view
-        EntryList = root.Q<ListView>("SearchResultBigLabel");
+        if (sw == SwitchType.events)
+            FillListEvent();
+        else
+            FillListBuilding();
 
-        //fill list with nothing initially
-        FillList();
+        ConfigureListView();
     }
 
     //building data
     List<Building> _buildingSearchList;
 
-    void FillList()
+    //event data
+    List<EventData> _eventSearchList;
+
+    void ConfigureListView()
+    {
+        //set settings for list view
+        EntryList.selectionType = SelectionType.None;
+
+        //set settings for list view's scroll
+        ScrollView SV = EntryList.Q<ScrollView>();
+        SV.verticalScrollerVisibility = ScrollerVisibility.Hidden;
+        SV.touchScrollBehavior = ScrollView.TouchScrollBehavior.Elastic;
+        SV.scrollDecelerationRate = 0.25f;
+        SV.elasticity = 0.01f;
+    }
+    void FillListBuilding()
     {
         EntryList.makeItem = () =>
         {
             // instantiate new entry
-            var newEntry = EntryTemplate.Instantiate();
+            var newEntry = LocationTemplate.Instantiate();
 
             var EntryLogic = new BuildingListEntryController();
 
@@ -63,27 +93,51 @@ public class ListController
 
         // Set the actual item's source list/array
         EntryList.itemsSource = _buildingSearchList;
-        
-        //set settings for list view
-        EntryList.selectionType = SelectionType.None;
+    }
 
-        //set settings for list view's scroll
-        ScrollView SV = EntryList.Q<ScrollView>();
-        SV.verticalScrollerVisibility = ScrollerVisibility.Hidden;
-        SV.touchScrollBehavior = ScrollView.TouchScrollBehavior.Elastic;
-        SV.scrollDecelerationRate = 0.25f;
-        SV.elasticity = 0.01f;
+    void FillListEvent()
+    {
+        EntryList.makeItem = () =>
+        {
+            // instantiate new entry
+            var newEntry = EventTemplate.Instantiate();
+
+            var EntryLogic = new EventListEntryController();
+
+            // Assign controller script to visual element
+            newEntry.userData = EntryLogic;
+
+            // Initialize controller script
+            EntryLogic.SetVisualElement(newEntry);
+
+            // return root of new instansiated element
+            return newEntry;
+        };
+
+        //bind function
+        EntryList.bindItem = (item, index) =>
+        {
+            (item.userData as EventListEntryController).SetEventData(_eventSearchList[index]);
+        };
+        // Set the actual item's source list/array
+        EntryList.itemsSource = _eventSearchList;
     }
 
     public void Update(List<Building> newList)
     {
         _buildingSearchList = newList;
-        EntryList.itemsSource = _buildingSearchList;
-
-        EntryList.bindItem = (item, index) =>
-        {
-            (item.userData as BuildingListEntryController).SetBuildingData(_buildingSearchList[index]);
-        };
+        FillListBuilding();
         EntryList.Rebuild();
+
+        sw = SwitchType.locations;
+    }
+
+    public void Update(List<EventData> newList)
+    {
+        _eventSearchList = newList;
+        FillListEvent();
+        EntryList.Rebuild();
+
+        sw = SwitchType.events;
     }
 }
