@@ -13,12 +13,12 @@ public class GetUserCurrentLocation : MonoBehaviour
     public GameObject LocationMarker;
     public float DesiredAccuracy;
     
-    private float _latitude = 0f;
     private float _longitude = 0f;
-    private double longMin = -81.209995;
-    private double latMin = 28.580255;
-    private double longMax = -81.181589;
-    private double latMax = 28.613986;
+    private float _latitude = 0f;
+    private float lonMin = -81.209995f;
+    private float lonMax = -81.181589f;
+    private float latMin = 28.580255f;
+    private float latMax = 28.613986f;
     
     private ArcGISMapComponent _arcGisMapComponent;
     private HPRoot _hpRoot;
@@ -27,12 +27,23 @@ public class GetUserCurrentLocation : MonoBehaviour
         _hpRoot = FindObjectOfType<HPRoot>();
         _arcGisMapComponent = FindObjectOfType<ArcGISMapComponent>();
         StartCoroutine(LocationCoroutine());
+        CreateLocationMarker();
     }
 
     private void Update()
     {
         // if (_latitude != 0f) Debug.Log($"Latitude: {_latitude}");
         // if (_longitude != 0f) Debug.Log($"Longitude: {_longitude}");
+        
+        // Location service running and location updated
+        if (Input.location.status == LocationServiceStatus.Running &&
+            PointInBounds(Input.location.lastData.longitude, Input.location.lastData.latitude) &&
+            (_longitude != Input.location.lastData.longitude || _latitude != Input.location.lastData.latitude))
+        {
+            _longitude = Input.location.lastData.longitude;
+            _latitude = Input.location.lastData.latitude;
+            UpdateLocationMarker(_longitude, _latitude);
+        }
     }
     
     IEnumerator LocationCoroutine() 
@@ -106,28 +117,42 @@ public class GetUserCurrentLocation : MonoBehaviour
                 + Input.location.lastData.altitude + " " 
                 + Input.location.lastData.horizontalAccuracy + " " 
                 + Input.location.lastData.timestamp);
-        
-            _latitude = Input.location.lastData.latitude;
+            
             _longitude = Input.location.lastData.longitude;
-            // TODO DRAW LOCATION KEEP UPDATING
-
-            _latitude = 28.60127224209225f;
-            _longitude = -81.19913365264773f;
-
-            var locationMarker = CreateLocationMarker(_latitude, _longitude);
-            SetElevation(locationMarker);
+            _latitude = Input.location.lastData.latitude;
         }
-
+        
         // Stop service if there is no need to query location updates continuously
-        Input.location.Stop();
+        // Input.location.Stop();
+    }
+
+    private void CreateLocationMarker()
+    {
+        // Random default coordinates I chose
+        _longitude = -81.1991396266178f;
+        _latitude = 28.6024642823258f;
+        CreateLocationMarkerComponent(_longitude, _latitude);
+        SetElevation(LocationMarker);
+        Debug.Log("Marker created!");
     }
     
-    private GameObject CreateLocationMarker(float lat, float lon)
+    private void CreateLocationMarkerComponent(float lon, float lat)
     {
         var location = LocationMarker.AddComponent<ArcGISLocationComponent>();
-        location.Position = new ArcGISPoint(lat, lon, 2f, new ArcGISSpatialReference(4326));
+        location.Position = new ArcGISPoint(lon, lat, 2f, new ArcGISSpatialReference(4326));
+    }
 
-        return LocationMarker;
+    private void UpdateLocationMarker(float lon, float lat)
+    {
+        UpdateLocationMarkerComponent(lon, lat);
+        SetElevation(LocationMarker);
+        Debug.Log("Marker updated!");
+    }
+    
+    private void UpdateLocationMarkerComponent(float lon, float lat)
+    {
+        var location = LocationMarker.GetComponent<ArcGISLocationComponent>();
+        location.Position = new ArcGISPoint(lon, lat, 2f, new ArcGISSpatialReference(4326));
     }
     
     private void SetElevation(GameObject locationMarker)
@@ -154,5 +179,10 @@ public class GetUserCurrentLocation : MonoBehaviour
         PersistData.DestinationPoint = spatialRef;
                 
         return GeoUtils.ProjectToSpatialReference(offsetPosition, new ArcGISSpatialReference(4326));
+    }
+
+    private bool PointInBounds(float lon, float lat)
+    {
+        return lon >= lonMin && lon <= lonMax && lat >= latMin && lat <= latMax;
     }
 }
