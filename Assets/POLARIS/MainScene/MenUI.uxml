@@ -19,22 +19,4 @@
             <ui:VisualElement name="FadeOutBottom" picking-mode="Ignore" style="flex-grow: 0; position: absolute; height: 20%; width: 100%; top: auto; left: auto; background-image: url(&apos;project://database/Assets/POLARIS/UI%20Assets/Fade%20Out.png?fileID=2800000&amp;guid=34eff8ce2adb4be41ac01034e1df4d2f&amp;type=3#Fade Out&apos;); background-color: rgba(46, 48, 82, 0); -unity-background-image-tint-color: rgb(46, 48, 82); cursor: initial; rotate: 180deg; bottom: -5px; flex-shrink: 0;" />
         </ui:VisualElement>
     </ui:VisualElement>
-    <ui:VisualElement class="panelEntity" style="flex-grow: 1; position: absolute; top: -30px; left: -1337px;">
-        <ui:VisualElement name="VisualElement" class="spacing" />
-        <Shadow class="panelShadow" style="opacity: 1;" />
-        <ui:VisualElement class="panel" style="flex-grow: 1;">
-            <ui:VisualElement class="panelImage" style="flex-grow: 1;" />
-            <ui:VisualElement class="panelBlocker" style="flex-grow: 1;" />
-            <ui:VisualElement class="panelTextArea" style="flex-grow: 1;">
-                <ui:Label tabindex="-1" text="Label" parse-escape-sequences="true" display-tooltip-when-elided="true" class="panelTextLocation" />
-                <ui:VisualElement class="panelLocationGroup" style="flex-grow: 1;">
-                    <ui:Label tabindex="-1" text="Label" parse-escape-sequences="true" display-tooltip-when-elided="true" class="panelTextAddress" />
-                    <ui:Label tabindex="-1" text="Label" parse-escape-sequences="true" display-tooltip-when-elided="true" class="panelTextDistance" />
-                </ui:VisualElement>
-                <ui:Label tabindex="-1" text="Label" parse-escape-sequences="true" display-tooltip-when-elided="true" class="panelTextEvents" />
-            </ui:VisualElement>
-            <ui:VisualElement class="panelNavigationIcon" style="flex-grow: 1;" />
-            <ui:VisualElement class="panelFavoritesIcon" style="flex-grow: 0;" />
-        </ui:VisualElement>
-    </ui:VisualElement>
 </ui:UXML>

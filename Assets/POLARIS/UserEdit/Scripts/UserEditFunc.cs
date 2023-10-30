@@ -4,19 +4,26 @@ using UnityEngine;
 using POLARIS.Managers;
 using UnityEngine.UIElements;
 using UnityEngine.SceneManagement;
+using System.Linq;
+using System;
+using System.Text.RegularExpressions;
+
 public class UserEditFunc : MonoBehaviour
 {
     public class FullTextField
     {
         public TextField field;
         public Label placeholder;
+        public Label errorMessage;
         private string currentValue;
+        public IEnumerator errorFadePlaying;
 
-        public FullTextField(TextField field, Label placeholder)
+        public FullTextField(TextField field, Label placeholder, Label errorMessage)
         {
             this.field = field;
             this.placeholder = placeholder;
             this.CurrentValue = "";
+            this.errorMessage = errorMessage;
         }
 
         public string CurrentValue { 
@@ -46,6 +53,7 @@ public class UserEditFunc : MonoBehaviour
     private Press resetPasswordPress;
     private IEnumerator callingFunction;
 
+    public bool errorTesting;
     private void Start()
     {
         //define the needed variables
@@ -69,13 +77,7 @@ public class UserEditFunc : MonoBehaviour
         logOutPress = new Press(UiDoc, "LogOut");
         logOutPress.AddEvent(OnLogOutClick);
 
-        resetPasswordPress = new Press(UiDoc, "ResetPassowrd");
-        //resetPasswordPress.AddEvent(OnConfirmClick);
-        //1. Update Placeholder correctly (once)
-        //2. Update confirm button correctly (once)
-        //3. Handle confirm button (once)
-        //4. Handle logout button (once)
-        //5. Handle reset password button (once)
+        resetPasswordPress = new Press(UiDoc, "ResetPassword");
 
         //initialize text input fields
         fieldsMap = new Dictionary<string, FullTextField>();
@@ -85,6 +87,7 @@ public class UserEditFunc : MonoBehaviour
             var field = UiDoc.rootVisualElement.Q<VisualElement>(name + "Field");
             TextField userInput = field.Q<TextField>("UserInput");
             Label placeholder = field.Q<Label>("Placeholder");
+            Label errorMessage = field.Q<Label>("ErrorMessage");
 
             //register update on change for confirm
             userInput.RegisterValueChangedCallback(OnChangedField);
@@ -93,7 +96,7 @@ public class UserEditFunc : MonoBehaviour
             SetPlaceholderText(userInput, placeholder, name);
 
             //add to list
-            fieldsMap.Add(name, new FullTextField(userInput, placeholder));
+            fieldsMap.Add(name, new FullTextField(userInput, placeholder, errorMessage));
         }
         Initialize();
     }
@@ -101,7 +104,7 @@ public class UserEditFunc : MonoBehaviour
     {
         PopulateTextFields();
     }
-
+    #region TextFieldFunctions
     public void EmptyFields()
     {
         //empty out fields
@@ -111,15 +114,16 @@ public class UserEditFunc : MonoBehaviour
         }
     }
 
+    //gets values from UserManager and populates text field, also initializes whether confirm button should appear
     private void PopulateTextFields()
     {
         //populate if UserManager not null
         if (UserManager.isNotNull())
         {
+            //set initial values
             fieldsMap["Email"].CurrentValue = (UserInstance.data.Email);
             fieldsMap["Username"].CurrentValue = (UserInstance.data.Username);
             fieldsMap["Name"].CurrentValue = (UserInstance.data.Realname);
-            //set initial value
         }
         else
         {
@@ -132,6 +136,7 @@ public class UserEditFunc : MonoBehaviour
         renderConfirmButton();
     }
 
+    //detects if text in fields have changed (and if the confirm button should appear as result)
     private void renderConfirmButton()
     {
         bool flag = false;
@@ -153,9 +158,17 @@ public class UserEditFunc : MonoBehaviour
         else
         {
             confirmButton.style.height = 200;
+            //stop shaking if it's shaking
+            if (playing != null)
+            {
+                StopCoroutine(playing);
+                confirmButton.style.translate = new Translate(0, 0);
+                confirmButton.SetEnabled(true);
+            }
         }
     }
 
+    //set placeholder functionallity
     private static void SetPlaceholderText(TextField textField, Label placeholder, string text)
     {
         string placeholderClass = TextField.ussClassName + "__placeholder";
@@ -173,32 +186,113 @@ public class UserEditFunc : MonoBehaviour
                 placeholder.text = string.Empty;
         }
     }
+    public enum fieldValidationChecks
+    {
+        emptyError,
+        whitespaceError,
+        emailFormatError,
+        success
+    }
+    private IDictionary<fieldValidationChecks, string> errorMessages = new Dictionary<fieldValidationChecks, string>()
+    {
+        {fieldValidationChecks.emptyError, "(field cannot be empty)"},
+        {fieldValidationChecks.whitespaceError, "(field cannot contain whitespaces)" },
+        {fieldValidationChecks.emailFormatError, "(email is invalid)" }
+    };
+    //iterates through all fields and check if all are valid on confirm click
+    private bool allFieldCheck()
+    {
+        //for testing
+        if (errorTesting)
+        {
+            //set errors
+            foreach (string name in fieldNames)
+            {
+                playErrorMessage(fieldsMap[name], "(THIS IS A TEST)");
+            }
+            ConfirmShakeAnimation();
+            return false;
+        }
 
+        //error checking
+        bool errorExists = false;
+        foreach (string name in fieldNames)
+        {
+            bool flag = false;
+
+            //trim whitespace characters
+            fieldsMap[name].field.value = fieldsMap[name].field.value.Trim();
+
+            if (name == "Email") flag = true;
+            fieldValidationChecks checkError = isFieldValid(fieldsMap[name].field.value, flag, flag);
+
+            //output error message
+            if (checkError != fieldValidationChecks.success)
+            {
+                errorExists = true;
+                playErrorMessage(fieldsMap[name], errorMessages[checkError]);
+            }
+        }
+
+        return !errorExists;
+    }
+    //checking if the fields are valid
+    private fieldValidationChecks isFieldValid(string text, bool email = false, bool whitespaces = false)
+    {
+        //check if empty
+        if (text.Length == 0)
+            return fieldValidationChecks.emptyError;
+
+        //check if any whitespaces exist
+        if (text.Any(x => Char.IsWhiteSpace(x)))
+            return fieldValidationChecks.whitespaceError;
+
+        //check if email is valid
+        if (email && !IsValidEmail(text))
+            return fieldValidationChecks.emailFormatError;
+
+        return fieldValidationChecks.success;
+    }
+
+    private static bool IsValidEmail(string email)
+    {
+        string regex = @"^[^@\s]+@[^@\s]+\.(com|net|org|gov)$";
+
+        return Regex.IsMatch(email, regex, RegexOptions.IgnoreCase);
+    }
+
+    #endregion
+
+    #region ConfirmButtonFunctions
+    //call update user and then choose to render confirm button based on success or failure
     public IEnumerator CallBackend(IDictionary<string, string> req)
     {
         yield return StartCoroutine(UserInstance.UpdateFields(req));
-        //correct confirm
+
+        //check whether user updated succeeded based on data in UserManager (field by field)
         if (UserInstance.data.Email == fieldsMap["Email"].field.value)
             fieldsMap["Email"].matchValues();
 
         if (UserInstance.data.Username == fieldsMap["Username"].field.value)
-        {
-            Debug.Log(fieldsMap["Username"].field.value);
-            Debug.Log(UserInstance.data.Username);
             fieldsMap["Username"].matchValues();
-            Debug.Log("yes");
-        }
             
         if (UserInstance.data.Realname == fieldsMap["Name"].field.value)
             fieldsMap["Name"].matchValues();
 
+        //render confirm button based on above results
         renderConfirmButton();
-        Debug.Log("Made it");
         callingFunction = null;
     }
 
+    //what should happen when press ocnfirm
     public void OnConfirmClick()
     {
+        //if fields are not valid don't send request
+        if (!allFieldCheck())
+        {
+            ConfirmShakeAnimation();
+            return;
+        }
         //create request. Only put field in request if it's changed
         IDictionary<string, string> request = new Dictionary<string, string>();
         foreach (string name in fieldNames)
@@ -211,17 +305,81 @@ public class UserEditFunc : MonoBehaviour
             }
         }
 
-        if(callingFunction == null)
+        //call user function if no update is currently happening
+        if (callingFunction == null)
         {
             request["UserID"] = UserInstance.data.UserID1;
             callingFunction = CallBackend(request);
             StartCoroutine(callingFunction);
         }
     }
+    #endregion
 
+    #region LogOutFunctions
     public void OnLogOutClick()
     {
         UserInstance.Logout();
         SceneManager.LoadScene("Login");
     }
+    #endregion
+
+    #region AnimationFunctions
+    IEnumerator playing;
+    private void ConfirmShakeAnimation()
+    {
+        if(playing == null)
+        {
+            playing = playShakeAnimation(confirmButton);
+            StartCoroutine(playing);
+        }
+    }
+
+    private IEnumerator playShakeAnimation(VisualElement ui)
+    {
+        ui.SetEnabled(false);
+        for(int i = 0;i < 2; i++)
+        {
+            ui.style.translate = new Translate(10, 0);
+            yield return new WaitForSeconds(0.05f);
+            ui.style.translate = new Translate(-10, 0);
+            yield return new WaitForSeconds(0.05f);
+        }
+        ui.style.translate = new Translate(0, 0);
+        ui.SetEnabled(true);
+
+        playing = null;
+    }
+
+    public void playErrorMessage(FullTextField ui, string err)
+    {
+        //reset error message if currently in process of fading out
+        if(ui.errorFadePlaying != null)
+        {
+            StopCoroutine(ui.errorFadePlaying);
+            ui.errorFadePlaying = null;
+        }
+        ui.errorMessage.text = err;
+        FadeIn(ui.errorMessage);
+        ui.errorFadePlaying = fadeOutAnimation(ui);
+        StartCoroutine(ui.errorFadePlaying);
+    }
+
+    private IEnumerator fadeOutAnimation(FullTextField ui)
+    {
+        yield return new WaitForSeconds(3f);
+        FadeOut(ui.errorMessage);
+        ui.errorFadePlaying = null;
+    }
+    void FadeIn(Label ui)
+    {
+        ui.AddToClassList("fade-in");
+        ui.RemoveFromClassList("fade-out");
+    }
+
+    void FadeOut(Label ui)
+    {
+        ui.AddToClassList("fade-out");
+        ui.RemoveFromClassList("fade-in");
+    }
+    #endregion
 }

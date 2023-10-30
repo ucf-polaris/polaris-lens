@@ -4,24 +4,28 @@
 
 #UserInput > TextInput {
     background-color: rgba(0, 0, 0, 0);
-    background-image: resource('Assets/POLARIS/Register/text box.png');
+    background-image: url('project://database/Assets/POLARIS/Register/text%20box.png?fileID=2800000&guid=611bd04747d3c46a9831a8414b7aabf6&type=3#text box');
     border-width: 0;
     height: 80%;
 }
 
 #Confirm:active {
     -unity-background-image-tint-color: rgb(0, 63, 17);
-    -unity-text-outline-width: 8px;
+    -unity-text-outline-width: 0;
+    display: flex;
+    opacity: 0.5;
 }
 
 #ResetPassword:active {
     -unity-background-image-tint-color: rgb(0, 63, 17);
-    -unity-text-outline-width: 8px;
+    -unity-text-outline-width: 0;
+    opacity: 0.5;
 }
 
 #LogOut:active {
     -unity-background-image-tint-color: rgb(0, 63, 17);
-    -unity-text-outline-width: 8px;
+    -unity-text-outline-width: 0;
+    opacity: 0.5;
 }
 
 .unity-base-text-field__input {
@@ -43,4 +47,28 @@
 
 .hide-edit-UI {
     bottom: 120%;
+}
+
+.errorMessage {
+    position: absolute;
+    top: 188px;
+    left: 40px;
+    color: rgb(255, 0, 0);
+    font-size: 25px;
+    -unity-font: resource('Polaris/fonts/LiberationSans');
+    opacity: 0;
+}
+
+.fade-in {
+    opacity: 1;
+    transition-property: opacity;
+    transition-duration: 0;
+    transition-timing-function: linear;
+}
+
+.fade-out {
+    opacity: 0;
+    transition-property: opacity;
+    transition-duration: 0.3s;
+    transition-timing-function: linear;
 }
