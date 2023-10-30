@@ -166,6 +166,7 @@ PlayerSettings:
   applicationIdentifier:
     Android: com.ucfar.polaris
     Standalone: com.DefaultCompany.com.unity.template.ar
+    iPhone: com.ucfar.polaris
   buildNumber:
     Standalone: 0
     VisionOS: 0
