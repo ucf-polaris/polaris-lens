@@ -229,7 +229,7 @@ public class UserEditFunc : MonoBehaviour
             fieldValidationChecks checkError = isFieldValid(fieldsMap[name].field.value, flag, flag);
 
             //output error message
-            if (checkError != fieldValidationChecks.success)
+            if (checkError != fieldValidationChecks.success && fieldsMap[name].valueHasChanged())
             {
                 errorExists = true;
                 playErrorMessage(fieldsMap[name], errorMessages[checkError]);

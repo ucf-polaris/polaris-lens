@@ -60,7 +60,7 @@ public class ChangeTabImage : MonoBehaviour
     private void OnClickArrow(ClickEvent evt)
     {
 	    _menuOpen = !_menuOpen;
-	    _spacer.style.height = Length.Percent(_menuOpen ?  15 : 80);
+	    _spacer.style.height = Length.Percent(_menuOpen ?  15 : 82.5f);
 	    _arrow.style.rotate = new Rotate(_menuOpen ? 90 : 270);
     }
 
@@ -69,7 +69,7 @@ public class ChangeTabImage : MonoBehaviour
 	    _menuOpen = !(_menuOpen && _lastPressed == pressed);
 	    _lastPressed = pressed;
 
-	    _spacer.style.height = Length.Percent(_menuOpen ?  15 : 80);
+	    _spacer.style.height = Length.Percent(_menuOpen ?  15 : 82.5f);
 	    _arrow.style.rotate = new Rotate(_menuOpen ? 90 : 270);
     }
 }
