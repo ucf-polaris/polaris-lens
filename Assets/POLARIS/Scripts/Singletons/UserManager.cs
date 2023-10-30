@@ -63,13 +63,13 @@ namespace POLARIS.Managers{
         public class UserCodeData
         {
             [SerializeField]
-            private string token;
+            private string userID;
             [SerializeField]
-            private string refreshToken;
+            private string token;
 
             #region Setters and Getters
-            public string Token { get => token; set { token = value; PlayerPrefs.SetString("AuthToken", value); } }
-            public string RefreshToken { get => refreshToken; set { refreshToken = value; PlayerPrefs.SetString("RefreshToken", value); } }
+            public string UserID { get => userID; set { userID = value; PlayerPrefs.SetString("UserID", value); } }
+            public string Token { get => token; set { token = value; PlayerPrefs.SetString("CodeAuthToken", value); } }
             #endregion
         }
 
