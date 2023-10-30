@@ -244,7 +244,7 @@ public class UserEditFunc : MonoBehaviour
             return fieldValidationChecks.emptyError;
 
         //check if any whitespaces exist
-        if (text.Any(x => Char.IsWhiteSpace(x)))
+        if (whitespaces && text.Any(x => Char.IsWhiteSpace(x)))
             return fieldValidationChecks.whitespaceError;
 
         //check if email is valid
