@@ -11,19 +11,19 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/POLARIS/GeospatialScene/Polaris Geospatial.unity
     guid: 3fec6582c005a884b89abe0952eda77c
-  - enabled: 0
+  - enabled: 1
     path: Assets/POLARIS/Welcome.unity
     guid: 6a8da7fd905ba4c719082e32bfce3471
-  - enabled: 0
+  - enabled: 1
     path: Assets/POLARIS/Register.unity
     guid: dcb6b30fed2714731970bd1052d1f012
-  - enabled: 0
+  - enabled: 1
     path: Assets/POLARIS/Login.unity
     guid: 897ec51777dbc41e18496ceacd948817
-  - enabled: 0
+  - enabled: 1
     path: Assets/POLARIS/Verify.unity
     guid: dfaa98f6805b345d4a793b5b222b3b0b
-  - enabled: 0
+  - enabled: 1
     path: Assets/POLARIS/ForgotPWCode.unity
     guid: 9efe41a69590d42ab9537bd2284f9f58
   - enabled: 0

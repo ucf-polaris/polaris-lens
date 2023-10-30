@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 0}
-  m_IndirectSpecularColor: {r: 0.4503178, g: 0.5003408, b: 0.57531166, a: 1}
+  m_IndirectSpecularColor: {r: 0.45031738, g: 0.50033987, b: 0.57531095, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -325,7 +325,7 @@ Transform:
   m_GameObject: {fileID: 177370685}
   serializedVersion: 2
   m_LocalRotation: {x: 0.70710677, y: -0, z: -0, w: 0.7071068}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalPosition: {x: 0, y: 0, z: 0.0000000013969839}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -669,7 +669,7 @@ MonoBehaviour:
   m_LocalPosition:
     x: -9039478.68992216
     y: 0
-    z: 3325135.872468732
+    z: 3325135.8724687304
   m_LocalRotation:
     value:
       x: 0
@@ -876,7 +876,7 @@ MonoBehaviour:
   m_LocalPosition:
     x: -9039198.95691282
     y: 500
-    z: 3324946.361543439
+    z: 3324946.3615434384
   m_LocalRotation:
     value:
       x: 0.54716814
@@ -1156,7 +1156,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   data:
     username: 
-    UserID: d0e274c9-173c-4021-b529-57fa8710029a
+    UserID: 
     email: 
     realname: 
     token: 
@@ -1164,6 +1164,10 @@ MonoBehaviour:
     favorite: []
     schedule: []
     visited: []
+    currScene: 
+  codeData:
+    token: 
+    refreshToken: 
   Testing: 1
 --- !u!4 &1080807621
 Transform:
@@ -1633,7 +1637,7 @@ MonoBehaviour:
   m_LocalPosition:
     x: -9039162.689922158
     y: 1000
-    z: 3325135.872468732
+    z: 3325135.8724687304
   m_LocalRotation:
     value:
       x: 0

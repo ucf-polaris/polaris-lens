@@ -12,7 +12,7 @@
         </ui:GroupBox>
     </ui:GroupBox>
     <ui:VisualElement style="flex-grow: 1; background-color: rgb(46, 48, 82); height: auto;">
-        <ui:TextField picking-mode="Ignore" keyboard-type="Search" name="SearchBar" style="width: 90%; align-self: center; padding-top: 0; padding-right: 0; padding-bottom: 0; padding-left: 0; margin-top: 4%; margin-right: 2%; margin-bottom: 2%; margin-left: 2%; height: 150px; min-height: auto; font-size: 80px;" />
+        <ui:TextField picking-mode="Ignore" keyboard-type="Search" name="SearchBar" style="width: 90%; align-self: center; padding-top: 0; padding-right: 0; padding-bottom: 0; padding-left: 0; margin-top: 4%; margin-right: 2%; margin-bottom: 2%; margin-left: 2%; height: 150px; min-height: auto; font-size: 80px; background-image: none;" />
         <ui:Label tabindex="-1" text="Locations" parse-escape-sequences="true" display-tooltip-when-elided="true" name="Identifier" style="position: relative; font-size: 85px; color: rgb(212, 212, 212); left: 54px; top: auto; bottom: 0;" />
         <ui:VisualElement name="SearchResults" class="SearchResults" style="flex-direction: column; align-items: center; justify-content: flex-end; height: 80%; align-self: auto; flex-grow: 0; min-height: auto; min-width: auto; top: 50px; width: 100%;">
             <ui:ListView name="SearchResultBigLabel" fixed-item-height="780" virtualization-method="FixedHeight" show-foldout-header="false" show-border="false" show-bound-collection-size="false" class="SearchResultBigLabel" style="flex-grow: 0; height: 100%; width: 90%; max-height: none; min-height: auto; background-color: rgb(46, 48, 82); position: relative; top: auto; justify-content: flex-start; align-items: center; flex-shrink: 0;" />

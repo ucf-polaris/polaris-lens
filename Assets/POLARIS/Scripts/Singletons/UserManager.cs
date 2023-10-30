@@ -45,6 +45,8 @@ namespace POLARIS.Managers{
             public List<string> schedule;
             [SerializeField]
             public List<string> visited;
+            [SerializeField]
+            private string currScene;
 
             #region Setters and Getters
             public string Username { get => username; set { username = value; PlayerPrefs.SetString("username", value); } }
@@ -53,6 +55,7 @@ namespace POLARIS.Managers{
             public string Realname { get => realname; set { realname = value; PlayerPrefs.SetString("realName", value); } }
             public string Token { get => token; set { token = value; PlayerPrefs.SetString("AuthToken", value); } }
             public string RefreshToken { get => refreshToken; set { refreshToken = value; PlayerPrefs.SetString("RefreshToken", value); } }
+            public string CurrScene { get => currScene; set { currScene = value; PlayerPrefs.SetString("currScene", value); } }
             #endregion
         }
 
@@ -105,6 +108,7 @@ namespace POLARIS.Managers{
             PlayerPrefs.DeleteKey("AuthToken");
             PlayerPrefs.DeleteKey("realName");
             PlayerPrefs.DeleteKey("username");
+            data = new UserData();
 
             /*
             PlayerPrefs.DeleteKey("favorites");

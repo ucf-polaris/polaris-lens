@@ -58,6 +58,7 @@ public class UserEditFunc : MonoBehaviour
     {
         //define the needed variables
         UserInstance = UserManager.getInstance();
+        UserInstance.data.CurrScene = SceneManager.GetActiveScene().name;
         UiDoc = gameObject.GetComponent<UIDocument>();
         buttonNameList = new string[] { "Confirm", "ResetPassword", "LogOut" };
         fieldNames = new string[] { "Email", "Username", "Name" };
@@ -78,6 +79,7 @@ public class UserEditFunc : MonoBehaviour
         logOutPress.AddEvent(OnLogOutClick);
 
         resetPasswordPress = new Press(UiDoc, "ResetPassword");
+        resetPasswordPress.AddEvent(OnResetPasswordClick);
 
         //initialize text input fields
         fieldsMap = new Dictionary<string, FullTextField>();
@@ -315,11 +317,16 @@ public class UserEditFunc : MonoBehaviour
     }
     #endregion
 
-    #region LogOutFunctions
+    #region OtherButtonFunctions
     public void OnLogOutClick()
     {
         UserInstance.Logout();
         SceneManager.LoadScene("Login");
+    }
+
+    public void OnResetPasswordClick()
+    {
+        SceneManager.LoadScene("ForgotPWCode");
     }
     #endregion
 
