@@ -5,6 +5,7 @@ using Google.XR.ARCoreExtensions;
 using Google.XR.ARCoreExtensions.Samples.Geospatial;
 using Unity.Mathematics;
 using Unity.VisualScripting;
+using Unity.XR.CoreUtils;
 using UnityEngine;
 using UnityEngine.XR.ARFoundation;
 
@@ -52,6 +53,8 @@ namespace POLARIS.GeospatialScene
         // Temp function for show
         public ARGeospatialAnchor PlacePanel(List<GameObject> anchorObjects, GeospatialAnchorHistory history)
         {
+            if (Camera.gameObject.GetNamedChild("Panel")) return null;
+            
             var panel = AnchorManager.AddComponent<TextPanel>();
             panel.Instantiate(new GeospatialAnchorContent("WHY HELLO THERE <style=Description>third panel <color=green>hello</color></style>", history));
             var anchor = panel.PlacePanelGeospatialAnchor(anchorObjects, AnchorManager);

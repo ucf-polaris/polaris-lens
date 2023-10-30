@@ -12,6 +12,7 @@ using UnityEngine.Networking;
 using UnityEngine.UI;
 using UnityEngine.XR.ARFoundation;
 using POLARIS.Managers;
+using Unity.VisualScripting;
 
 namespace POLARIS.GeospatialScene
 {
@@ -252,42 +253,56 @@ namespace POLARIS.GeospatialScene
         {
             // Mock using student union coords 28.601927704512025, -81.20044219923692
             if (eventManager?.dataList is null) return;
-            
+
             var events = eventManager.dataList.Where(e =>
-                                                    Math.Abs(e.Location.BuildingLat -
+                                                     Math.Abs(e.Location.BuildingLat -
                                                              28.601927704512025) <
-                                                             // Content.History.Latitude) <
-                                                    0.000001 &&
-                                                    Math.Abs(e.Location.BuildingLong -
+                                                            // Content.History.Latitude) <
+                                                     0.000001 &&
+                                                     Math.Abs(e.Location.BuildingLong -
                                                              -81.20044219923692) <
-                                                             // Content.History.Longitude) <
-                                                    0.000001);
+                                                            // Content.History.Longitude) <
+                                                     0.000001);
             
             // TODO: APPEND HEADER somehow
-
+            
             foreach (var e in events)
             {
                 var textObj = Resources.Load<GameObject>("Polaris/AREventText");
 
                 var text = GenerateEventText(e);
                 textObj.GetComponent<TextMeshProUGUI>().SetText(text);
-                StartCoroutine(SetImage(e.Image, textObj.GetComponentInChildren<Image>()));
-
+                // StartCoroutine(SetImage(e.Image, textObj.GetComponentInChildren<Image>()));
+                try
+                {
+                    var eventSprite = Sprite.Create(e.rawImage, new Rect(0, 0, e.rawImage.width, e.rawImage.height), new Vector2(0.5f, 0.5f));
+                    var image = textObj.GetComponentInChildren<Image>();
+                    image.sprite = eventSprite;
+                }
+                catch (Exception exception)
+                {
+                    Console.WriteLine("Could not get sprite " + exception);
+                }
+                
                 Instantiate(textObj, _bottomLayout.transform);
             }
 
             _eventsLoaded = true;
         }
 
+        // TODO: Make this look nicer
         private static string GenerateEventText(EventData e)
         {
             var sb = new StringBuilder();
 
-            sb.Append(e.Name + "\n\n");
-            sb.Append("<indent=45%><line-height=120%>" + e.ListedLocation + "\n");
-            sb.Append("<line-height=120%>" + GenerateTime(e.DateTime) + "\n");
-            sb.Append("<line-height=120%>" + e.Host + "\n\n");
-            sb.Append("<indent=0%>" + HtmlParser.RichParse(e.Description));
+            sb.Append("<line-height=120%>" + e.Name + "\n");
+            sb.Append("<indent=45%><line-height=120%>" + GenerateTime(e.DateTime) + "\n");
+            sb.Append("<line-height=120%>" + e.ListedLocation + "\n");
+            sb.Append("<line-height=120%><indent=0%>" + e.Host + "\n\n");
+            sb.Append(HtmlParser.RichParse(e.Description));
+            
+            print(e.Description);
+            print("parsed: " + HtmlParser.RichParse(e.Description));
 
             return sb.ToString();
         }
@@ -297,19 +312,20 @@ namespace POLARIS.GeospatialScene
             return $"{dt:h:mm tt - dddd, MMMM dd}";
         }
         
-        private static IEnumerator SetImage(string url, Graphic img)
-        {   
-            var request = UnityWebRequestTexture.GetTexture(url);
-            yield return request.SendWebRequest();
-            if (request.result != UnityWebRequest.Result.Success)
-            {
-                Debug.Log(request.error);
-            }
-            else
-            {
-                img.material.mainTexture = ((DownloadHandlerTexture)request.downloadHandler).texture;
-                Debug.Log("maybe success");
-            }
-        }
+        // private static IEnumerator SetImage(EventData e, Graphic img)
+        // {   
+        //     
+        //     var request = UnityWebRequestTexture.GetTexture(e.Image);
+        //     yield return request.SendWebRequest();
+        //     if (request.result != UnityWebRequest.Result.Success)
+        //     {
+        //         Debug.Log(request.error);
+        //     }
+        //     else
+        //     {
+        //         img.material.mainTexture = ((DownloadHandlerTexture)request.downloadHandler).texture;
+        //         Debug.Log("maybe success");
+        //     }
+        // }
     }
 }
