@@ -44,6 +44,7 @@ public class EmailCode : MonoBehaviour
             // set the user id and token in the playerprefs
             instance.data.UserID1 = UserID;
             instance.codeData.Token = Token;
+            Debug.Log(instance.codeData.Token);
 
             // switch to the next gameobject
             gameObject.SetActive(false);

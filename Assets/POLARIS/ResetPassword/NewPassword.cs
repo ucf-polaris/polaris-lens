@@ -5,6 +5,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 using POLARIS.Managers;
+using UnityEngine.SceneManagement;
 
 public class NewPassword : MonoBehaviour
 {
@@ -17,6 +18,7 @@ public class NewPassword : MonoBehaviour
     private string Token;
     private string RefreshToken;
     private string UserID;
+    private string prevScene;
     public GameObject next;
     // Start is called before the first frame update
     void Start()
@@ -35,6 +37,11 @@ public class NewPassword : MonoBehaviour
         instance = UserManager.getInstance();
         Token = instance.data.Token;
         UserID = instance.data.UserID1;
+        prevScene = instance.data.CurrScene;
+        if (string.IsNullOrEmpty(prevScene))
+        {
+            prevScene = "Login";
+        }
     }
 
     public void OnChangePassClick()
@@ -67,9 +74,10 @@ public class NewPassword : MonoBehaviour
         StartCoroutine(instance.UpdatePassword(request, (response) =>
         {
             Debug.Log("Received Response: " + response);
-            errorMessageText.text = "Password successfully updated!";
+            errorMessageText.text = "Password successfully updated!\n Returning back...";
             errorMessageText.color = Color.green;
-            // display success message
+
+            StartCoroutine(waiter());
         }, (error) =>
         {
             Debug.Log("Error: " + error);
@@ -78,5 +86,11 @@ public class NewPassword : MonoBehaviour
             // display error message
             return;
         }));
+    }
+
+    IEnumerator waiter()
+    {
+        yield return new WaitForSeconds(5);
+        SceneManager.LoadScene(prevScene);
     }
 }

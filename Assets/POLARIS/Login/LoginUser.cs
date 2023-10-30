@@ -8,13 +8,24 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using TMPro; 
 using UnityEngine.SceneManagement;
+using POLARIS.Managers;
 
 public class LoginUser : MonoBehaviour
 {
     public TMP_InputField emailInput;
     public TMP_InputField passwordInput;
+    private UserManager instance;
+    private string Token;
+    private string UserID;
+    private string RefreshToken;
+    private string prevScene;
     public string loginURL = "https://api.ucfpolaris.com/user/login";
-    
+
+    public void Start()
+    {
+        instance = UserManager.getInstance();
+        instance.data.CurrScene = SceneManager.GetActiveScene().name;
+    }
     public void Login()
     {
         StartCoroutine(SendLoginRequest(emailInput.text, passwordInput.text));
@@ -40,6 +51,10 @@ public class LoginUser : MonoBehaviour
         {
             Debug.Log(www.error);
         }
+        else if (www.downloadHandler.text.Contains("ERROR"))
+        {
+            Debug.Log(www.downloadHandler.text);
+        }
         else
         {
             Debug.Log("Form upload complete!");
@@ -47,11 +62,23 @@ public class LoginUser : MonoBehaviour
             Debug.Log(www.result);
             JObject jsonResponse = JObject.Parse(www.downloadHandler.text);
             Debug.Log("Response: " + jsonResponse);
-            if (jsonResponse.ContainsKey("UserID"))
+            if (jsonResponse["verified"].Value<bool>() == true)
             {
+                instance.data.UserID1 = jsonResponse["UserID"].Value<string>();
+                instance.data.Email = jsonResponse["email"] != null ? jsonResponse["email"].Value<string>() : "";
+                instance.data.Username = jsonResponse["username"] != null ? jsonResponse["username"].Value<string>() : "";
+                instance.data.Realname = jsonResponse["name"] != null ? jsonResponse["name"].Value<string>() : "";
+                instance.data.schedule = jsonResponse["schedule"] != null ? jsonResponse["schedule"].Value<List<string>>() : new List<string>();
+                instance.data.favorite = jsonResponse["favorite"] != null ? jsonResponse["favorite"].Value<List<string>>() : new List<string>();
+                instance.data.visited = jsonResponse["visited"] != null ? jsonResponse["visited"].Value<List<string>>() : new List<string>();
+                instance.data.Token = (string)jsonResponse["tokens"]["token"];
+                instance.data.RefreshToken = (string)jsonResponse["tokens"]["refreshToken"];
                 SceneManager.LoadScene("MainScene");
             }
-            else Debug.Log("incorrect login");
+            else
+            {
+                SceneManager.LoadScene("Verify");
+            }
         }
     }
     

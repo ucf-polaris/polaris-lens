@@ -14,6 +14,11 @@ public class WelcomeScript : MonoBehaviour
     {
         SceneManager.LoadScene("Register"); 
     }
+
+    public void OnForgotPasswordClick()
+    {
+        SceneManager.LoadScene("ForgotPWCode");
+    }
     
     // Start is called before the first frame update
     void Start()
