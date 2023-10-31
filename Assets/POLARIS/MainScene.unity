@@ -528,59 +528,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1 &454771658
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 454771659}
-  - component: {fileID: 454771660}
-  m_Layer: 5
-  m_Name: RouteInfo
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!224 &454771659
-RectTransform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 454771658}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 1267588321}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0.5, y: 0.5}
-  m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 100, y: 100}
-  m_Pivot: {x: 0.5, y: 0.5}
---- !u!114 &454771660
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 454771658}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 19102, guid: 0000000000000000e000000000000000, type: 0}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  m_PanelSettings: {fileID: 11400000, guid: 83c80393519b7f14db65285d95e88514, type: 2}
-  m_ParentUI: {fileID: 1267588322}
-  sourceAsset: {fileID: 9197481963319205126, guid: d49ff30ea74bd8d439e447a34953b37a,
-    type: 3}
-  m_SortingOrder: 0
 --- !u!1 &607878207
 GameObject:
   m_ObjectHideFlags: 0
@@ -729,7 +676,7 @@ MonoBehaviour:
   RouteBreadcrumb: {fileID: 4122667162209955305, guid: 03458b7caef582b4387ba5bd468061d2,
     type: 3}
   Route: {fileID: 177370685}
-  RouteInfo: {fileID: 454771658}
+  RouteInfo: {fileID: 985640667}
   LocationMarker: {fileID: 70745446}
   PathStart: {r: 0.34509805, g: 0.34509805, b: 0.34509805, a: 0}
   PathEnd: {r: 0.18777141, g: 0.2816463, b: 0.7264151, a: 1}
@@ -1214,7 +1161,6 @@ RectTransform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 2103678089}
-  - {fileID: 454771659}
   m_Father: {fileID: 1939349958}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}

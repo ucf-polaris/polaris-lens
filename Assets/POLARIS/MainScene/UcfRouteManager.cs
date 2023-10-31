@@ -14,6 +14,7 @@ using Esri.GameEngine.Geometry;
 using Esri.HPFramework;
 using Newtonsoft.Json.Linq;
 using POLARIS.MainScene;
+using QuickEye.UIToolkit;
 using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.UIElements;
@@ -32,39 +33,42 @@ namespace POLARIS
         public Color PathStart;
         public Color PathEnd;
 
+        private Label _routingSrcLabel;
         private Label _routingDestLabel;
         private Label _routingInfoLabel;
-
-        private HPRoot _hpRoot;
+        private GroupBox _routingSrcBox;
+        private VisualElement _routingBox;
+        private Button _slideButton;
+        private Button _stopButton;
+        
         private ArcGISMapComponent _arcGisMapComponent;
 
         private const float ElevationOffset = 2.0f;
 
         private const int StopCount = 2;
-        private readonly Queue<GameObject> _stops = new Queue<GameObject>();
-        private bool _routing = false;
+        private readonly Queue<GameObject> _stops = new();
         private const string RoutingURL = "https://route-api.arcgis.com/arcgis/rest/services/World/Route/NAServer/Route_World/solve";
-        private readonly List<GameObject> _breadcrumbs = new List<GameObject>();
+        private readonly List<GameObject> _breadcrumbs = new();
 
         private LineRenderer _lineRenderer;
 
-        private readonly HttpClient _client = new HttpClient();
+        private readonly HttpClient _client = new();
 
         private double3 _lastRootPosition;
 
         private Camera _mainCamera;
 
-        private string _startName;
+        private string _srcName;
         private string _destName;
-        private readonly Queue<string> _stopNames = new Queue<string>();
+        private readonly Queue<string> _stopNames = new();
 
-        private float pressTime = 0;
+        private bool _routing = false;
+        private bool _lastRouting = true;
+        private float _pressTime = 0;
+        private bool _closed = false;
 
         private void Start()
         {
-            // We need HPRoot for the HitToGeoPosition Method
-            _hpRoot = FindObjectOfType<HPRoot>();
-
             // We need this ArcGISMapComponent for the FromCartesianPosition Method
             // defined on the ArcGISMapComponent.View
             _arcGisMapComponent = FindObjectOfType<ArcGISMapComponent>();
@@ -79,31 +83,40 @@ namespace POLARIS
 
             _mainCamera = Camera.main;
 
+            // UI Elements
             var rootVisual = RouteInfo.GetComponent<UIDocument>().rootVisualElement;
+            _routingSrcLabel = rootVisual.Q<Label>("RoutingSrc");
             _routingDestLabel = rootVisual.Q<Label>("RoutingDest");
             _routingInfoLabel = rootVisual.Q<Label>("RoutingInfos");
+            _routingSrcBox = rootVisual.Q<GroupBox>("RoutingSrcBox");
+            _routingBox = rootVisual.Q<VisualElement>("RoutingInfo");
+            _slideButton = rootVisual.Q<Button>("SlideButton");
+            _stopButton = rootVisual.Q<Button>("StopButton");
+            
+            _slideButton.clickable.clicked += ToggleSlide;
+            _stopButton.clickable.clicked += StopClicked;
         }
         
         private async void Update()
         {
             if (Input.touchCount > 0)
             {
-                Touch touch = Input.GetTouch(0);
+                var touch = Input.GetTouch(0);
                 switch (touch.phase)
                 {
                     // Uncomment below if you want to reset when the touch was moved
                     //case TouchPhase.Moved:
                     case TouchPhase.Began:
-                        pressTime = 0;
+                        _pressTime = 0;
                         break;
 
                     case TouchPhase.Stationary:
-                        pressTime += Time.deltaTime;
+                        _pressTime += Time.deltaTime;
                         break;
 
                     case TouchPhase.Ended:
                     case TouchPhase.Canceled:
-                        if (pressTime > 0.5f)
+                        if (_pressTime > 0.5f)
                         {
                             if (_routing)
                             {
@@ -126,7 +139,7 @@ namespace POLARIS
 
                                 _stops.Enqueue(routeMarker);
                                 var locationName = hit.transform.name;
-                                _stopNames.Enqueue(locationName.StartsWith("ArcGISGameObject_") ? "Point" : GetBuilding.ToTitleCase(locationName[4..]));
+                                _stopNames.Enqueue(locationName.StartsWith("ArcGISGameObject_") ? $"{locationComponent.Position.Y:00.00000}, {locationComponent.Position.X:00.00000}" : GetBuilding.ToTitleCase(locationName[4..]));
 
                                 if (_stops.Count > StopCount)
                                 {
@@ -137,9 +150,8 @@ namespace POLARIS
                                 if (_stops.Count == StopCount)
                                 {
                                     var stopNamesArray = _stopNames.ToArray();
-                                    _startName = stopNamesArray[0];
+                                    _srcName = stopNamesArray[0];
                                     _destName = stopNamesArray[1];
-                                    _routing = true;
 
                                     var results = await FetchRoute(_stops.ToArray());
 
@@ -151,16 +163,28 @@ namespace POLARIS
                                     {
                                         StartCoroutine(DrawRoute(results));
                                     }
-
-                                    _routing = false;
                                 }
                             }
                         }
-                        pressTime = 0;
+                        _pressTime = 0;
+                        break;
+                    case TouchPhase.Moved:
+                    default:
                         break;
                 }
             }
 
+            // _routingBox.ToggleDisplayStyle(_routing);
+
+            if (_routing != _lastRouting)
+            {
+                print("ROUTEI" + _routing + _lastRouting);
+                _lastRouting = _routing;
+                print("ROUTEI2" + _routing + _lastRouting);
+                StartCoroutine(ToggleRouting(_routing));
+            }
+            // print("ROUTEI3" + _routing);
+            
             RebaseRoute();
         }
 
@@ -197,11 +221,16 @@ namespace POLARIS
                 return "";
 
             var jsonTravelModeAsset = Resources.Load("travelMode") as TextAsset;
+            if (jsonTravelModeAsset == null)
+            {
+                Debug.LogError("ERROR - Could not find travelMode asset");
+            }
+            
             var jsonTravelModeText = JObject.Parse(jsonTravelModeAsset.text).ToString();
 
-            IEnumerable<KeyValuePair<string, string>> payload = new List<KeyValuePair<string, string>>()
+            IEnumerable<KeyValuePair<string, string>> payload = new List<KeyValuePair<string, string>>
             {
-                new KeyValuePair<string, string>("stops", GetRouteString(stops)),
+                new ("stops", GetRouteString(stops)),
                 new ("returnRoutes", "true"),
                 new ("token", _arcGisMapComponent.APIKey),
                 new ("f", "json"),
@@ -247,14 +276,14 @@ namespace POLARIS
 
             var info = JObject.Parse(routeInfo);
             var routes = info.SelectToken("routes");
-            var features = routes.SelectToken("features");
+            var features = routes?.SelectToken("features");
 
-            UpdateRouteInfo(info);
+            UpdateRouteInfo(info, true);
 
             foreach (var feature in features)
             {
                 var geometry = feature.SelectToken("geometry");
-                var paths = geometry.SelectToken("paths")[0];
+                var paths = geometry?.SelectToken("paths")?[0];
 
                 var pathList = new List<double[]>{};
 
@@ -303,20 +332,23 @@ namespace POLARIS
             location.Position = HitToGeoPosition(hitInfo, ElevationOffset);
         }
 
-        private void UpdateRouteInfo(JToken info)
+        private void UpdateRouteInfo(JToken info, bool includeSrc)
         {
-            var features = info.SelectToken("routes").SelectToken("features");
-            var attributes = features[0].SelectToken("attributes");
+            var features = info.SelectToken("routes")?.SelectToken("features");
+            var attributes = features?[0]?.SelectToken("attributes");
 
-            var travelMiles = (float)attributes.SelectToken("Total_Miles");
+            var travelMiles = (float)attributes?.SelectToken("Total_Miles");
 
-            var summary = info.SelectToken("directions")[0].SelectToken("summary");
-            var travelMinutes = (float)summary.SelectToken("totalTime");
+            var summary = info.SelectToken("directions")?[0]?.SelectToken("summary");
+            var travelMinutes = (float)summary?.SelectToken("totalTime");
 
             print($"Time: {travelMinutes:0.00} Minutes, Distance: {travelMiles:0.00} Miles");
 
-            _routingDestLabel.text = $"Routing from {_startName} to {_destName}";
-            _routingInfoLabel.text = $"{travelMinutes:0} min, {travelMiles:0.0} miles";
+            _routingInfoLabel.text = $"Routing - {travelMinutes:0} min. ({travelMiles:0.0} mi.)";
+            _routingSrcLabel.text = _srcName;
+            _routingDestLabel.text = _destName;
+            
+            _routingSrcBox.ToggleDisplayStyle(includeSrc);
         }
 
         private void ClearRoute()
@@ -325,9 +357,13 @@ namespace POLARIS
                 Destroy(breadcrumb);
 
             _breadcrumbs.Clear();
+            _stops.Clear();
+            _stopNames.Clear();
 
             if (_lineRenderer)
                 _lineRenderer.positionCount = 0;
+
+            _routing = false;
         }
 
         private void RenderLine() 
@@ -349,6 +385,7 @@ namespace POLARIS
 
             _lineRenderer.positionCount = allPoints.Count;
             _lineRenderer.SetPositions(allPoints.ToArray());
+            _routing = true;
         }
 
         // The ArcGIS Rebase component
@@ -384,7 +421,36 @@ namespace POLARIS
             }
             _lastRootPosition = rootPosition;
         }
-        
+
+        private void ToggleSlide()
+        {
+            _closed = !_closed;
+            _routingBox.style.left = Length.Percent(_closed ? -67f : -5f);
+            _slideButton.style.rotate = new Rotate(_closed ? 180 : 0);
+            _stopButton.style.width = _stopButton.style.height = _closed ? 0 : 100;
+        }
+
+        private void StopClicked()
+        {
+            ClearRoute();
+        }
+
+        private IEnumerator ToggleRouting(bool routing)
+        {
+            if (routing)
+            {
+                _routingBox.style.left = Length.Percent(-80f);
+                _routingBox.ToggleDisplayStyle(true);
+                _routingBox.style.left = Length.Percent(-5f);
+            }
+            else
+            {
+                _routingBox.style.left = Length.Percent(-80f);
+                yield return new WaitForSeconds(0.3f);
+                _routingBox.ToggleDisplayStyle(false);
+            }
+        }
+
         private int GetClosestPathPoint(Vector3[] points)
         {
             var smallestDist = float.MaxValue;
