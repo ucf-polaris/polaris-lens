@@ -72,4 +72,11 @@ public class ChangeTabImage : MonoBehaviour
 	    _spacer.style.height = Length.Percent(_menuOpen ?  15 : 82.5f);
 	    _arrow.style.rotate = new Rotate(_menuOpen ? 90 : 270);
     }
+
+    public void RaiseMenu(FocusEvent e)
+    {
+	    _menuOpen = true;
+	    _spacer.style.height = Length.Percent(15);
+	    _arrow.style.rotate = new Rotate(90);
+    }
 }

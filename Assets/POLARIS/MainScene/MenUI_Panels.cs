@@ -1,15 +1,7 @@
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using System;
-using Esri.ArcGISMapsSDK.Components;
-using Esri.ArcGISMapsSDK.Utils.GeoCoord;
-using Esri.GameEngine.Geometry;
-using Esri.HPFramework;
-using TMPro;
-using Unity.Mathematics;
 using UnityEngine.EventSystems;
-using UnityEngine.Serialization;
 using UnityEngine.UIElements;
 using POLARIS.Managers;
 
@@ -19,8 +11,8 @@ namespace POLARIS.MainScene {
         public Geocoder geo;
 
         //data objects
-        private List<Building> _buildingSearchList = new List<Building>();
-        private List<EventData> _eventSearchList = new List<EventData>();
+        private List<Building> _buildingSearchList = new();
+        private List<EventData> _eventSearchList = new();
 
         //misc. variables
         private string currentTab;
@@ -43,7 +35,7 @@ namespace POLARIS.MainScene {
 
         private ListController listController;
         // Start is called before the first frame update
-        void Start()
+        private void Start()
         {
             //Initialize variables
 
@@ -55,23 +47,26 @@ namespace POLARIS.MainScene {
             var rootVisual = uiDoc.rootVisualElement;
             listController.Initialize(rootVisual, EventListEntryTemplate, LocationListEntryTemplate, ListController.SwitchType.locations);
 
-            //set up the serach bar
+            //set up the search bar
             _searchField = rootVisual.Q<TextField>("SearchBar");
             _searchField.RegisterValueChangedCallback(OnSearchValueChanged);
+            
+            var tab = GetComponent<ChangeTabImage>();
+            _searchField.RegisterCallback<FocusEvent>(tab.RaiseMenu);
+            
             _searchField.selectAllOnFocus = true;
             SetPlaceholderText(_searchField, currentTab == "location" ? "Search for locations" : "Search for events");
         }
 
         // Update is called once per frame
-        void Update()
+        private void Update()
         {
-            if (ChangeTabImage._lastPressed != currentTab)
-            {
-                currentTab = ChangeTabImage._lastPressed;
-                _searchField.value = "";
-                ClearSearchResults(true);
-                SetPlaceholderText(_searchField, ChangeTabImage._lastPressed == "location" ? "Search for locations" : "Search for events");
-            }
+            if (ChangeTabImage._lastPressed == currentTab) return;
+            
+            currentTab = ChangeTabImage._lastPressed;
+            _searchField.value = "";
+            ClearSearchResults(true);
+            SetPlaceholderText(_searchField, ChangeTabImage._lastPressed == "location" ? "Search for locations" : "Search for events");
         }
         private void OnSearchValueChanged(ChangeEvent<string> evt)
         {
