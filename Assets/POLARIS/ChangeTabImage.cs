@@ -78,4 +78,12 @@ public class ChangeTabImage : MonoBehaviour
 	    _arrow.style.rotate = new Rotate(_menuOpen ? 90 : 270);
 		panelFuncts.ExtendedScrollView.Extended = false;
 	}
+
+    public void RaiseMenu(FocusEvent e)
+    {
+	    _menuOpen = true;
+	    _spacer.style.height = Length.Percent(15);
+	    _arrow.style.rotate = new Rotate(90);
+		panelFuncts.ExtendedScrollView.Extended = false;
+    }
 }
