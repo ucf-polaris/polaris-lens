@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UIElements;
+using POLARIS.MainScene;
 
 public class BuildingListEntryController
 {
@@ -12,9 +13,21 @@ public class BuildingListEntryController
     public VisualElement image;
     VisualElement FavoriteElement;
     VisualElement NavigationElement;
+    VisualElement PanelEntity;
+    //since it's all the same extended view, don't keep cloning a reference to the same extended view
+    public static extendedScrollView extendedView;
+
+    private void OutputFunction(ClickEvent evt)
+    {
+        Debug.Log(NameLabel.text);
+    }
 
     public void SetVisualElement(VisualElement visualElement)
     {
+        PanelEntity = visualElement.Q<VisualElement>(className: "panelEntity");
+        PanelEntity.UnregisterCallback<ClickEvent>(OutputFunction);
+        PanelEntity.RegisterCallback<ClickEvent>(OutputFunction);
+
         NameLabel = visualElement.Q<Label>(className: "panelTextLocation");
         DistanceLabel = visualElement.Q<Label>(className: "panelTextDistance");
         AddressLabel = visualElement.Q<Label>(className: "panelTextAddress");

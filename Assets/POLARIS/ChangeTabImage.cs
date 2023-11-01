@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.UIElements;
+using POLARIS.MainScene;
 
 public class ChangeTabImage : MonoBehaviour
 {
@@ -17,9 +18,12 @@ public class ChangeTabImage : MonoBehaviour
 	public static string _lastPressed = "location";
 	private bool _menuOpen = false;
 
+	private MenUI_Panels panelFuncts;
+
 	// Start is called before the first frame update
     private void Start()
     {
+		panelFuncts = gameObject.GetComponent<MenUI_Panels>();
         var uiDoc = gameObject.GetComponent<UIDocument>();
 
 		_calendarButton = uiDoc.rootVisualElement.Q<Button>("Cal");
@@ -62,7 +66,8 @@ public class ChangeTabImage : MonoBehaviour
 	    _menuOpen = !_menuOpen;
 	    _spacer.style.height = Length.Percent(_menuOpen ?  15 : 82.5f);
 	    _arrow.style.rotate = new Rotate(_menuOpen ? 90 : 270);
-    }
+		panelFuncts.ExtendedScrollView.Extended = false;
+	}
 
     private void MoveUI(string pressed)
     {
@@ -71,5 +76,6 @@ public class ChangeTabImage : MonoBehaviour
 
 	    _spacer.style.height = Length.Percent(_menuOpen ?  15 : 82.5f);
 	    _arrow.style.rotate = new Rotate(_menuOpen ? 90 : 270);
-    }
+		panelFuncts.ExtendedScrollView.Extended = false;
+	}
 }

@@ -6,7 +6,7 @@
             <ui:VisualElement class="panelImage" style="flex-grow: 1;" />
             <ui:VisualElement class="panelBlocker" style="flex-grow: 1;" />
             <ui:VisualElement class="panelTextArea" style="flex-grow: 1;">
-                <ui:Label tabindex="-1" text="Label" parse-escape-sequences="true" display-tooltip-when-elided="true" class="panelTextLocation" />
+                <ui:Label tabindex="-1" text="Label" parse-escape-sequences="true" display-tooltip-when-elided="false" class="panelTextLocation" />
                 <ui:VisualElement class="panelLocationGroup" style="flex-grow: 1;">
                     <ui:Label tabindex="-1" text="An Address - " parse-escape-sequences="true" display-tooltip-when-elided="true" class="panelTextAddress" />
                     <ui:Label tabindex="-1" text="Label" parse-escape-sequences="true" display-tooltip-when-elided="true" class="panelTextDistance" style="left: -10px;" />

@@ -96,10 +96,6 @@
 #SearchResultBigLabel > ListView {
 }
 
-.unity-list-view__empty-label {
-    display: none;
-}
-
 .panelShadow {
     position: absolute;
     top: auto;
@@ -247,14 +243,6 @@
     -unity-font: resource('Polaris/fonts/Poppins-SemiBold');
     right: auto;
     color: rgb(96, 96, 96);
-}
-
-.unity-list-view__item {
-    background-color: rgba(255, 0, 0, 0);
-}
-
-.unity-list-view__item:hover {
-    background-color: rgba(0, 0, 255, 0);
 }
 
 .panelLocationGroup {

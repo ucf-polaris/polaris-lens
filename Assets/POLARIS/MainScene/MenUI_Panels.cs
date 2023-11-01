@@ -33,6 +33,8 @@ namespace POLARIS.MainScene {
         private TextField _searchField;
         private Button _searchButton;
         private Button _clearButton;
+        
+        public extendedScrollView ExtendedScrollView;
 
         //UI Toolkit Objects
         [SerializeField]
@@ -46,14 +48,18 @@ namespace POLARIS.MainScene {
         void Start()
         {
             //Initialize variables
-
             eventManager = EventManager.getInstance();
             currentTab = ChangeTabImage._lastPressed;
             listController = new ListController();
+            
 
             var uiDoc = GetComponent<UIDocument>();
             var rootVisual = uiDoc.rootVisualElement;
+            ExtendedScrollView = new extendedScrollView(rootVisual.Q<ScrollView>("ExtendedScrollView"));
+            //passing back variables
             listController.Initialize(rootVisual, EventListEntryTemplate, LocationListEntryTemplate, ListController.SwitchType.locations);
+            EventListEntryController.extendedView = ExtendedScrollView;
+            BuildingListEntryController.extendedView = ExtendedScrollView;
 
             //set up the serach bar
             _searchField = rootVisual.Q<TextField>("SearchBar");
@@ -75,6 +81,7 @@ namespace POLARIS.MainScene {
         }
         private void OnSearchValueChanged(ChangeEvent<string> evt)
         {
+            ExtendedScrollView.Extended = false;
             string newText = evt.newValue;
 
             if (newText.EndsWith("\n"))
@@ -301,5 +308,43 @@ namespace POLARIS.MainScene {
                 }
             }
         }
+    }
+    [Serializable]
+    public class extendedScrollView
+    {
+        public ScrollView ExtendedView;
+        private bool extended;
+        public Label DescriptionText;
+        public Label LocationText;
+        public Label StartDateText;
+        public Label EndDateText;
+        public Label TitleText;
+        public VisualElement image;
+
+        public extendedScrollView(ScrollView sv)
+        {
+            ExtendedView = sv;
+            DescriptionText = sv.Q<Label>("DescriptionText");
+            LocationText = sv.Q<Label>("LocationText");
+            StartDateText = sv.Q<Label>("StartDateText");
+            EndDateText = sv.Q<Label>("EndDateText");
+            TitleText = sv.Q<Label>("TitleText");
+            image = sv.Q<VisualElement>("ImagePop");
+
+            //back click button
+            sv.Q<VisualElement>("BackClick").RegisterCallback<ClickEvent>(OnBackClick);
+        }
+
+        //also close when...
+        //1. Search something new
+        //2. Switch tab
+        //3. Collapse Menu
+        //only really concerned with what happens within this scene. Any scene swaps will reset everything
+        private void OnBackClick(ClickEvent evt)
+        {
+            Extended = false;
+        }
+
+        public bool Extended { get => extended; set { extended = value; ExtendedView.style.top = Length.Percent(value ? 0f : 110f); } }
     }
 }
