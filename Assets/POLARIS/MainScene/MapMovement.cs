@@ -16,6 +16,7 @@ using Esri.ArcGISMapsSDK.Components;
 using Esri.ArcGISMapsSDK.Utils.Math;
 using Esri.HPFramework;
 using System;
+using System.Linq;
 using Unity.Mathematics;
 using UnityEngine;
 
@@ -96,7 +97,10 @@ namespace Esri.ArcGISMapsSDK.Samples.Components
 
 				if (Math.Abs(pinchZoomValue) > float.Epsilon || Math.Abs(rotationAngle) > float.Epsilon)
 				{
-					var towardsMouse = GetMouseRayCastDirection();
+					var towardsMouse = GetMouseRayCastDirection(true);
+					Geometry.RayPlaneIntersection(
+						cartesianPosition, towardsMouse, double3.zero, math.up(),
+						out var intersection);
 
 					var pinchOffset = towardsMouse * pinchZoomValue * PinchZoomSpeed *
 					                  (cartesianPosition.y / 300);
@@ -106,9 +110,13 @@ namespace Esri.ArcGISMapsSDK.Samples.Components
 					{
 						cartesianPosition += pinchOffset;
 					}
+					
+					var form = new GameObject().transform;
+					form.SetPositionAndRotation(cartesianPosition.ToVector3(), cartesianRotation);
+					form.RotateAround((cartesianPosition + towardsMouse * intersection).ToVector3(), Vector3.up, rotationAngle);
 
-					var eulerRot = cartesianRotation.GetEulerDegrees();
-					cartesianRotation = Quaternion.Euler(eulerRot.x, eulerRot.y + rotationAngle, eulerRot.z);
+					cartesianPosition = form.position.ToDouble3();
+					cartesianRotation = form.rotation;
 				}
 				else
 				{
@@ -123,7 +131,7 @@ namespace Esri.ArcGISMapsSDK.Samples.Components
 						
 						if (deltaTouch == Vector3.zero) continue;
 
-						var worldRayDir = GetMouseRayCastDirection();
+						var worldRayDir = GetMouseRayCastDirection(false);
 						var isIntersected = Geometry.RayPlaneIntersection(
 							cartesianPosition, worldRayDir, double3.zero, math.up(),
 							out var intersection);
@@ -153,7 +161,7 @@ namespace Esri.ArcGISMapsSDK.Samples.Components
 
 		private double3 GetCartesianCoord(double3 cartesianPosition)
 		{
-			var worldRayDir = GetMouseRayCastDirection();
+			var worldRayDir = GetMouseRayCastDirection(false);
 			var isIntersected = Geometry.RayPlaneIntersection(cartesianPosition, worldRayDir, double3.zero, math.up(), out var intersection);
 			if (!isIntersected || !(intersection >= 0)) return double3.zero;
 			return cartesianPosition + worldRayDir * intersection;
@@ -173,21 +181,24 @@ namespace Esri.ArcGISMapsSDK.Samples.Components
 			}
 		}
 
-		private static Vector3 GetTouchPosition()
+		private static Vector3 GetTouchPosition(bool average)
 		{
-			if (Input.touchCount > 0)
+			// Handle fallback behavior for no touches (e.g., use the center of the screen)
+			if (Input.touchCount <= 0)
 			{
-				// Use the position of the first touch as the touch position
-				return Input.touches[0].position;
-			}
-			else
-			{
-				// Handle fallback behavior for no touches (e.g., use the center of the screen)
 				return new Vector3(Screen.width / 2, Screen.height / 2, 0);
 			}
+			
+			if (average)
+			{
+				return (Input.touches[0].position + Input.touches[1].position) / 2;
+			}
+
+			// Use the position of the first touch as the touch position
+			return Input.touches[0].position;
 		}
 
-		private double3 GetMouseRayCastDirection()
+		private double3 GetMouseRayCastDirection(bool average)
 		{
 			var forward = _hpTransform.Forward.ToDouble3();
 			var right = _hpTransform.Right.ToDouble3();
@@ -208,7 +219,7 @@ namespace Esri.ArcGISMapsSDK.Samples.Components
 			proj.c2.w *= -1;
 			proj.c3.z *= -1;
 
-			var mousePosition = GetTouchPosition();
+			var mousePosition = GetTouchPosition(average);
 			var ndcCoord = new double3(2.0 * (mousePosition.x / Screen.width) - 1.0,
 			                           2.0 * (mousePosition.y / Screen.height) - 1.0, 1);
 			var viewRayDir = math.normalize(proj.HomogeneousTransformPoint(ndcCoord));

@@ -256,12 +256,12 @@ namespace POLARIS.GeospatialScene
 
             var events = eventManager.dataList.Where(e =>
                                                      Math.Abs(e.Location.BuildingLat -
-                                                             28.601927704512025) <
-                                                            // Content.History.Latitude) <
+                                                             // 28.601927704512025) <
+                                                            Content.History.Latitude) <
                                                      0.000001 &&
                                                      Math.Abs(e.Location.BuildingLong -
-                                                             -81.20044219923692) <
-                                                            // Content.History.Longitude) <
+                                                             // -81.20044219923692) <
+                                                            Content.History.Longitude) <
                                                      0.000001);
             
             // TODO: APPEND HEADER somehow

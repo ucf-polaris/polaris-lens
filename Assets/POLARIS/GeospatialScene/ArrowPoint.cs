@@ -25,7 +25,7 @@ namespace POLARIS.GeospatialScene
         public void SetEnabled(bool enable)
         {
             _enabled = enable;
-            if (_enabled)
+            if (_enabled && _destPoint != null)
             {                
                 _destPoint = PersistData.DestinationPoint;
             }
