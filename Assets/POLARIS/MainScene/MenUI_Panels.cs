@@ -1,6 +1,8 @@
 using System.Collections.Generic;
 using UnityEngine;
 using System;
+using System.Collections;
+using System.Linq;
 using UnityEngine.EventSystems;
 using UnityEngine.UIElements;
 using POLARIS.Managers;
@@ -37,6 +39,8 @@ namespace POLARIS.MainScene {
         VisualTreeAsset EventListEntryTemplate;
 
         private ListController listController;
+
+        public static bool userOnListView;
         // Start is called before the first frame update
         private void Start()
         {
@@ -45,7 +49,6 @@ namespace POLARIS.MainScene {
             locationManager = LocationManager.getInstance();
             currentTab = ChangeTabImage._lastPressed;
             listController = new ListController();
-            
 
             var uiDoc = GetComponent<UIDocument>();
             var rootVisual = uiDoc.rootVisualElement;
@@ -64,18 +67,43 @@ namespace POLARIS.MainScene {
             
             _searchField.selectAllOnFocus = true;
             SetPlaceholderText(_searchField, currentTab == "location" ? "Search for locations" : "Search for events");
+
+            StartCoroutine(FillSearchOnStart());
+        }
+
+        private IEnumerator FillSearchOnStart()
+        {
+            if (currentTab == "location")
+            {
+                while (Locations.LocationList == null) yield return null;
+                List<Building> buildings = Locations.LocationList.ToList();
+                UpdateBuildingSearchUI(buildings);
+            }
+            else
+            {
+                while (eventManager.dataList == null) yield return null;
+                List<EventData> events = eventManager.dataList;
+                UpdateEventSearchUI(events);
+            }
         }
 
         // Update is called once per frame
         private void Update()
         {
+            // Can move around map at top on event/location list view, but not when clicking on specific event
+            // Tried doing same thing for ExtendedScrollView, but didn't work :(
+            userOnListView = listController.EntryList.panel.focusController.focusedElement ==
+                listController.EntryList || ExtendedScrollView.Extended;
+            
             if (ChangeTabImage._lastPressed == currentTab) return;
             
+            // Just swapped tabs
             currentTab = ChangeTabImage._lastPressed;
-            _searchField.value = "";
             ClearSearchResults(true);
+            _searchField.value = "";
             SetPlaceholderText(_searchField, ChangeTabImage._lastPressed == "location" ? "Search for locations" : "Search for events");
         }
+        
         private void OnSearchValueChanged(ChangeEvent<string> evt)
         {
             ExtendedScrollView.Extended = false;
@@ -88,8 +116,9 @@ namespace POLARIS.MainScene {
                 return;
             }
 
-            if (!string.IsNullOrWhiteSpace(newText))
+            if (currentTab == "location")
             {
+<<<<<<< HEAD
                 if (currentTab == "location")
                 {
                     List<LocationData> buildings = locationManager.GetBuildingsFromSearch(newText, newText[0] == '~');
@@ -100,20 +129,57 @@ namespace POLARIS.MainScene {
                     List<EventData> events = eventManager.GetEventsFromSearch(newText, newText[0] == '~');
                     UpdateEventSearchUI(events);
                 }
+=======
+                List<Building> buildings = GetBuildingsFromSearch(newText, newText.Length > 0 && newText[0] == '~', newText == "");
+                UpdateBuildingSearchUI(buildings);
+>>>>>>> 17846b68ab7ac3a8d60499e6f11077a95ce68b80
             }
             else
             {
-                ClearSearchResults(false);
+                List<EventData> events = eventManager.GetEventsFromSearch(newText, newText.Length > 0 && newText[0] == '~', newText == "");
+                UpdateEventSearchUI(events);
             }
         }
-
-
+        
         private bool FuzzyMatch(string source, string target, int tolerance)
         {
             return LongestCommonSubsequence(source, target).Length >= target.Length - tolerance;
         }
 
+<<<<<<< HEAD
         private void UpdateBuildingSearchUI(List<LocationData> buildings)
+=======
+        private List<Building> GetBuildingsFromSearch(string query, bool fuzzySearch, bool returnAll)
+        {
+            const int TOLERANCE = 1;
+
+            List<Building> buildings = new List<Building>();
+            foreach (Building building in Locations.LocationList)
+            {
+                if (returnAll || building.BuildingName.IndexOf(query, StringComparison.OrdinalIgnoreCase) >= 0 ||
+                    (fuzzySearch && FuzzyMatch(building.BuildingName, query, TOLERANCE)))
+                {
+                    buildings.Add(building);
+                    continue;
+                }
+
+                if (building.BuildingAllias == null) continue;
+                foreach (string alias in building.BuildingAllias)
+                {
+                    if (alias.IndexOf(query, StringComparison.OrdinalIgnoreCase) >= 0 ||
+                        (fuzzySearch && FuzzyMatch(alias, query, TOLERANCE)))
+                    {
+                        buildings.Add(building);
+                        break;
+                    }
+                }
+            }
+
+            return buildings;
+        }
+
+        private void UpdateBuildingSearchUI(List<Building> buildings)
+>>>>>>> 17846b68ab7ac3a8d60499e6f11077a95ce68b80
         {
             listController.Update(buildings);
         }
@@ -189,10 +255,16 @@ namespace POLARIS.MainScene {
 
             //clear with empty version of list type
             if (listController.sw == type2)
-                listController.Update(new List<EventData>());
+                listController.Update(eventManager.dataList);
+                // listController.Update(new List<EventData>());
             else if (listController.sw == type1)
+<<<<<<< HEAD
                 listController.Update(new List<LocationData>());
             
+=======
+                listController.Update(Locations.LocationList.ToList());
+                // listController.Update(new List<Building>());
+>>>>>>> 17846b68ab7ac3a8d60499e6f11077a95ce68b80
         }
 
         public static void SetPlaceholderText(TextField textField, string placeholder)

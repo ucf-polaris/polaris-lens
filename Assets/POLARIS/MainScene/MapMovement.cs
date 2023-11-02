@@ -17,6 +17,7 @@ using Esri.ArcGISMapsSDK.Utils.Math;
 using Esri.HPFramework;
 using System;
 using System.Linq;
+using POLARIS.MainScene;
 using Unity.Mathematics;
 using UnityEngine;
 
@@ -79,7 +80,7 @@ namespace Esri.ArcGISMapsSDK.Samples.Components
 			// Not functional until we have a spatial reference
 			if (_arcGisMapComponent.View.SpatialReference == null) return;
 			
-			TouchEvent();
+			if (!MenUI_Panels.userOnListView) TouchEvent();
 		}
 		
 		private void TouchEvent()

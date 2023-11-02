@@ -101,6 +101,8 @@ namespace POLARIS
         
         private async void Update()
         {
+            if (MenUI_Panels.userOnListView) return;
+            
             if (Input.touchCount > 0)
             {
                 var touch = Input.GetTouch(0);

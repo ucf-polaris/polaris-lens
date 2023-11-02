@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Esri.ArcGISMapsSDK.Components;
 using Esri.ArcGISMapsSDK.Utils.GeoCoord;
 using Esri.GameEngine.Geometry;
@@ -24,7 +25,7 @@ public class ListController
     VisualTreeAsset LocationTemplate;
 
     //UI elements in main scene
-    ListView EntryList;
+    public ListView EntryList;
     
     public SwitchType sw;
 
@@ -89,7 +90,7 @@ public class ListController
         //bind function
         EntryList.bindItem = (item, index) =>
         {
-            (item.userData as BuildingListEntryController).SetBuildingData(_buildingSearchList[index]);
+            (item.userData as BuildingListEntryController)?.SetBuildingData(_buildingSearchList[index]);
         };
 
         // Set the actual item's source list/array
@@ -118,7 +119,7 @@ public class ListController
         //bind function
         EntryList.bindItem = (item, index) =>
         {
-            (item.userData as EventListEntryController).SetEventData(_eventSearchList[index]);
+            (item.userData as EventListEntryController)?.SetEventData(_eventSearchList[index]);
         };
         // Set the actual item's source list/array
         EntryList.itemsSource = _eventSearchList;
