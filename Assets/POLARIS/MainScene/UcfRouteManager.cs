@@ -132,7 +132,7 @@ namespace POLARIS
                             {
                                 var routeMarker = Instantiate(RouteMarker, hit.point, Quaternion.identity, _arcGisMapComponent.transform);
 
-                                var geoPosition = HitToGeoPosition(hit);
+                                var geoPosition = HitToGeoPosition(hit, 30);
 
                                 var locationComponent = routeMarker.GetComponent<ArcGISLocationComponent>();
                                 locationComponent.enabled = true;
@@ -159,10 +159,10 @@ namespace POLARIS
                                 if (_stops.Count == StopCount)
                                 {
                                     var stopNamesArray = _stopNames.ToArray();
-                                    _srcName = stopNamesArray[1];
-                                    _destName = stopNamesArray[0];
+                                    _srcName = stopNamesArray[0];
+                                    _destName = stopNamesArray[1];
 
-                                    var results = await FetchRoute(_stops.Reverse().ToArray());
+                                    var results = await FetchRoute(_stops.ToArray());
 
                                     if (results.Contains("error"))
                                     {
