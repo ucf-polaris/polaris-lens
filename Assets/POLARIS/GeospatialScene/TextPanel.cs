@@ -8,11 +8,9 @@ using Google.XR.ARCoreExtensions.Samples.Geospatial;
 using TMPro;
 using Unity.XR.CoreUtils;
 using UnityEngine;
-using UnityEngine.Networking;
 using UnityEngine.UI;
 using UnityEngine.XR.ARFoundation;
 using POLARIS.Managers;
-using Unity.VisualScripting;
 
 namespace POLARIS.GeospatialScene
 {
@@ -272,17 +270,18 @@ namespace POLARIS.GeospatialScene
 
                 var text = GenerateEventText(e);
                 textObj.GetComponent<TextMeshProUGUI>().SetText(text);
-                // StartCoroutine(SetImage(e.Image, textObj.GetComponentInChildren<Image>()));
-                try
-                {
-                    var eventSprite = Sprite.Create(e.rawImage, new Rect(0, 0, e.rawImage.width, e.rawImage.height), new Vector2(0.5f, 0.5f));
-                    var image = textObj.GetComponentInChildren<Image>();
-                    image.sprite = eventSprite;
-                }
-                catch (Exception exception)
-                {
-                    Console.WriteLine("Could not get sprite " + exception);
-                }
+                
+                // Set image - need better design
+                // try
+                // {
+                //     var eventSprite = Sprite.Create(e.rawImage, new Rect(0, 0, e.rawImage.width, e.rawImage.height), new Vector2(0.5f, 0.5f));
+                //     var image = textObj.GetComponentInChildren<Image>();
+                //     image.sprite = eventSprite;
+                // }
+                // catch (Exception exception)
+                // {
+                //     Console.WriteLine("Could not get sprite " + exception);
+                // }
                 
                 Instantiate(textObj, _bottomLayout.transform);
             }
@@ -295,14 +294,11 @@ namespace POLARIS.GeospatialScene
         {
             var sb = new StringBuilder();
 
-            sb.Append("<line-height=120%>" + e.Name + "\n");
-            sb.Append("<indent=45%><line-height=120%>" + GenerateTime(e.DateTime) + "\n");
-            sb.Append("<line-height=120%>" + e.ListedLocation + "\n");
-            sb.Append("<line-height=120%><indent=0%>" + e.Host + "\n\n");
-            sb.Append(HtmlParser.RichParse(e.Description));
-            
-            print(e.Description);
-            print("parsed: " + HtmlParser.RichParse(e.Description));
+            sb.Append("<style=\"EvTitle\">" + e.Name + "</style>\n");
+            sb.Append("<style=\"EvTime\">" + GenerateTime(e.DateTime) + "</style>\n");
+            sb.Append("<style=\"EvLocation\">" + e.ListedLocation + "</style>\n");
+            sb.Append("<style=\"EvHost\">" + e.Host + "</style>\n");
+            sb.Append("<style=\"EvDescription\">" + HtmlParser.RichParse(e.Description) + "</style>");
 
             return sb.ToString();
         }

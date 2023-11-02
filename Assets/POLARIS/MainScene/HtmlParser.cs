@@ -23,10 +23,10 @@ public class HtmlParser : MonoBehaviour
                     switch (html.Substring(pointerA + 1, pointerB - pointerA - 1))
                     {
                         case "p":
-                            // sb.Append("<style=\"desc\">");
+                            sb.Append("<style=\"desc\">");
                             break;
                         case "/p":
-                            // sb.Append("</style=\"desc\">");
+                            sb.Append("</style>");
                             break;
                         case "strong":
                             sb.Append("<b>");

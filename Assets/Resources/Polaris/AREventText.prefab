@@ -17,7 +17,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &6033608626331081117
 RectTransform:
   m_ObjectHideFlags: 0
@@ -144,8 +144,8 @@ MonoBehaviour:
   m_text: "hey everyone eeeeeee\neeeeeeeeeeee\n\n                         Location
     loc\n                         Time time\n\ndescription\n\ndescription\nhie\ndsd"
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 603f10c492281704c97555249ff70cd4, type: 2}
-  m_sharedMaterial: {fileID: -9087230933869019084, guid: 603f10c492281704c97555249ff70cd4,
+  m_fontAsset: {fileID: 11400000, guid: 1aa50505c0f267c45a685914152180c5, type: 2}
+  m_sharedMaterial: {fileID: -8572600303408819042, guid: 1aa50505c0f267c45a685914152180c5,
     type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}

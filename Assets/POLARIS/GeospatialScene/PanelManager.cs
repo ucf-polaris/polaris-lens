@@ -75,7 +75,7 @@ namespace POLARIS.GeospatialScene
                                                            location.BuildingLat, 
                                                            location.BuildingLong, 
                                                            location.BuildingAltitude,
-                                                           AnchorType.Geospatial, 
+                                                           location.BuildingAltitude == 0 ? AnchorType.Terrain : AnchorType.Geospatial, 
                                                            new Quaternion(0, 0, 0, 0)))).ToList();
             
             // var results = new[]

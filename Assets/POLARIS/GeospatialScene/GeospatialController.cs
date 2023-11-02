@@ -161,7 +161,7 @@ namespace Google.XR.ARCoreExtensions.Samples.Geospatial
         /// <summary>
         /// UI element to display information at runtime.
         /// </summary>
-        public GameObject InfoPanel;
+        // public GameObject InfoPanel;
 
         /// <summary>
         /// Text displaying <see cref="GeospatialPose"/> information at runtime.
@@ -468,7 +468,7 @@ namespace Google.XR.ARCoreExtensions.Samples.Geospatial
 
             _isReturning = false;
             _enablingGeospatial = false;
-            InfoPanel.SetActive(false);
+            // InfoPanel.SetActive(false);
             // GeometryToggle.gameObject.SetActive(false);
             // AnchorSettingButton.gameObject.SetActive(false);
             // AnchorSettingPanel.gameObject.SetActive(false);
@@ -766,15 +766,11 @@ namespace Google.XR.ARCoreExtensions.Samples.Geospatial
                 // }
             }
 
-            InfoPanel.SetActive(true);
+            // InfoPanel.SetActive(true);
             if (earthTrackingState == TrackingState.Tracking)
             {
                 InfoText.text = string.Format(
-                "Latitude/Longitude: {1:F6}°, {2:F6}° (+/- {3:F6}m) {0}" +
-                // "Altitude: {4:F2}m{0}" +
-                // "Vertical Accuracy: {5:F2}m{0}" +
-                "Eun Rotation: {6}{0} (+/- {7:F1}°)",
-                // "Yaw Accuracy: {7:F1}°",
+                "GPS Accuracy: {3:F6}m)    Rotation Accuracy: {7:F1}",
                 Environment.NewLine, pose.Latitude, pose.Longitude, 
                 pose.HorizontalAccuracy, pose.Altitude, pose.VerticalAccuracy,
                 pose.EunRotation.ToString("F1"), pose.OrientationYawAccuracy);
@@ -1429,7 +1425,7 @@ namespace Google.XR.ARCoreExtensions.Samples.Geospatial
             // TerrainAnchorToggle.gameObject.SetActive(false);
             // RooftopAnchorToggle.gameObject.SetActive(false);
             ClearAllButton.gameObject.SetActive(false);
-            InfoPanel.SetActive(false);
+            // InfoPanel.SetActive(false);
 
             Debug.LogError(reason);
             SnackBarText.text = reason;
