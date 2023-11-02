@@ -52,7 +52,6 @@ namespace POLARIS.MainScene
                 locationName.StartsWith("ArcGISGameObject_") ||
                 locationName.Length <= 4)
             {
-                UnsetLastBuildingColor();
                 return;
             }
 
@@ -94,6 +93,10 @@ namespace POLARIS.MainScene
             var coords = GeoUtils.ProjectToSpatialReference(offsetPosition, new ArcGISSpatialReference(4326));
             Debug.Log($"Hit position: {coords.X}, {coords.Y}, {coords.Z}");
 
+            if (hit.transform.parent.gameObject != _lastSelected)
+            {
+                UnsetLastBuildingColor();
+            }
             return hit;
         }
 
