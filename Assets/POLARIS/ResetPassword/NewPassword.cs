@@ -67,7 +67,7 @@ public class NewPassword : MonoBehaviour
         // Next, build the request dictionary for the reset password endpoint
         IDictionary<string, string> request = new Dictionary<string, string>();
         request["UserID"] = UserID;
-        request["new_password"] = newPass;
+        request["new_password"] = Hashing.HashPassword(newPass);
 
         // Make a request to UserManager.UpdatePassword()
         // this sends the new password to be updated in the user object
