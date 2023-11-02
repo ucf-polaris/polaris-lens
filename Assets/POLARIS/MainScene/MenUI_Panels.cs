@@ -118,21 +118,8 @@ namespace POLARIS.MainScene {
 
             if (currentTab == "location")
             {
-<<<<<<< HEAD
-                if (currentTab == "location")
-                {
-                    List<LocationData> buildings = locationManager.GetBuildingsFromSearch(newText, newText[0] == '~');
-                    UpdateBuildingSearchUI(buildings);
-                }
-                else
-                {
-                    List<EventData> events = eventManager.GetEventsFromSearch(newText, newText[0] == '~');
-                    UpdateEventSearchUI(events);
-                }
-=======
                 List<Building> buildings = GetBuildingsFromSearch(newText, newText.Length > 0 && newText[0] == '~', newText == "");
                 UpdateBuildingSearchUI(buildings);
->>>>>>> 17846b68ab7ac3a8d60499e6f11077a95ce68b80
             }
             else
             {
@@ -146,9 +133,6 @@ namespace POLARIS.MainScene {
             return LongestCommonSubsequence(source, target).Length >= target.Length - tolerance;
         }
 
-<<<<<<< HEAD
-        private void UpdateBuildingSearchUI(List<LocationData> buildings)
-=======
         private List<Building> GetBuildingsFromSearch(string query, bool fuzzySearch, bool returnAll)
         {
             const int TOLERANCE = 1;
@@ -179,7 +163,6 @@ namespace POLARIS.MainScene {
         }
 
         private void UpdateBuildingSearchUI(List<Building> buildings)
->>>>>>> 17846b68ab7ac3a8d60499e6f11077a95ce68b80
         {
             listController.Update(buildings);
         }
@@ -258,13 +241,8 @@ namespace POLARIS.MainScene {
                 listController.Update(eventManager.dataList);
                 // listController.Update(new List<EventData>());
             else if (listController.sw == type1)
-<<<<<<< HEAD
-                listController.Update(new List<LocationData>());
-            
-=======
                 listController.Update(Locations.LocationList.ToList());
                 // listController.Update(new List<Building>());
->>>>>>> 17846b68ab7ac3a8d60499e6f11077a95ce68b80
         }
 
         public static void SetPlaceholderText(TextField textField, string placeholder)
