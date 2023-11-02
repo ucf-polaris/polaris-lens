@@ -15,11 +15,16 @@ namespace POLARIS.MainScene
 {
     public class GetBuilding : MonoBehaviour
     {
+        public Color BuildingSelect;
+        
         private Camera _mainCamera;
         private Label _uiDocLabel;
 
-        private float lastTapTime = 0;
-        private float doubleTapThreshold = 0.3f;
+        private float _lastTapTime = 0;
+        private const float DoubleTapThreshold = 0.3f;
+
+        private GameObject _lastSelected;
+        private Color _lastColor;
         
         private ArcGISMapComponent _arcGisMapComponent;
 
@@ -34,52 +39,62 @@ namespace POLARIS.MainScene
         private void Update()
         {
             // Double tap to view building name
-            if (Input.touchCount == 1)
+            if (Input.touchCount != 1) return;
+            
+            var touch = Input.GetTouch(0);
+            if (touch.phase != TouchPhase.Began) return;
+
+            var hit = MapRaycast(touch);
+            var locationName = hit.transform.name;
+            print("My object is clicked by mouse " + locationName);
+
+            if (string.IsNullOrWhiteSpace(locationName) ||
+                locationName.StartsWith("ArcGISGameObject_") ||
+                locationName.Length <= 4)
             {
-                Touch touch = Input.GetTouch(0);
-                if (touch.phase == TouchPhase.Began)
-                {
-                    if (Time.time - lastTapTime <= doubleTapThreshold)
-                    {
-                        lastTapTime = 0;
-                        
-                        var ray = _mainCamera.ScreenPointToRay(touch.position);
-
-                        if (!Physics.Raycast(ray, out var hit)) return;
-                        
-                        var worldPosition = math.inverse(_arcGisMapComponent.WorldMatrix).HomogeneousTransformPoint(hit.point.ToDouble3());
-                        var geoPosition = _arcGisMapComponent.View.WorldToGeographic(worldPosition);
-                        var offsetPosition = new ArcGISPoint(geoPosition.X, geoPosition.Y, geoPosition.Z, geoPosition.SpatialReference);
-                        var coords = GeoUtils.ProjectToSpatialReference(offsetPosition, new ArcGISSpatialReference(4326));
-                        
-                        var locationName = hit.transform.name;
-                        Debug.Log($"Hit position: {coords.X}, {coords.Y}, {coords.Z}");
-                        print("My object is clicked by mouse " + locationName);
-                        if (!string.IsNullOrWhiteSpace(locationName) &&
-                            !locationName.StartsWith("ArcGISGameObject_") && locationName.Length > 4)
-                        {
-                            var buildingName = ToTitleCase(locationName[4..]);
-                            _uiDocLabel.text = $"{buildingName}";
-                            var closestBuilding = GetClosestBuilding(buildingName);
-                            Debug.Log(
-                                $"Name: {closestBuilding.BuildingName ?? ""}\n" +
-                                $"Aliases: {((closestBuilding.BuildingAllias != null) ? string.Join(", ", closestBuilding.BuildingAllias) : "")}\n" +
-                                $"Abbreviations: {((closestBuilding.BuildingAbbreviation != null) ? string.Join(", ", closestBuilding.BuildingAbbreviation) : "")}\n" +
-                                $"Description: {closestBuilding.BuildingDesc ?? ""}\n" +
-                                $"Longitude: {closestBuilding.BuildingLong}\n" +
-                                $"Latitude: {closestBuilding.BuildingLat}\n" +
-                                $"Address: {closestBuilding.BuildingAddress ?? ""}\n" +
-                                $"Events: {((closestBuilding.BuildingEvents != null) ? string.Join(", ", closestBuilding.BuildingEvents) : "")}\n");
-
-                            StartCoroutine(ToggleLabelHeight());
-                        }
-                    }
-                    else
-                    {
-                        lastTapTime = Time.time;
-                    }
-                }
+                UnsetLastBuildingColor();
+                return;
             }
+
+            if (Time.time - _lastTapTime <= DoubleTapThreshold)
+            {
+                _lastTapTime = 0;
+
+                var buildingName = ToTitleCase(locationName[4..]);
+                _uiDocLabel.text = $"{buildingName}";
+                var closestBuilding = GetClosestBuilding(buildingName);
+                Debug.Log(
+                    $"Name: {closestBuilding.BuildingName ?? ""}\n" +
+                    $"Aliases: {((closestBuilding.BuildingAllias != null) ? string.Join(", ", closestBuilding.BuildingAllias) : "")}\n" +
+                    $"Abbreviations: {((closestBuilding.BuildingAbbreviation != null) ? string.Join(", ", closestBuilding.BuildingAbbreviation) : "")}\n" +
+                    $"Description: {closestBuilding.BuildingDesc ?? ""}\n" +
+                    $"Longitude: {closestBuilding.BuildingLong}\n" +
+                    $"Latitude: {closestBuilding.BuildingLat}\n" +
+                    $"Address: {closestBuilding.BuildingAddress ?? ""}\n" +
+                    $"Events: {((closestBuilding.BuildingEvents != null) ? string.Join(", ", closestBuilding.BuildingEvents) : "")}\n");
+                            
+                UpdateBuildingColor(hit.transform.gameObject, BuildingSelect);
+                StartCoroutine(ToggleLabelHeight());
+            }
+            else
+            {
+                _lastTapTime = Time.time;
+            }
+        }
+
+        private RaycastHit MapRaycast(Touch touch)
+        {
+            var ray = _mainCamera.ScreenPointToRay(touch.position);
+            
+            if (!Physics.Raycast(ray, out var hit)) return new RaycastHit();
+                        
+            var worldPosition = math.inverse(_arcGisMapComponent.WorldMatrix).HomogeneousTransformPoint(hit.point.ToDouble3());
+            var geoPosition = _arcGisMapComponent.View.WorldToGeographic(worldPosition);
+            var offsetPosition = new ArcGISPoint(geoPosition.X, geoPosition.Y, geoPosition.Z, geoPosition.SpatialReference);
+            var coords = GeoUtils.ProjectToSpatialReference(offsetPosition, new ArcGISSpatialReference(4326));
+            Debug.Log($"Hit position: {coords.X}, {coords.Y}, {coords.Z}");
+
+            return hit;
         }
 
         private IEnumerator ToggleLabelHeight()
@@ -89,6 +104,28 @@ namespace POLARIS.MainScene
             yield return new WaitForSeconds(2.0f);
             _uiDocLabel.ToggleInClassList("RaisedLabel");
             _uiDocLabel.ToggleInClassList("BuildingTopLabel");
+        }
+
+        private void UpdateBuildingColor(GameObject buildingPart, Color color)
+        {
+            var building = buildingPart.transform.parent.gameObject;
+            _lastColor = building.GetComponentInChildren<MeshRenderer>().material.color;
+            _lastSelected = building;
+            
+            foreach (var mesh in building.GetComponentsInChildren<MeshRenderer>())
+            {
+                mesh.material.color = color;
+            }
+        }
+
+        private void UnsetLastBuildingColor()
+        {
+            if (!_lastSelected) return;
+            
+            foreach (var mesh in _lastSelected.GetComponentsInChildren<MeshRenderer>())
+            {
+                mesh.material.color = _lastColor;
+            }
         }
 
         public static string ToTitleCase(string stringToConvert)
@@ -129,11 +166,11 @@ namespace POLARIS.MainScene
             }
         }
 
-        public static Building GetClosestBuilding(String raycastHitName)
+        public static Building GetClosestBuilding(string raycastHitName)
         {
             foreach (Building building in Locations.LocationList)
             {
-                if (String.Equals(raycastHitName, building.BuildingName,
+                if (string.Equals(raycastHitName, building.BuildingName,
                         StringComparison.OrdinalIgnoreCase))
                 {
                     return building;
