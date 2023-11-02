@@ -69,7 +69,7 @@ public class LoginUser : MonoBehaviour
                 instance.data.Username = jsonResponse["username"] != null ? jsonResponse["username"].Value<string>() : "";
                 instance.data.Realname = jsonResponse["name"] != null ? jsonResponse["name"].Value<string>() : "";
                 instance.data.schedule = jsonResponse["schedule"] != null ? jsonResponse["schedule"].Value<List<string>>() : new List<string>();
-                instance.data.favorite = jsonResponse["favorite"] != null ? jsonResponse["favorite"].Value<List<string>>() : new List<string>();
+                instance.data.favorite = jsonResponse["favorite"] != null ? jsonResponse["favorite"].Value<HashSet<string>>() : new HashSet<string>();
                 instance.data.visited = jsonResponse["visited"] != null ? jsonResponse["visited"].Value<List<string>>() : new List<string>();
                 instance.data.Token = (string)jsonResponse["tokens"]["token"];
                 instance.data.RefreshToken = (string)jsonResponse["tokens"]["refreshToken"];
