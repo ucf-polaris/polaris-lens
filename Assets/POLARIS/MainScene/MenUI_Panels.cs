@@ -27,8 +27,6 @@ namespace POLARIS.MainScene {
         private TextField _searchField;
         private Button _searchButton;
         private Button _clearButton;
-        
-        public extendedScrollView ExtendedScrollView;
 
         //UI Toolkit Objects
         [SerializeField]
@@ -37,7 +35,8 @@ namespace POLARIS.MainScene {
         [SerializeField]
         VisualTreeAsset EventListEntryTemplate;
 
-        private ListController listController;
+        public ListController listController;
+        public extendedScrollView ExtendedScrollView;
 
         public static bool userOnListView;
         // Start is called before the first frame update
@@ -90,8 +89,7 @@ namespace POLARIS.MainScene {
         {
             // Can move around map at top on event/location list view, but not when clicking on specific event
             // Tried doing same thing for ExtendedScrollView, but didn't work :(
-            userOnListView = listController.EntryList.panel.focusController.focusedElement ==
-                listController.EntryList || ExtendedScrollView.Extended;
+            userOnListView = listController.EntryList.panel.focusController.focusedElement == listController.EntryList || ExtendedScrollView.Extended;
             
             if (ChangeTabImage._lastPressed == currentTab) return;
             
@@ -104,9 +102,9 @@ namespace POLARIS.MainScene {
         
         private void OnSearchValueChanged(ChangeEvent<string> evt)
         {
-            ExtendedScrollView.Extended = false;
             string newText = evt.newValue;
 
+            //from something to empty string
             if (newText.EndsWith("\n"))
             {
                 Deselect();
@@ -114,16 +112,27 @@ namespace POLARIS.MainScene {
                 return;
             }
 
+            //when you replace placeholder by focusing on text box
+            bool flag = ((evt.previousValue == "Search for locations" || evt.previousValue == "Search for events") && evt.newValue == "");
+            Debug.Log(flag);
             if (currentTab == "location")
             {
                 List<Building> buildings = GetBuildingsFromSearch(newText, newText.Length > 0 && newText[0] == '~', newText == "");
-                UpdateBuildingSearchUI(buildings);
+                UpdateBuildingSearchUI(buildings, !flag);
             }
             else
             {
                 List<EventData> events = eventManager.GetEventsFromSearch(newText, newText.Length > 0 && newText[0] == '~', newText == "");
-                UpdateEventSearchUI(events);
+                UpdateEventSearchUI(events, !flag);
             }
+            //return to top when search
+            /*if (evt.newValue != evt.previousValue && )
+            {
+                Debug.Log("NEW: " + evt.newValue);
+                Debug.Log("OLD: " + evt.previousValue);
+                ReturnGoToTop();
+                ExtendedScrollView.Extended = false;
+            }*/
         }
         
         private bool FuzzyMatch(string source, string target, int tolerance)
@@ -160,14 +169,25 @@ namespace POLARIS.MainScene {
             return buildings;
         }
 
-        private void UpdateBuildingSearchUI(List<Building> buildings)
+        private void UpdateBuildingSearchUI(List<Building> buildings, bool shouldReset = true)
         {
             listController.Update(buildings);
+            if (shouldReset)
+            {
+                ReturnGoToTop();
+                ExtendedScrollView.Extended = false;
+            }
+            
         }
 
-        private void UpdateEventSearchUI(List<EventData> events)
+        private void UpdateEventSearchUI(List<EventData> events, bool shouldReset = true)
         {
             listController.Update(events);
+            if (shouldReset)
+            {
+                ReturnGoToTop();
+                ExtendedScrollView.Extended = false;
+            }
         }
 
         private void OnBuildingSearchClick(Building selectedBuilding)
@@ -323,6 +343,14 @@ namespace POLARIS.MainScene {
                     return Backtrack(C, source, target, i - 1, j);
                 }
             }
+        }
+
+        public void ReturnGoToTop()
+        {
+            ScrollView SV = listController.GetScrollView();
+            SV.verticalScroller.value = SV.verticalScroller.lowValue;
+            SV.scrollDecelerationRate = 0.0f;
+            Debug.Log("call");
         }
     }
     [Serializable]

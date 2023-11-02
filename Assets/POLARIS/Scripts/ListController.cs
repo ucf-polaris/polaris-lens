@@ -29,6 +29,8 @@ public class ListController
     
     public SwitchType sw;
 
+    private const float scrollDeceleration = 0.01f;
+
     public void Initialize(VisualElement root, VisualTreeAsset eventEntry, VisualTreeAsset locationEntry, SwitchType type)
     {
         sw = type;
@@ -55,19 +57,23 @@ public class ListController
 
     //event data
     List<EventData> _eventSearchList;
-
+    public ScrollView GetScrollView()
+    {
+        return EntryList.Q<ScrollView>();
+    }
     void ConfigureListView()
     {
         //set settings for list view
         EntryList.selectionType = SelectionType.None;
+        //restore screen deceleration if touch
+        EntryList.RegisterCallback<PointerDownEvent>(OnScreenTouch);
 
         //set settings for list view's scroll
         ScrollView SV = EntryList.Q<ScrollView>();
         SV.verticalScrollerVisibility = ScrollerVisibility.Hidden;
         SV.touchScrollBehavior = ScrollView.TouchScrollBehavior.Elastic;
-        SV.scrollDecelerationRate = 0.25f;
-        SV.elasticity = 0.01f;
     }
+
     void FillListBuilding()
     {
         EntryList.makeItem = () =>
@@ -141,5 +147,10 @@ public class ListController
         EntryList.Rebuild();
 
         sw = SwitchType.events;
+    }
+
+    private void OnScreenTouch(PointerDownEvent evt)
+    {
+        GetScrollView().scrollDecelerationRate = scrollDeceleration;
     }
 }
