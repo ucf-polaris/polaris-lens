@@ -18,6 +18,7 @@ public class EventListEntryController : ListEntryController
     string startDate = "";
     string endDate = "";
     string fullDescription = "";
+    string fullTitle = "";
 
     public void OutputFunction(ClickEvent evt)
     {
@@ -30,7 +31,7 @@ public class EventListEntryController : ListEntryController
         extendedView.LocationText.text = location;
         extendedView.StartDateText.text = startDate;
         extendedView.EndDateText.text = endDate;
-        extendedView.TitleText.text = NameLabel.text;
+        extendedView.TitleText.text = fullTitle;
 
         extendedView.Extended = true;
     }
@@ -65,10 +66,11 @@ public class EventListEntryController : ListEntryController
 
     public void SetEventData(EventData eventData)
     {
-        NameLabel.text = eventData.Name;
+        fullTitle = eventData.Name;
+        NameLabel.text = cullText(eventData.Name, 35);
 
         fullDescription = HtmlParser.RichParse(eventData.Description);
-        DescriptionLabel.text = cullDescriptionText(fullDescription);
+        DescriptionLabel.text = cullText(fullDescription, 180);
 
         location = eventData.ListedLocation;
         startDate = eventData.DateTime.ToString("f") + " to";
@@ -76,13 +78,12 @@ public class EventListEntryController : ListEntryController
 
         var splitDate = startDate.Split(",");
         string useDate = splitDate[1] + splitDate[2];
-        TimeLocationLabel.text = useDate.Trim() + " - " + eventData.ListedLocation;
+        TimeLocationLabel.text = cullText(useDate.Trim() + " - " + eventData.ListedLocation, 60);
         
         image.style.backgroundImage = eventData.rawImage;
     }
 
-    const int MAX_LENGTH = 180;
-    private string cullDescriptionText(string s)
+    private string cullText(string s, int length)
     {
         //get rid of all new lines
         s = s.Replace("\n", "");
@@ -90,11 +91,11 @@ public class EventListEntryController : ListEntryController
         //get rid of any tabs?
         s = s.Replace("\t", "");
 
-        if (s.Length <= MAX_LENGTH)
+        if (s.Length <= length)
             return s;
 
         //get rid of excess
-        return TruncateLongString(s, MAX_LENGTH) + "...";
+        return TruncateLongString(s, length) + "...";
     }
 }
 
