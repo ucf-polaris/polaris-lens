@@ -76,7 +76,7 @@ namespace POLARIS.MainScene {
             if (currentTab == "location")
             {
                 while (Locations.LocationList == null) yield return null;
-                List<Building> buildings = Locations.LocationList.ToList();
+                List<LocationData> buildings = locationManager.dataList;
                 UpdateBuildingSearchUI(buildings);
             }
             else
@@ -118,7 +118,7 @@ namespace POLARIS.MainScene {
 
             if (currentTab == "location")
             {
-                List<Building> buildings = GetBuildingsFromSearch(newText, newText.Length > 0 && newText[0] == '~', newText == "");
+                List<LocationData> buildings = locationManager.GetBuildingsFromSearch(newText, newText.Length > 0 && newText[0] == '~', newText == "");
                 UpdateBuildingSearchUI(buildings);
             }
             else
@@ -162,7 +162,7 @@ namespace POLARIS.MainScene {
             return buildings;
         }
 
-        private void UpdateBuildingSearchUI(List<Building> buildings)
+        private void UpdateBuildingSearchUI(List<LocationData> buildings)
         {
             listController.Update(buildings);
         }
@@ -241,7 +241,7 @@ namespace POLARIS.MainScene {
                 listController.Update(eventManager.dataList);
                 // listController.Update(new List<EventData>());
             else if (listController.sw == type1)
-                listController.Update(Locations.LocationList.ToList());
+                listController.Update(locationManager.dataList);
                 // listController.Update(new List<Building>());
         }
 

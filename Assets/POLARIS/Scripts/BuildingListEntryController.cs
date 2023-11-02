@@ -59,7 +59,7 @@ public class BuildingListEntryController
         NameLabel.text = buildingData.BuildingName;
         DistanceLabel.text = "N miles";
         AddressLabel.text = buildingData.BuildingAddress == "none" ? "" : buildingData.BuildingAddress + " - ";
-        EventLabel.text = buildingData.BuildingEvents.Length.ToString() + " Events";
+        EventLabel.text = (buildingData.BuildingEvents != null ? buildingData.BuildingEvents.Length.ToString() : "0") + " Events";
         //FavoriteElement clickable event
         //NavigationElement clickable event
     }
