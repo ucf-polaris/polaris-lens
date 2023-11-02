@@ -34,7 +34,7 @@ public class ListController
 
         //initialize variables
         EntryList = root.Q<ListView>("SearchResultBigLabel");
-        _buildingSearchList = new List<Building>();
+        _buildingSearchList = new List<LocationData>();
         _eventSearchList = new List<EventData>();
 
         //template
@@ -50,7 +50,7 @@ public class ListController
     }
 
     //building data
-    List<Building> _buildingSearchList;
+    List<LocationData> _buildingSearchList;
 
     //event data
     List<EventData> _eventSearchList;
@@ -124,7 +124,7 @@ public class ListController
         EntryList.itemsSource = _eventSearchList;
     }
 
-    public void Update(List<Building> newList)
+    public void Update(List<LocationData> newList)
     {
         _buildingSearchList = newList;
         FillListBuilding();

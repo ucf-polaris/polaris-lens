@@ -11,7 +11,7 @@ namespace POLARIS.MainScene {
         public Geocoder geo;
 
         //data objects
-        private List<Building> _buildingSearchList = new();
+        private List<LocationData> _buildingSearchList = new();
         private List<EventData> _eventSearchList = new();
 
         //misc. variables
@@ -20,6 +20,7 @@ namespace POLARIS.MainScene {
 
         //Managers
         private EventManager eventManager;
+        private LocationManager locationManager;
 
         //UI Toolkit elements
         private TextField _searchField;
@@ -41,6 +42,7 @@ namespace POLARIS.MainScene {
         {
             //Initialize variables
             eventManager = EventManager.getInstance();
+            locationManager = LocationManager.getInstance();
             currentTab = ChangeTabImage._lastPressed;
             listController = new ListController();
             
@@ -90,7 +92,7 @@ namespace POLARIS.MainScene {
             {
                 if (currentTab == "location")
                 {
-                    List<Building> buildings = GetBuildingsFromSearch(newText, newText[0] == '~');
+                    List<LocationData> buildings = locationManager.GetBuildingsFromSearch(newText, newText[0] == '~');
                     UpdateBuildingSearchUI(buildings);
                 }
                 else
@@ -111,36 +113,7 @@ namespace POLARIS.MainScene {
             return LongestCommonSubsequence(source, target).Length >= target.Length - tolerance;
         }
 
-        private List<Building> GetBuildingsFromSearch(string query, bool fuzzySearch)
-        {
-            const int TOLERANCE = 1;
-
-            List<Building> buildings = new List<Building>();
-            foreach (Building building in Locations.LocationList)
-            {
-                if (building.BuildingName.IndexOf(query, StringComparison.OrdinalIgnoreCase) >= 0 ||
-                    (fuzzySearch && FuzzyMatch(building.BuildingName, query, TOLERANCE)))
-                {
-                    buildings.Add(building);
-                    continue;
-                }
-
-                if (building.BuildingAllias == null) continue;
-                foreach (string alias in building.BuildingAllias)
-                {
-                    if (alias.IndexOf(query, StringComparison.OrdinalIgnoreCase) >= 0 ||
-                        (fuzzySearch && FuzzyMatch(alias, query, TOLERANCE)))
-                    {
-                        buildings.Add(building);
-                        break;
-                    }
-                }
-            }
-
-            return buildings;
-        }
-
-        private void UpdateBuildingSearchUI(List<Building> buildings)
+        private void UpdateBuildingSearchUI(List<LocationData> buildings)
         {
             listController.Update(buildings);
         }
@@ -218,7 +191,7 @@ namespace POLARIS.MainScene {
             if (listController.sw == type2)
                 listController.Update(new List<EventData>());
             else if (listController.sw == type1)
-                listController.Update(new List<Building>());
+                listController.Update(new List<LocationData>());
             
         }
 

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UIElements;
 using POLARIS.MainScene;
+using POLARIS.Managers;
 
 public class BuildingListEntryController
 {
@@ -53,7 +54,7 @@ public class BuildingListEntryController
         */
     }
 
-    public void SetBuildingData(Building buildingData)
+    public void SetBuildingData(LocationData buildingData)
     {
         NameLabel.text = buildingData.BuildingName;
         DistanceLabel.text = "N miles";

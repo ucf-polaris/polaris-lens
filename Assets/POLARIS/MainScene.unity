@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 0}
-  m_IndirectSpecularColor: {r: 0.45031768, g: 0.50034016, b: 0.5753112, a: 1}
+  m_IndirectSpecularColor: {r: 0.45031738, g: 0.50033987, b: 0.57531095, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -325,7 +325,7 @@ Transform:
   m_GameObject: {fileID: 177370685}
   serializedVersion: 2
   m_LocalRotation: {x: 0.70710677, y: -0, z: -0, w: 0.7071068}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalPosition: {x: 0, y: 0, z: 0.0000000013969839}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -493,6 +493,7 @@ GameObject:
   m_Component:
   - component: {fileID: 355669367}
   - component: {fileID: 355669366}
+  - component: {fileID: 355669368}
   m_Layer: 0
   m_Name: GetLocations
   m_TagString: Untagged
@@ -507,7 +508,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 355669365}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 9a067df3cf121744da839189bb49759b, type: 3}
   m_Name: 
@@ -528,6 +529,20 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &355669368
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 355669365}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6f6237737febe42c2a3a9cc238b83c5c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  dataList: []
+  Testing: 0
 --- !u!1 &607878207
 GameObject:
   m_ObjectHideFlags: 0
@@ -616,7 +631,7 @@ MonoBehaviour:
   m_LocalPosition:
     x: -9039478.68992216
     y: 0
-    z: 3325135.872468732
+    z: 3325135.8724687304
   m_LocalRotation:
     value:
       x: 0
@@ -823,7 +838,7 @@ MonoBehaviour:
   m_LocalPosition:
     x: -9039198.95691282
     y: 500
-    z: 3324946.361543439
+    z: 3324946.3615434384
   m_LocalRotation:
     value:
       x: 0.54716814
@@ -1113,8 +1128,8 @@ MonoBehaviour:
     visited: []
     currScene: 
   codeData:
+    userID: 
     token: 
-    refreshToken: 
   Testing: 1
 --- !u!4 &1080807621
 Transform:
@@ -1583,7 +1598,7 @@ MonoBehaviour:
   m_LocalPosition:
     x: -9039162.689922158
     y: 1000
-    z: 3325135.872468732
+    z: 3325135.8724687304
   m_LocalRotation:
     value:
       x: 0
