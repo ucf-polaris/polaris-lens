@@ -94,7 +94,6 @@ namespace POLARIS.Managers{
                 Instance = this;
                 data = new UserData();
                 LoadPlayerPrefs(data);
-                LoadFavorites();
                 Debug.Log(data.UserID1);
             }
         }
@@ -132,6 +131,7 @@ namespace POLARIS.Managers{
             data.Token = PlayerPrefs.GetString("AuthToken");
             data.Realname = PlayerPrefs.GetString("realName");
             data.Username = PlayerPrefs.GetString("username");
+            LoadFavorites(data);
 
             return data.UserID1 != "" && data.Token != "";
         }
@@ -142,7 +142,7 @@ namespace POLARIS.Managers{
             File.WriteAllText(FavoritesFilePath, json);
         }
 
-        public void LoadFavorites()
+        public void LoadFavorites(UserData data)
         {
             if (File.Exists(FavoritesFilePath))
             {
