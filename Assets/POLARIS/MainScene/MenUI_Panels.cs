@@ -114,7 +114,6 @@ namespace POLARIS.MainScene {
 
             //when you replace placeholder by focusing on text box
             bool flag = ((evt.previousValue == "Search for locations" || evt.previousValue == "Search for events") && evt.newValue == "");
-            Debug.Log(flag);
             if (currentTab == "location")
             {
                 List<Building> buildings = GetBuildingsFromSearch(newText, newText.Length > 0 && newText[0] == '~', newText == "");
@@ -125,14 +124,6 @@ namespace POLARIS.MainScene {
                 List<EventData> events = eventManager.GetEventsFromSearch(newText, newText.Length > 0 && newText[0] == '~', newText == "");
                 UpdateEventSearchUI(events, !flag);
             }
-            //return to top when search
-            /*if (evt.newValue != evt.previousValue && )
-            {
-                Debug.Log("NEW: " + evt.newValue);
-                Debug.Log("OLD: " + evt.previousValue);
-                ReturnGoToTop();
-                ExtendedScrollView.Extended = false;
-            }*/
         }
         
         private bool FuzzyMatch(string source, string target, int tolerance)
@@ -350,7 +341,6 @@ namespace POLARIS.MainScene {
             ScrollView SV = listController.GetScrollView();
             SV.verticalScroller.value = SV.verticalScroller.lowValue;
             SV.scrollDecelerationRate = 0.0f;
-            Debug.Log("call");
         }
     }
     [Serializable]
