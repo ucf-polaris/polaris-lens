@@ -32,7 +32,7 @@
 
 #SearchBar > TextInput {
     background-color: rgba(0, 0, 0, 0);
-    background-image: resource('Assets/POLARIS/Rectangle 16.png');
+    background-image: url('project://database/Assets/POLARIS/Rectangle%2016.png?fileID=2800000&guid=e8e46927aba794088b4321a528cafdf8&type=3#Rectangle 16');
     border-width: 0;
     -unity-background-image-tint-color: rgb(25, 25, 32);
 }

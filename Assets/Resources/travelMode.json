@@ -1,14 +1,9 @@
 {
       "attributeParameterValues": [
         {
-          "attributeName": "Avoid Private Roads",
-          "parameterName": "Restriction Usage",
-          "value": "AVOID_MEDIUM"
-        },
-        {
           "attributeName": "Walking",
           "parameterName": "Restriction Usage",
-          "value": "PROHIBITED"
+          "value": "PREFER_LOW"
         },
         {
           "attributeName": "Preferred for Pedestrians",

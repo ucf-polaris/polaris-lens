@@ -6,6 +6,7 @@
 
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
 using Esri.ArcGISMapsSDK.Components;
@@ -46,7 +47,7 @@ namespace POLARIS
         private const float ElevationOffset = 2.0f;
 
         private const int StopCount = 2;
-        private readonly Queue<GameObject> _stops = new();
+        private readonly Stack<GameObject> _stops = new();
         private const string RoutingURL = "https://route-api.arcgis.com/arcgis/rest/services/World/Route/NAServer/Route_World/solve";
         private readonly List<GameObject> _breadcrumbs = new();
 
@@ -60,10 +61,11 @@ namespace POLARIS
 
         private string _srcName;
         private string _destName;
-        private readonly Queue<string> _stopNames = new();
+        private readonly Stack<string> _stopNames = new();
 
+        private bool _destSelected = false;
+        private bool _lastDestSelected = true;
         private bool _routing = false;
-        private bool _lastRouting = true;
         private float _pressTime = 0;
         private bool _closed = false;
 
@@ -135,25 +137,32 @@ namespace POLARIS
                                 var locationComponent = routeMarker.GetComponent<ArcGISLocationComponent>();
                                 locationComponent.enabled = true;
                                 locationComponent.Position = geoPosition;
-                                locationComponent.Rotation = new ArcGISRotation(0, 90, 0);
+                                locationComponent.Rotation = new ArcGISRotation(0, 180, 0);
 
-                                _stops.Enqueue(routeMarker);
+                                _stops.Push(routeMarker);
                                 var locationName = hit.transform.name;
-                                _stopNames.Enqueue(locationName.StartsWith("ArcGISGameObject_") ? $"{locationComponent.Position.Y:00.00000}, {locationComponent.Position.X:00.00000}" : GetBuilding.ToTitleCase(locationName[4..]));
+                                _stopNames.Push(locationName.StartsWith("ArcGISGameObject_") ? $"{locationComponent.Position.Y:00.00000}, {locationComponent.Position.X:00.00000}" : GetBuilding.ToTitleCase(locationName[4..]));
 
                                 if (_stops.Count > StopCount)
                                 {
-                                    Destroy(_stops.Dequeue());
-                                    _stopNames.Dequeue();
+                                    Destroy(_stops.Pop());
+                                    _stopNames.Pop();
+                                }
+
+                                if (_stops.Count == 1)
+                                {
+                                    _destName = _stopNames.Peek();
+                                    UpdateRouteInfoIncomplete();
+                                    _destSelected = true;
                                 }
                     
                                 if (_stops.Count == StopCount)
                                 {
                                     var stopNamesArray = _stopNames.ToArray();
-                                    _srcName = stopNamesArray[0];
-                                    _destName = stopNamesArray[1];
+                                    _srcName = stopNamesArray[1];
+                                    _destName = stopNamesArray[0];
 
-                                    var results = await FetchRoute(_stops.ToArray());
+                                    var results = await FetchRoute(_stops.Reverse().ToArray());
 
                                     if (results.Contains("error"))
                                     {
@@ -174,17 +183,12 @@ namespace POLARIS
                 }
             }
 
-            // _routingBox.ToggleDisplayStyle(_routing);
-
-            if (_routing != _lastRouting)
+            if (_destSelected != _lastDestSelected)
             {
-                print("ROUTEI" + _routing + _lastRouting);
-                _lastRouting = _routing;
-                print("ROUTEI2" + _routing + _lastRouting);
-                StartCoroutine(ToggleRouting(_routing));
+                _lastDestSelected = _destSelected;
+                StartCoroutine(ToggleRouting(_destSelected));
             }
-            // print("ROUTEI3" + _routing);
-            
+
             RebaseRoute();
         }
 
@@ -272,7 +276,7 @@ namespace POLARIS
 
         private IEnumerator DrawRoute(string routeInfo)
         {
-            ClearRoute();
+            ClearRoute(false);
 
             var info = JObject.Parse(routeInfo);
             var routes = info.SelectToken("routes");
@@ -351,19 +355,35 @@ namespace POLARIS
             _routingSrcBox.ToggleDisplayStyle(includeSrc);
         }
 
-        private void ClearRoute()
+        private void UpdateRouteInfoIncomplete()
         {
+            _routingInfoLabel.text = "Choose starting point...";
+            _routingSrcLabel.text = "Waiting";
+            _routingDestLabel.text = _destName;
+            
+            _routingSrcBox.ToggleDisplayStyle(false);
+        }
+
+        private void ClearRoute(bool markers)
+        {
+            if (markers)
+            {
+                foreach (var stop in _stops)
+                {
+                    Destroy(stop);
+                }
+                _stops.Clear();
+                _stopNames.Clear();
+                
+                _routing = _destSelected = false;
+            }
+
             foreach (var breadcrumb in _breadcrumbs)
                 Destroy(breadcrumb);
-
             _breadcrumbs.Clear();
-            _stops.Clear();
-            _stopNames.Clear();
 
             if (_lineRenderer)
                 _lineRenderer.positionCount = 0;
-
-            _routing = false;
         }
 
         private void RenderLine() 
@@ -432,7 +452,7 @@ namespace POLARIS
 
         private void StopClicked()
         {
-            ClearRoute();
+            ClearRoute(true);
         }
 
         private IEnumerator ToggleRouting(bool routing)
