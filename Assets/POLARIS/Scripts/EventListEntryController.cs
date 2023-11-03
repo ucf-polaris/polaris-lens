@@ -33,6 +33,8 @@ public class EventListEntryController : ListEntryController
         extendedView.EndDateText.text = endDate;
         extendedView.TitleText.text = fullTitle;
 
+        extendedView.ExtendedView.verticalScroller.value = extendedView.ExtendedView.verticalScroller.lowValue;
+
         extendedView.Extended = true;
     }
 
