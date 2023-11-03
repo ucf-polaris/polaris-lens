@@ -47,6 +47,8 @@ namespace POLARIS.Managers{
             public List<string> visited;
             [SerializeField]
             private string currScene;
+            [SerializeField]
+            private string suggested;
 
             #region Setters and Getters
             public string Username { get => username; set { username = value; PlayerPrefs.SetString("username", value); } }
@@ -56,6 +58,7 @@ namespace POLARIS.Managers{
             public string Token { get => token; set { token = value; PlayerPrefs.SetString("AuthToken", value); } }
             public string RefreshToken { get => refreshToken; set { refreshToken = value; PlayerPrefs.SetString("RefreshToken", value); } }
             public string CurrScene { get => currScene; set { currScene = value; PlayerPrefs.SetString("currScene", value); } }
+            public string Suggested { get => suggested; set { suggested = value; PlayerPrefs.SetString("suggested", value); } }
             #endregion
         }
 
@@ -73,7 +76,7 @@ namespace POLARIS.Managers{
             #endregion
         }
 
-        static public UserManager getInstance()
+        public static UserManager getInstance()
         {
             return Instance;
         }
@@ -99,6 +102,7 @@ namespace POLARIS.Managers{
         {
             return Instance != null && Instance.data != null;
         }
+        
         //On log out destroy player prefs
         public void Logout()
         {
@@ -127,6 +131,7 @@ namespace POLARIS.Managers{
             data.Token = PlayerPrefs.GetString("AuthToken");
             data.Realname = PlayerPrefs.GetString("realName");
             data.Username = PlayerPrefs.GetString("username");
+            data.Suggested = PlayerPrefs.GetString("suggested");
 
             return data.UserID1 != "" && data.Token != "";
         }
@@ -135,7 +140,7 @@ namespace POLARIS.Managers{
         {
             //make backend call to update here (or implement system to avoid spams to backend)
             request["UserID"] = data.UserID1;
-            if(currentCall == null)
+            if (currentCall == null)
             {
                 currentCall = UpdateFields(request);
                 StartCoroutine(currentCall);

@@ -15,6 +15,7 @@ using Esri.GameEngine.Geometry;
 using Esri.HPFramework;
 using Newtonsoft.Json.Linq;
 using POLARIS.MainScene;
+using POLARIS.Managers;
 using QuickEye.UIToolkit;
 using Unity.Mathematics;
 using UnityEngine;
@@ -69,6 +70,9 @@ namespace POLARIS
         private float _pressTime = 0;
         private bool _closed = false;
 
+        private UserManager userManager;
+        private Queue<string> suggestedLocations;
+
         private void Start()
         {
             // We need this ArcGISMapComponent for the FromCartesianPosition Method
@@ -97,6 +101,9 @@ namespace POLARIS
             
             _slideButton.clickable.clicked += ToggleSlide;
             _stopButton.clickable.clicked += StopClicked;
+
+            userManager = UserManager.getInstance();
+            suggestedLocations = new Queue<string>(3);
         }
         
         private async void Update()
@@ -163,6 +170,7 @@ namespace POLARIS
                                     var stopNamesArray = _stopNames.ToArray();
                                     _srcName = stopNamesArray[0];
                                     _destName = stopNamesArray[1];
+                                    HandleSuggestedLocations(_destName);
 
                                     var results = await FetchRoute(_stops.ToArray());
 
@@ -490,7 +498,7 @@ namespace POLARIS
             if (smallestDist > 50) // Dont know what dist this is
             {
                 // TODO: Auto reroute
-                Debug.Log("Should recalculate route! - Smallest dist is " + smallestDist);
+                // Debug.Log("Should recalculate route! - Smallest dist is " + smallestDist);
             }
 
             return smallestIndex;
@@ -515,6 +523,24 @@ namespace POLARIS
             }
             
             return pointDist / totalDist;
+        }
+
+        private string QueueToString(Queue<string> queue)
+        {
+            return string.Join(", ", queue);
+        }
+
+        private void HandleSuggestedLocations(string suggestion)
+        {
+            if (userManager.data.Suggested != null) suggestedLocations = new Queue<string>(userManager.data.Suggested.Split("~").Reverse());
+            print("Suggested locations: " + QueueToString(suggestedLocations));
+            
+            if (suggestedLocations.Count >= 3) suggestedLocations.Dequeue();
+            suggestedLocations.Enqueue(suggestion);
+            
+            // Use ~ as separator because some strings have commas, spaces, etc.
+            userManager.data.Suggested = string.Join("~", suggestedLocations.Reverse());
+            print("Suggested string: " + userManager.data.Suggested);
         }
     }
 }

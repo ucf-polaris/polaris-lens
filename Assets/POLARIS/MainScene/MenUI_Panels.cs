@@ -21,6 +21,7 @@ namespace POLARIS.MainScene {
         private bool _waitingForResponse = false;
 
         //Managers
+        private UserManager userManager;
         private EventManager eventManager;
 
         //UI Toolkit elements
@@ -43,6 +44,7 @@ namespace POLARIS.MainScene {
         private void Start()
         {
             //Initialize variables
+            userManager = UserManager.getInstance();
             eventManager = EventManager.getInstance();
             currentTab = ChangeTabImage._lastPressed;
             listController = new ListController();
