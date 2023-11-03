@@ -5,6 +5,7 @@ using UnityEngine.Networking;
 using Newtonsoft.Json.Linq;
 using Newtonsoft.Json;
 using System;
+using System.IO;
 
 namespace POLARIS.Managers{
     public class UserManager : BaseManager
@@ -17,10 +18,14 @@ namespace POLARIS.Managers{
         private const string updateCodeURL = "https://api.ucfpolaris.com/user/update";
         private const string BaseApiURL = "https://api.ucfpolaris.com";
         private const string UserGetURL = BaseApiURL + "/user/get";
+        private const string FavoritesFileName = "favorites.json";
+        private string FavoritesFilePath;
         public bool Testing = false;
 
         void Awake()
         {
+            FavoritesFilePath = Path.Combine(Application.persistentDataPath, FavoritesFileName);
+            Debug.Log(FavoritesFilePath);
             Initialize();
         }
 
@@ -40,11 +45,11 @@ namespace POLARIS.Managers{
             [SerializeField]
             private string refreshToken;
             [SerializeField]
-            public List<string> favorite;
+            public List<string> favorite = new List<string>();
             [SerializeField]
-            public List<string> schedule;
+            public List<string> schedule = new List<string>();
             [SerializeField]
-            public List<string> visited;
+            public List<string> visited = new List<string>();
             [SerializeField]
             private string currScene;
             [SerializeField]
@@ -112,6 +117,7 @@ namespace POLARIS.Managers{
             PlayerPrefs.DeleteKey("AuthToken");
             PlayerPrefs.DeleteKey("realName");
             PlayerPrefs.DeleteKey("username");
+            ClearFavorites();
             data = new UserData();
 
             /*
@@ -132,10 +138,46 @@ namespace POLARIS.Managers{
             data.Realname = PlayerPrefs.GetString("realName");
             data.Username = PlayerPrefs.GetString("username");
             data.Suggested = PlayerPrefs.GetString("suggested");
+            LoadFavorites(data);
 
             return data.UserID1 != "" && data.Token != "";
         }
+        class StoreInFile
+        {
+            public List<string> favorites;
+            public StoreInFile(List<string> lst)
+            {
+                favorites = lst;
+            }
+        }
 
+        public void SaveFavorites()
+        {
+            StoreInFile s = new StoreInFile(data.favorite);
+            string json = JsonConvert.SerializeObject(s);
+            //string json = JsonUtility.ToJson(data.favorite.ToArray());
+            Debug.Log(json);
+            File.WriteAllText(FavoritesFilePath, json);
+        }
+
+        public void LoadFavorites(UserData data)
+        {
+            if (File.Exists(FavoritesFilePath))
+            {
+                string json = File.ReadAllText(FavoritesFilePath);
+                StoreInFile obj = JsonConvert.DeserializeObject<StoreInFile>(json);
+                data.favorite = obj.favorites;
+            }
+        }
+
+        public void ClearFavorites()
+        {
+            if (File.Exists(FavoritesFilePath))
+            {
+                File.Delete(FavoritesFilePath);
+            }
+            data.favorite.Clear();
+        }
         public void UpdateBackendCall(IDictionary<string, string> request)
         {
             //make backend call to update here (or implement system to avoid spams to backend)
@@ -306,6 +348,35 @@ namespace POLARIS.Managers{
                 onSuccess?.Invoke(jsonResponse);
             }
         }
+
+        public bool isFavorite(LocationData building)
+        {
+            if (data.favorite == null) return false;
+            return data.favorite.Contains(building.BuildingName);
+        }
+
+        public void UpdateFavorites(bool add, LocationData building)
+        {
+            if (data.favorite == null) data.favorite = new List<string>();
+
+            if (add && !data.favorite.Contains(building.BuildingName))
+            {
+                Debug.Log("Added");
+                data.favorite.Add(building.BuildingName);
+                building.IsFavorited = true;
+            }
+            else if (!add && data.favorite.Contains(building.BuildingName))
+            {
+                Debug.Log("Removed");
+                data.favorite.Remove(building.BuildingName);
+                building.IsFavorited = false;
+            }
+            else
+                Debug.Log(add ? "Building is already favorited, why favorite again?" : "Building isn't even favorited, why defavorite?!?");
+            SaveFavorites();
+        }
+
+
         //could implement this as login though
         override protected IEnumerator Scan(IDictionary<string, string> request)
         {

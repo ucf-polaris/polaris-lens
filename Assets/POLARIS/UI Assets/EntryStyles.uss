@@ -204,3 +204,11 @@
     position: relative;
     -unity-background-image-tint-color: rgba(255, 255, 255, 0);
 }
+
+.isFavorited {
+    background-image: resource('Polaris/star-filled');
+}
+
+.isNotFavorited {
+    background-image: resource('Polaris/star-outline');
+}

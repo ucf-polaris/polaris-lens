@@ -13,7 +13,7 @@ namespace POLARIS.MainScene {
         public Geocoder geo;
 
         //data objects
-        private List<Building> _buildingSearchList = new();
+        private List<LocationData> _buildingSearchList = new();
         private List<EventData> _eventSearchList = new();
 
         //misc. variables
@@ -23,6 +23,7 @@ namespace POLARIS.MainScene {
         //Managers
         private UserManager userManager;
         private EventManager eventManager;
+        private LocationManager locationManager;
 
         //UI Toolkit elements
         private TextField _searchField;
@@ -46,6 +47,7 @@ namespace POLARIS.MainScene {
             //Initialize variables
             userManager = UserManager.getInstance();
             eventManager = EventManager.getInstance();
+            locationManager = LocationManager.getInstance();
             currentTab = ChangeTabImage._lastPressed;
             listController = new ListController();
 
@@ -75,7 +77,7 @@ namespace POLARIS.MainScene {
             if (currentTab == "location")
             {
                 while (Locations.LocationList == null) yield return null;
-                List<Building> buildings = Locations.LocationList.ToList();
+                List<LocationData> buildings = locationManager.dataList;
                 UpdateBuildingSearchUI(buildings);
             }
             else
@@ -118,48 +120,14 @@ namespace POLARIS.MainScene {
             bool flag = ((evt.previousValue == "Search for locations" || evt.previousValue == "Search for events") && evt.newValue == "");
             if (currentTab == "location")
             {
-                List<Building> buildings = GetBuildingsFromSearch(newText, newText.Length > 0 && newText[0] == '~', newText == "");
-                UpdateBuildingSearchUI(buildings, !flag);
+                List<LocationData> buildings = locationManager.GetBuildingsFromSearch(newText, newText.Length > 0 && newText[0] == '~', newText == "");
+                UpdateBuildingSearchUI(buildings);
             }
             else
             {
                 List<EventData> events = eventManager.GetEventsFromSearch(newText, newText.Length > 0 && newText[0] == '~', newText == "");
                 UpdateEventSearchUI(events, !flag);
             }
-        }
-        
-        private bool FuzzyMatch(string source, string target, int tolerance)
-        {
-            return LongestCommonSubsequence(source, target).Length >= target.Length - tolerance;
-        }
-
-        private List<Building> GetBuildingsFromSearch(string query, bool fuzzySearch, bool returnAll)
-        {
-            const int TOLERANCE = 1;
-
-            List<Building> buildings = new List<Building>();
-            foreach (Building building in Locations.LocationList)
-            {
-                if (returnAll || building.BuildingName.IndexOf(query, StringComparison.OrdinalIgnoreCase) >= 0 ||
-                    (fuzzySearch && FuzzyMatch(building.BuildingName, query, TOLERANCE)))
-                {
-                    buildings.Add(building);
-                    continue;
-                }
-
-                if (building.BuildingAllias == null) continue;
-                foreach (string alias in building.BuildingAllias)
-                {
-                    if (alias.IndexOf(query, StringComparison.OrdinalIgnoreCase) >= 0 ||
-                        (fuzzySearch && FuzzyMatch(alias, query, TOLERANCE)))
-                    {
-                        buildings.Add(building);
-                        break;
-                    }
-                }
-            }
-
-            return buildings;
         }
 
         private void UpdateBuildingSearchUI(List<Building> buildings, bool shouldReset = true)
@@ -252,7 +220,7 @@ namespace POLARIS.MainScene {
                 listController.Update(eventManager.dataList);
                 // listController.Update(new List<EventData>());
             else if (listController.sw == type1)
-                listController.Update(Locations.LocationList.ToList());
+                listController.Update(locationManager.dataList);
                 // listController.Update(new List<Building>());
         }
 
