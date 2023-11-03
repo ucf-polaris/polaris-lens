@@ -14,7 +14,7 @@
                 <ui:Label tabindex="-1" text="Label" parse-escape-sequences="true" display-tooltip-when-elided="true" class="panelTextEvents" />
             </ui:VisualElement>
             <ui:VisualElement class="panelNavigationIcon" style="flex-grow: 1;" />
-            <ui:VisualElement class="panelFavoritesIcon" style="flex-grow: 1;" />
+            <ui:VisualElement class="panelFavoritesIcon isNotFavorited" style="flex-grow: 1;" />
         </ui:VisualElement>
     </ui:VisualElement>
 </ui:UXML>
