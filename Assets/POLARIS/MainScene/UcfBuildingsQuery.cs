@@ -57,6 +57,7 @@ namespace POLARIS
     public class UcfBuildingsQuery : MonoBehaviour
     {
         [SerializeField] private Color32 baseBuildingColor = new Color32(23, 103, 194, 255);
+        [SerializeField] private Color32 topBuildingColor = new Color32(123, 13, 194, 255);
         // The feature layer we are going to query
         public string FeatureLayerURL = "https://services.arcgis.com/dVL5xxth19juhrDY/ArcGIS/rest/services/MainCampus_RPbldgs/FeatureServer/0";
 
@@ -203,12 +204,10 @@ namespace POLARIS
                 _polyExtruder = buildingObject.AddComponent<PolyExtruder>();
                 _polyExtruder.isOutlineRendered = false;
 
-                int numEventsOfBuilding = GetNumEventsBuilding(feature.attributes.BuildingNa);
-                Color32 colorOfBuilding = new Color32(
-                    (byte)(baseBuildingColor.r * (1.0f / (numEventsOfBuilding + 1))),
-                    (byte)(baseBuildingColor.g * (1.0f / (numEventsOfBuilding + 1))),
-                    (byte)(baseBuildingColor.b * (1.0f / (numEventsOfBuilding + 1))), 
-                    255);
+                var numEventsOfBuilding = GetNumEventsBuilding(feature.attributes.BuildingNa);
+                var colorOfBuilding = Color.Lerp(
+                    baseBuildingColor, topBuildingColor, 1 - (1.0f / (numEventsOfBuilding + 1))
+                    );
                 // Debug.Log("calculated r: " + baseBuildingColor.r * (1.0f / (numEventsOfBuilding + 1)));
                 // Debug.Log("calculated g: " + baseBuildingColor.g * (1.0f / (numEventsOfBuilding + 1)));
                 // Debug.Log("calculated b: " + baseBuildingColor.b * (1.0f / (numEventsOfBuilding + 1)));
