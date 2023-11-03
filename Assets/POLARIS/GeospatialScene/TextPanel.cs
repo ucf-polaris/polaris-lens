@@ -232,7 +232,7 @@ namespace POLARIS.GeospatialScene
             _eventsLoaded = false;
         }
 
-        public static string GenerateLocationText(Building location)
+        public static string GenerateLocationText(LocationData location)
         {
             var sb = new StringBuilder(location.BuildingDesc.Length);
 

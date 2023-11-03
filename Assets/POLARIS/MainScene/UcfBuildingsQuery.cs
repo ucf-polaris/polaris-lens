@@ -56,6 +56,8 @@ namespace POLARIS
     // with correct property values. This is a good starting point if you are looking to parse your own feature layer into Unity.
     public class UcfBuildingsQuery : MonoBehaviour
     {
+        private LocationManager locationManager;
+        
         [SerializeField] private Color32 baseBuildingColor = new Color32(23, 103, 194, 255);
         [SerializeField] private Color32 topBuildingColor = new Color32(123, 13, 194, 255);
         // The feature layer we are going to query
@@ -84,6 +86,7 @@ namespace POLARIS
         // Get all the features when the script starts
         private void Start()
         {
+            locationManager = LocationManager.getInstance();
             var loader = FindChildWithTag(ArcGisMapComponent.gameObject, "Location");
             _locationComponent = loader.GetComponent<ArcGISLocationComponent>();
             _rootPos = loader.GetComponent<HPTransform>().UniversePosition;
@@ -124,7 +127,7 @@ namespace POLARIS
             else
             {
                 // Wait until locations are filled to use numEvents of each building for coloring
-                while (Locations.LocationList == null) yield return null;
+                while (locationManager.dataList == null) yield return null;
                 
                 CreateGameObjectsFromResponse(request.downloadHandler.text);
             }
@@ -221,8 +224,8 @@ namespace POLARIS
         
         private int GetNumEventsBuilding(String buildingName)
         {
-            Building foundBuilding = null;
-            foreach (Building building in Locations.LocationList)
+            LocationData foundBuilding = null;
+            foreach (LocationData building in locationManager.dataList)
             {
                 if (String.Equals(buildingName, building.BuildingName,
                         StringComparison.OrdinalIgnoreCase))

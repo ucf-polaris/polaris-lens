@@ -19,6 +19,7 @@
 
 using POLARIS.GeospatialScene;
 using POLARIS.MainScene;
+using POLARIS.Managers;
 using Unity.Mathematics;
 
 namespace Google.XR.ARCoreExtensions.Samples.Geospatial
@@ -45,6 +46,8 @@ namespace Google.XR.ARCoreExtensions.Samples.Geospatial
         Justification = "Bypass source check.")]
     public class GeospatialController : MonoBehaviour
     {
+        private LocationManager locationManager;
+        
         [Header("AR Components")]
 
         /// <summary>
@@ -426,6 +429,11 @@ namespace Google.XR.ARCoreExtensions.Samples.Geospatial
         //     SetAnchorPanelState(false);
         // }
 
+        void Start()
+        {
+            locationManager = LocationManager.getInstance();
+        }
+        
         /// <summary>
         /// Unity's Awake() method.
         /// </summary>
@@ -729,7 +737,7 @@ namespace Google.XR.ARCoreExtensions.Samples.Geospatial
                 }
                 
                 // Load in nearby panels (wait for locations array to be loaded)
-                if (Locations.LocationList is not null)
+                if (locationManager.dataList is not null)
                 {
                     var results = PanelManager.FetchNearbyIfNeeded(
                         new double2(pose.Latitude, pose.Longitude), _anchorObjects);

@@ -76,7 +76,7 @@ namespace POLARIS.MainScene {
         {
             if (currentTab == "location")
             {
-                while (Locations.LocationList == null) yield return null;
+                while (locationManager.dataList == null) yield return null;
                 List<LocationData> buildings = locationManager.dataList;
                 UpdateBuildingSearchUI(buildings);
             }
@@ -121,7 +121,7 @@ namespace POLARIS.MainScene {
             if (currentTab == "location")
             {
                 List<LocationData> buildings = locationManager.GetBuildingsFromSearch(newText, newText.Length > 0 && newText[0] == '~', newText == "");
-                UpdateBuildingSearchUI(buildings);
+                UpdateBuildingSearchUI(buildings, !flag);
             }
             else
             {
@@ -130,7 +130,7 @@ namespace POLARIS.MainScene {
             }
         }
 
-        private void UpdateBuildingSearchUI(List<Building> buildings, bool shouldReset = true)
+        private void UpdateBuildingSearchUI(List<LocationData> buildings, bool shouldReset = true)
         {
             listController.Update(buildings);
             if (shouldReset)
@@ -150,44 +150,7 @@ namespace POLARIS.MainScene {
                 ExtendedScrollView.Extended = false;
             }
         }
-
-        private void OnBuildingSearchClick(Building selectedBuilding)
-        {
-            if (_waitingForResponse) return;
-            _waitingForResponse = true;
-            Deselect();
-            Debug.Log(
-                $"Name: {selectedBuilding.BuildingName ?? ""}\n" +
-                $"Aliases: {((selectedBuilding.BuildingAllias != null) ? string.Join(", ", selectedBuilding.BuildingAllias) : "")}\n" +
-                $"Abbreviations: {((selectedBuilding.BuildingAbbreviation != null) ? string.Join(", ", selectedBuilding.BuildingAbbreviation) : "")}\n" +
-                $"Description: {selectedBuilding.BuildingDesc ?? ""}\n" +
-                $"Longitude: {selectedBuilding.BuildingLong}\n" +
-                $"Latitude: {selectedBuilding.BuildingLat}\n" +
-                $"Address: {selectedBuilding.BuildingAddress ?? ""}\n" +
-                $"Events: {((selectedBuilding.BuildingEvents != null) ? string.Join(", ", selectedBuilding.BuildingEvents) : "")}\n");
-            geo.SetStuff(selectedBuilding.BuildingLong, selectedBuilding.BuildingLat, selectedBuilding.BuildingAddress);
-            // ClearSearchResults();
-            _waitingForResponse = false;
-        }
-
-        private void OnEventSearchClick(EventData selectedEvent)
-        {
-            if (_waitingForResponse) return;
-            _waitingForResponse = true;
-            Deselect();
-            Debug.Log(
-                $"Name: {selectedEvent.Name ?? ""}\n" +
-                $"Description: {selectedEvent.Description ?? ""}\n" +
-                $"Longitude: {selectedEvent.Location.BuildingLong}\n" +
-                $"Latitude: {selectedEvent.Location.BuildingLat}\n" +
-                $"Host: {selectedEvent.Host ?? ""}\n" +
-                $"Start Time: {selectedEvent.DateTime}\n" +
-                $"End Time: {selectedEvent.EndsOn}\n" +
-                $"Image Path: {selectedEvent.Image ?? ""}\n" +
-                $"Location: {selectedEvent.ListedLocation ?? ""}\n");
-            // ClearSearchResults();
-            _waitingForResponse = false;
-        }
+        
 
         private void Deselect()
         {

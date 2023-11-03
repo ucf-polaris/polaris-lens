@@ -6,6 +6,7 @@ using Esri.ArcGISMapsSDK.Components;
 using Esri.ArcGISMapsSDK.Utils.GeoCoord;
 using Esri.GameEngine.Geometry;
 using Esri.HPFramework;
+using POLARIS.Managers;
 using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.UIElements;
@@ -27,10 +28,12 @@ namespace POLARIS.MainScene
         private Color _lastColor;
         
         private ArcGISMapComponent _arcGisMapComponent;
+        private LocationManager locationManager;
 
 
         private void Start()
         {
+            locationManager = LocationManager.getInstance();
             _mainCamera = Camera.main;
             _uiDocLabel = gameObject.GetComponent<UIDocument>().rootVisualElement.Q<Label>("BuildingTopLabel");
             _arcGisMapComponent = FindObjectOfType<ArcGISMapComponent>();
@@ -169,9 +172,9 @@ namespace POLARIS.MainScene
             }
         }
 
-        public static Building GetClosestBuilding(string raycastHitName)
+        private LocationData GetClosestBuilding(string raycastHitName)
         {
-            foreach (Building building in Locations.LocationList)
+            foreach (LocationData building in locationManager.dataList)
             {
                 if (string.Equals(raycastHitName, building.BuildingName,
                         StringComparison.OrdinalIgnoreCase))
@@ -190,7 +193,7 @@ namespace POLARIS.MainScene
                 }
             }
 
-            return Locations.LocationList[0];
+            return null;
         }
     }
 }

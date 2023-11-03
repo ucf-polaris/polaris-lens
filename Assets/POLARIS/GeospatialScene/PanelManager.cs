@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Google.XR.ARCoreExtensions;
 using Google.XR.ARCoreExtensions.Samples.Geospatial;
+using POLARIS.Managers;
 using Unity.Mathematics;
 using Unity.VisualScripting;
 using Unity.XR.CoreUtils;
@@ -13,6 +14,7 @@ namespace POLARIS.GeospatialScene
 {
     public class PanelManager : MonoBehaviour
     {
+        private LocationManager locationManager;
         public Camera Camera;
         public ARAnchorManager AnchorManager;
         
@@ -24,6 +26,10 @@ namespace POLARIS.GeospatialScene
         private const float LoadDistance = 400f; // m
         private const float RenderDistance = 100f; // m
 
+        void Start()
+        {
+            locationManager = LocationManager.getInstance();
+        }
         public PanelManager()
         {
             _loadLocation = new double2(0, 0);
@@ -157,9 +163,9 @@ namespace POLARIS.GeospatialScene
             _panels.Clear();
         }
 
-        private IEnumerable<Building> GetLocationsWithinRadius(double2 loc, double radius)
+        private IEnumerable<LocationData> GetLocationsWithinRadius(double2 loc, double radius)
         {
-            return Locations.LocationList.Where(
+            return locationManager.dataList.Where(
                 location => DistanceInKmBetweenEarthCoordinates(
                     loc, new double2(location.BuildingLat, location.BuildingLong)) < radius).ToList();
         }
