@@ -1,6 +1,4 @@
 <ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" xsi="http://www.w3.org/2001/XMLSchema-instance" engine="UnityEngine.UIElements" editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
-    <Style src="project://database/Assets/POLARIS/MainUSS.uss?fileID=7433441132597879392&amp;guid=c0cbfe978347ae54f841f39e05b3b78e&amp;type=3#MainUSS" />
-    <ui:VisualElement style="position: relative;">
-        <ui:Label text="Polaris" display-tooltip-when-elided="true" name="PolarisLabel" style="-unity-font: url(&apos;project://database/Assets/UI%20Toolkit/UnityThemes/UnityDefaultRuntimeTheme.tss?fileID=2230732570650464555&amp;guid=822ceb35a710d9b4bb5d07a9e09d4681&amp;type=3#NotInter-Regular&apos;); -unity-font-style: italic; font-size: 18px; -unity-text-align: upper-center; color: rgb(91, 202, 233); -unity-text-outline-color: rgb(255, 255, 255); -unity-text-outline-width: 2px; letter-spacing: 5px;" />
-    </ui:VisualElement>
+    <Style src="project://database/Assets/POLARIS/MainScene/MainUSS.uss?fileID=7433441132597879392&amp;guid=c0cbfe978347ae54f841f39e05b3b78e&amp;type=3#MainUSS" />
+    <ui:VisualElement style="position: relative;" />
 </ui:UXML>
