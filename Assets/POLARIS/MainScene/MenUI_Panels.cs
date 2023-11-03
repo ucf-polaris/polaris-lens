@@ -49,7 +49,7 @@ namespace POLARIS.MainScene {
 
             var uiDoc = GetComponent<UIDocument>();
             var rootVisual = uiDoc.rootVisualElement;
-            ExtendedScrollView = new extendedScrollView(rootVisual.Q<ScrollView>("ExtendedScrollView"));
+            ExtendedScrollView = new extendedScrollView(rootVisual.Q<VisualElement>("ExtendedScrollContainer"));
             //passing back variables
             listController.Initialize(rootVisual, EventListEntryTemplate, LocationListEntryTemplate, ListController.SwitchType.locations);
             EventListEntryController.extendedView = ExtendedScrollView;
@@ -276,6 +276,7 @@ namespace POLARIS.MainScene {
     public class extendedScrollView
     {
         public ScrollView ExtendedView;
+        public VisualElement ExtendedContainerView;
         private bool extended;
         public Label DescriptionText;
         public Label LocationText;
@@ -284,18 +285,21 @@ namespace POLARIS.MainScene {
         public Label TitleText;
         public VisualElement image;
 
-        public extendedScrollView(ScrollView sv)
+        public extendedScrollView(VisualElement container)
         {
-            ExtendedView = sv;
-            DescriptionText = sv.Q<Label>("DescriptionText");
-            LocationText = sv.Q<Label>("LocationText");
-            StartDateText = sv.Q<Label>("StartDateText");
-            EndDateText = sv.Q<Label>("EndDateText");
-            TitleText = sv.Q<Label>("TitleText");
-            image = sv.Q<VisualElement>("ImagePop");
+            //ExtendScrollContainer
+            ExtendedContainerView = container;
+            ExtendedView = container.Q<ScrollView>("ExtendedScrollView");
+
+            DescriptionText = container.Q<Label>("DescriptionText");
+            LocationText = container.Q<Label>("LocationText");
+            StartDateText = container.Q<Label>("StartDateText");
+            EndDateText = container.Q<Label>("EndDateText");
+            TitleText = container.Q<Label>("TitleText");
+            image = container.Q<VisualElement>("ImagePop");
 
             //back click button
-            sv.Q<VisualElement>("BackClick").RegisterCallback<ClickEvent>(OnBackClick);
+            container.Q<VisualElement>("BackClick").RegisterCallback<ClickEvent>(OnBackClick);
         }
 
         //also close when...
@@ -308,6 +312,6 @@ namespace POLARIS.MainScene {
             Extended = false;
         }
 
-        public bool Extended { get => extended; set { extended = value; ExtendedView.style.top = Length.Percent(value ? 0f : 110f); } }
+        public bool Extended { get => extended; set { extended = value; ExtendedContainerView.style.top = Length.Percent(value ? 10f : 110f); } }
     }
 }
