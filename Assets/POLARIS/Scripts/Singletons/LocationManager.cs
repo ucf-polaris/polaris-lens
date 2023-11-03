@@ -54,6 +54,8 @@ namespace POLARIS.Managers
                 running = Scan(null);
                 StartCoroutine(running);
             }
+            //since this isn't inherent to the building, needs to be set from userAccess
+            UpdateFavoritesInBuildings();
         }
 
         override protected IEnumerator Scan(IDictionary<string, string> request)
@@ -180,6 +182,40 @@ namespace POLARIS.Managers
 
             return buildings;
         }
+
+        private void LoadPlayerPrefs()
+        {
+            //implement loading the full list of locations here
+        }
+
+        public void SetPlayerPrefs()
+        {
+            //implement saving the full list of locations here
+        }
+
+        private void UpdateFavoritesInBuildings()
+        {
+            foreach(var building in dataList)
+            {
+                if (userAccess.isFavorite(building))
+                    building.IsFavorited = true;
+            }
+        }
+
+        private void UpdateVisitedInBuildings()
+        {
+            //unimplemented for now
+        }
+
+        public LocationData GetFromName(string name)
+        {
+            for (var i = 0; i < dataList.Count; i++)
+            {
+                if (dataList[i].BuildingName == name)
+                    return dataList[i];
+            }
+            return null;
+        }
     }
 
     [Serializable]
@@ -210,6 +246,10 @@ namespace POLARIS.Managers
         [SerializeField]
         private Location[] buildingEntrances;
         public Texture2D rawImage = null;
+        [SerializeField]
+        private bool isFavorited;
+        [SerializeField]
+        private bool isVisited;
 
         public float BuildingLong { get => buildingLong; set => buildingLong = value; }
         public float BuildingLat { get => buildingLat; set => buildingLat = value; }
@@ -223,20 +263,12 @@ namespace POLARIS.Managers
         public string BuildingAddress { get => buildingAddress; set => buildingAddress = value; }
         public string BuildingImage { get => buildingImage; set => buildingImage = value; }
         public Location[] BuildingEntrances { get => buildingEntrances; set => buildingEntrances = value; }
+        public bool IsFavorited { get => isFavorited; set => isFavorited = value; }
+        public bool IsVisited { get => isVisited; set => isVisited = value; }
 
         public LocationData()
         {
             //LoadPlayerPrefs();
-        }
-
-        public void LoadPlayerPrefs()
-        {
-            //implement getting events from player prefs here
-        }
-
-        public void SetPlayerPrefs()
-        {
-            //Up to you how you want to do this (if at all)
         }
 
         public IEnumerator DownloadImage(string MediaUrl)

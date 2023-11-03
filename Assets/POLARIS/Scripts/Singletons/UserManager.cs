@@ -19,11 +19,13 @@ namespace POLARIS.Managers{
         private const string BaseApiURL = "https://api.ucfpolaris.com";
         private const string UserGetURL = BaseApiURL + "/user/get";
         private const string FavoritesFileName = "favorites.json";
-        private static readonly string FavoritesFilePath = Path.Combine(Application.persistentDataPath, FavoritesFileName);
+        private string FavoritesFilePath;
         public bool Testing = false;
 
         void Awake()
         {
+            FavoritesFilePath = Path.Combine(Application.persistentDataPath, FavoritesFileName);
+            Debug.Log(FavoritesFilePath);
             Initialize();
         }
 
@@ -43,11 +45,11 @@ namespace POLARIS.Managers{
             [SerializeField]
             private string refreshToken;
             [SerializeField]
-            public HashSet<string> favorite;
+            public List<string> favorite = new List<string>();
             [SerializeField]
-            public List<string> schedule;
+            public List<string> schedule = new List<string>();
             [SerializeField]
-            public List<string> visited;
+            public List<string> visited = new List<string>();
             [SerializeField]
             private string currScene;
 
@@ -135,10 +137,21 @@ namespace POLARIS.Managers{
 
             return data.UserID1 != "" && data.Token != "";
         }
+        class StoreInFile
+        {
+            public List<string> favorites;
+            public StoreInFile(List<string> lst)
+            {
+                favorites = lst;
+            }
+        }
 
         public void SaveFavorites()
         {
-            string json = JsonUtility.ToJson(new List<string>(data.favorite));
+            StoreInFile s = new StoreInFile(data.favorite);
+            string json = JsonConvert.SerializeObject(s);
+            //string json = JsonUtility.ToJson(data.favorite.ToArray());
+            Debug.Log(json);
             File.WriteAllText(FavoritesFilePath, json);
         }
 
@@ -147,8 +160,8 @@ namespace POLARIS.Managers{
             if (File.Exists(FavoritesFilePath))
             {
                 string json = File.ReadAllText(FavoritesFilePath);
-                List<string> favList = JsonUtility.FromJson<List<string>>(json);
-                data.favorite = new HashSet<string>(favList);
+                StoreInFile obj = JsonConvert.DeserializeObject<StoreInFile>(json);
+                data.favorite = obj.favorites;
             }
         }
 
@@ -201,7 +214,7 @@ namespace POLARIS.Managers{
                 data.Username = jsonResponse["username"] != null ? jsonResponse["username"].Value<string>() : data.Username;
                 data.Realname = jsonResponse["name"] != null ? jsonResponse["name"].Value<string>() : data.Realname;
                 data.schedule = jsonResponse["schedule"] != null ? jsonResponse["schedule"].Value<List<string>>() : data.schedule;
-                data.favorite = jsonResponse["favorite"] != null ? jsonResponse["favorite"].Value<HashSet<string>>() : data.favorite;
+                data.favorite = jsonResponse["favorite"] != null ? jsonResponse["favorite"].Value<List<string>>() : data.favorite;
                 data.visited = jsonResponse["visited"] != null ? jsonResponse["visited"].Value<List<string>>() : data.visited;
             }
             currentCall = null;
@@ -333,17 +346,28 @@ namespace POLARIS.Managers{
 
         public bool isFavorite(LocationData building)
         {
+            if (data.favorite == null) return false;
             return data.favorite.Contains(building.BuildingName);
         }
 
-        public void UpdateFavorites(bool mode, string buildingName)
+        public void UpdateFavorites(bool add, LocationData building)
         {
-            if (mode && !data.favorite.Contains(buildingName))
-                data.favorite.Add(buildingName);
-            else if (!mode && data.favorite.Contains(buildingName))
-                data.favorite.Remove(buildingName);
+            if (data.favorite == null) data.favorite = new List<string>();
+
+            if (add && !data.favorite.Contains(building.BuildingName))
+            {
+                Debug.Log("Added");
+                data.favorite.Add(building.BuildingName);
+                building.IsFavorited = true;
+            }
+            else if (!add && data.favorite.Contains(building.BuildingName))
+            {
+                Debug.Log("Removed");
+                data.favorite.Remove(building.BuildingName);
+                building.IsFavorited = false;
+            }
             else
-                Debug.Log(mode ? "Building is already favorited, why favorite again?" : "Building isn't even favorited, why defavorite?!?");
+                Debug.Log(add ? "Building is already favorited, why favorite again?" : "Building isn't even favorited, why defavorite?!?");
             SaveFavorites();
         }
 
