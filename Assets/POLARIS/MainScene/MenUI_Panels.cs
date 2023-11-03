@@ -12,10 +12,6 @@ namespace POLARIS.MainScene {
     {
         public Geocoder geo;
 
-        //data objects
-        private List<LocationData> _buildingSearchList = new();
-        private List<EventData> _eventSearchList = new();
-
         //misc. variables
         private string currentTab;
         private bool _waitingForResponse = false;
@@ -76,13 +72,13 @@ namespace POLARIS.MainScene {
         {
             if (currentTab == "location")
             {
-                while (locationManager.dataList == null) yield return null;
+                while (locationManager.dataList.Count == 0) yield return null;
                 List<LocationData> buildings = locationManager.dataList;
                 UpdateBuildingSearchUI(buildings);
             }
             else
             {
-                while (eventManager.dataList == null) yield return null;
+                while (eventManager.dataList.Count == 0) yield return null;
                 List<EventData> events = eventManager.dataList;
                 UpdateEventSearchUI(events);
             }

@@ -535,7 +535,11 @@ namespace POLARIS
             if (userManager.data.Suggested != null) suggestedLocations = new Queue<string>(userManager.data.Suggested.Split("~").Reverse());
             print("Suggested locations: " + QueueToString(suggestedLocations));
             
+            // Remove duplicates
+            suggestedLocations = new Queue<string>(suggestedLocations.Where(x => x != suggestion));
+            // Keep capacity at 3
             if (suggestedLocations.Count >= 3) suggestedLocations.Dequeue();
+            // Add suggestion
             suggestedLocations.Enqueue(suggestion);
             
             // Use ~ as separator because some strings have commas, spaces, etc.

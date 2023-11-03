@@ -127,7 +127,7 @@ namespace POLARIS
             else
             {
                 // Wait until locations are filled to use numEvents of each building for coloring
-                while (locationManager.dataList == null) yield return null;
+                while (locationManager.dataList.Count == 0) yield return null;
                 
                 CreateGameObjectsFromResponse(request.downloadHandler.text);
             }
