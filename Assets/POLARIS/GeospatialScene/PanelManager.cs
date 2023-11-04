@@ -23,8 +23,8 @@ namespace POLARIS.GeospatialScene
         private double2 _loadLocation;
         private float _loadTime;
 
-        private const float LoadDistance = 400f; // m
-        private const float RenderDistance = 100f; // m
+        private const float LoadDistance = 1.0f; // km
+        private const float RenderDistance = 200f; // m
 
         void Start()
         {
@@ -42,7 +42,7 @@ namespace POLARIS.GeospatialScene
             // Wait at least 5 seconds
             // Check for distance
             if (!(Time.time - _loadTime > 5 &&
-                  DistanceInKmBetweenEarthCoordinates(currentLocation, _loadLocation) > LoadDistance/2000))
+                  DistanceInKmBetweenEarthCoordinates(currentLocation, _loadLocation) > LoadDistance/2))
             {
                 // Return nothing
                 return new List<GeospatialAnchorContent>();
@@ -60,7 +60,7 @@ namespace POLARIS.GeospatialScene
         public ARGeospatialAnchor PlacePanel(List<GameObject> anchorObjects, GeospatialAnchorHistory history)
         {
             if (Camera.gameObject.GetNamedChild("Panel")) return null;
-            
+
             var panel = AnchorManager.AddComponent<TextPanel>();
             panel.Instantiate(new GeospatialAnchorContent("WHY HELLO THERE <style=Description>third panel <color=green>hello</color></style>", history));
             var anchor = panel.PlacePanelGeospatialAnchor(anchorObjects, AnchorManager);
@@ -84,12 +84,24 @@ namespace POLARIS.GeospatialScene
                                                            location.BuildingAltitude == 0 ? AnchorType.Terrain : AnchorType.Geospatial, 
                                                            new Quaternion(0, 0, 0, 0)))).ToList();
             
+            Debug.Log("Text: " + contentList[0].Text);
+            Debug.Log("Lat Long: " + contentList[0].History.Latitude + " " + contentList[0].History.Latitude);
+            Debug.Log("Text: " + contentList[0].History.Altitude);
+            Debug.Log("Text: " + contentList[0].History.AnchorType);
+            
+            Debug.Log("2Text: " + contentList[1].Text);
+            Debug.Log("2Lat Long: " + contentList[1].History.Latitude + " " + contentList[0].History.Latitude);
+            Debug.Log("2Text: " + contentList[1].History.Altitude);
+            Debug.Log("2Text: " + contentList[1].History.AnchorType);
+
             // var results = new[]
             // {
             //     new GeospatialAnchorContent("FIRST panel", new GeospatialAnchorHistory(28.614402, -81.195860, -5.6, AnchorType.Geospatial, new Quaternion(0, 0, 0, 0))),
             //     new GeospatialAnchorContent("second panel", new GeospatialAnchorHistory(28.614469, -81.195702, -5.4, AnchorType.Geospatial, new Quaternion(0, 0, 0, 0))),
             //     new GeospatialAnchorContent("<style=Description>third panel <color=green>hello</color></style>", new GeospatialAnchorHistory(28.614369, -81.195760, -5.4, AnchorType.Geospatial, new Quaternion(0, 0, 0, 0)))
             // };
+            
+            Debug.Log("Location selected length " + contentList.Count);
 
             // Find which panels should be added and removed
             var addPanels = new List<int>();
@@ -125,6 +137,8 @@ namespace POLARIS.GeospatialScene
                     _panels.RemoveAt(i);
                 }
             }
+            
+            Debug.Log("panels list length " + contentList.Count);
 
             // Add new panels
             foreach (var newPanel in addPanels)
@@ -142,6 +156,8 @@ namespace POLARIS.GeospatialScene
         {
             foreach (var panel in _panels)
             {
+                if (panel.CurrentPrefab == null) continue;
+                
                 var withinThresh =
                     Vector3.Distance(panel.CurrentPrefab.transform.position, Camera.transform.position) <
                     RenderDistance;
@@ -160,6 +176,10 @@ namespace POLARIS.GeospatialScene
 
         public void ClearPanels()
         {
+            foreach (var panel in _panels)
+            {
+                Destroy(panel);
+            }
             _panels.Clear();
         }
 

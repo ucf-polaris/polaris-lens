@@ -70,6 +70,9 @@ namespace POLARIS
         private float _pressTime = 0;
         private bool _closed = false;
 
+        private float _travelMinutes = 0f;
+        private float _travelMiles = 0f;
+
         private UserManager userManager;
         private Queue<string> suggestedLocations;
         [SerializeField] private int numSuggestions = 3;
@@ -301,7 +304,7 @@ namespace POLARIS
                 var geometry = feature.SelectToken("geometry");
                 var paths = geometry?.SelectToken("paths")?[0];
 
-                var pathList = new List<double[]>{};
+                var pathList = new List<double[]>();
 
                 foreach(var path in paths)
                 {
@@ -353,18 +356,23 @@ namespace POLARIS
             var features = info.SelectToken("routes")?.SelectToken("features");
             var attributes = features?[0]?.SelectToken("attributes");
 
-            var travelMiles = (float)attributes?.SelectToken("Total_Miles");
+            _travelMiles = (float)attributes?.SelectToken("Total_Miles");
 
             var summary = info.SelectToken("directions")?[0]?.SelectToken("summary");
-            var travelMinutes = (float)summary?.SelectToken("totalTime");
+            _travelMinutes = (float)summary?.SelectToken("totalTime");
 
-            print($"Time: {travelMinutes:0.00} Minutes, Distance: {travelMiles:0.00} Miles");
+            print($"Time: {_travelMinutes:0.00} Minutes, Distance: {_travelMiles:0.00} Miles");
 
-            _routingInfoLabel.text = $"Routing - {travelMinutes:0} min. ({travelMiles:0.0} mi.)";
+            _routingInfoLabel.text = $"Routing - {_travelMinutes:0} min. ({_travelMiles:0.0} mi.)";
             _routingSrcLabel.text = _srcName;
             _routingDestLabel.text = _destName;
             
             _routingSrcBox.ToggleDisplayStyle(includeSrc);
+
+            PersistData.SrcName = _srcName;
+            PersistData.DestName = _destName;
+            PersistData.TravelMiles = _travelMiles;
+            PersistData.TravelMinutes = _travelMinutes;
         }
 
         private void UpdateRouteInfoIncomplete()
@@ -388,6 +396,7 @@ namespace POLARIS
                 _stopNames.Clear();
                 
                 _routing = _destSelected = false;
+                PersistData.Routing = false;
             }
 
             foreach (var breadcrumb in _breadcrumbs)
@@ -418,6 +427,7 @@ namespace POLARIS
             _lineRenderer.positionCount = allPoints.Count;
             _lineRenderer.SetPositions(allPoints.ToArray());
             _routing = true;
+            PersistData.Routing = true;
         }
 
         // The ArcGIS Rebase component
@@ -443,6 +453,7 @@ namespace POLARIS
                 _lineRenderer.SetPositions(points);
                 var closestPoint = GetClosestPathPoint(points);
                 var pointPercent = PointPercentage(points, closestPoint);
+                _routingInfoLabel.text = $"Routing - {(_travelMinutes*pointPercent):0} min. ({(_travelMiles*pointPercent):0.0} mi.)";
 
                 var gradient = new Gradient();
                 gradient.SetKeys(
@@ -506,7 +517,7 @@ namespace POLARIS
             return smallestIndex;
         }
         
-        private static float PointPercentage(IReadOnlyList<Vector3> linePositions, int point)
+        public static float PointPercentage(IReadOnlyList<Vector3> linePositions, int point)
         {
             var totalDist = 0f;
             var pointDist = 0f;

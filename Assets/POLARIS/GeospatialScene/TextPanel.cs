@@ -53,6 +53,8 @@ namespace POLARIS.GeospatialScene
         public ARGeospatialAnchor PlacePanelGeospatialAnchor(
             List<GameObject> anchorObjects, ARAnchorManager anchorManager)
         {
+            print("PLACED at " + Content.History.Latitude + ", " + Content.History.Longitude);
+            
             if (Content.History.AnchorType == AnchorType.Terrain)
             {
                 return PlacePanelGeospatialTerrainAnchor(anchorObjects, anchorManager);
@@ -119,7 +121,7 @@ namespace POLARIS.GeospatialScene
             }
 
             var resultGo = result.Anchor.gameObject;
-            var anchorGo = Instantiate(LoadingPrefab,
+            CurrentPrefab = Instantiate(LoadingPrefab,
                                        resultGo.transform);
             anchorObjects.Add(resultGo);
 
@@ -234,6 +236,8 @@ namespace POLARIS.GeospatialScene
 
         public static string GenerateLocationText(LocationData location)
         {
+            location.BuildingDesc ??= "This is definitely one the buildings ever at UCF.";
+
             var sb = new StringBuilder(location.BuildingDesc.Length);
 
             sb.Append("<style=Title>");

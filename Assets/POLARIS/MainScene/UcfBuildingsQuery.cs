@@ -14,9 +14,11 @@ using Esri.HPFramework;
 using UnityEngine;
 using UnityEngine.Networking;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using Unity.Mathematics;
 using TMPro;
 using POLARIS.Managers;
+using UnityEngine.Serialization;
 
 namespace POLARIS
 { 
@@ -42,7 +44,6 @@ namespace POLARIS
     internal class BuildingProperties
     {
         public string BuildingNa;
-        public string BuildingNu;
     }
 
     [Serializable]
@@ -56,18 +57,12 @@ namespace POLARIS
     // with correct property values. This is a good starting point if you are looking to parse your own feature layer into Unity.
     public class UcfBuildingsQuery : MonoBehaviour
     {
-        private LocationManager locationManager;
+        private LocationManager _locationManager;
         
-        [SerializeField] private Color32 baseBuildingColor = new Color32(23, 103, 194, 255);
-        [SerializeField] private Color32 topBuildingColor = new Color32(123, 13, 194, 255);
+        [SerializeField] private Color32 BaseBuildingColor = new (23, 103, 194, 255);
+        [SerializeField] private Color32 TopBuildingColor = new (123, 13, 194, 255);
         // The feature layer we are going to query
         public string FeatureLayerURL = "https://services.arcgis.com/dVL5xxth19juhrDY/ArcGIS/rest/services/MainCampus_RPbldgs/FeatureServer/0";
-
-        // The height where we spawn the building before finding the ground height
-        private const int BuildingSpawnHeight = 10000;
-
-        // This will hold a reference to each feature we created
-        // public List<GameObject> Buildings = new List<GameObject>();
 
         // In the query request we can denote the Spatial Reference we want the return geometries in.
         // It is important that we create the GameObjects with the same Spatial Reference
@@ -83,10 +78,20 @@ namespace POLARIS
 
         private bool _runCreate;
 
+        private const int DefaultHeight = 40;
+        private readonly Dictionary<string, int> _customHeights = new()
+        {
+            { "REFLECTING POND", 1 },
+            { "STUDENT UNION", 50 },
+            { "WATER TOWER", 50 },
+            { "ARBORETUM GREENHOUSE", 10 },
+            { "ARBORETUM PORTABLE", 10}
+        };
+
         // Get all the features when the script starts
         private void Start()
         {
-            locationManager = LocationManager.getInstance();
+            _locationManager = LocationManager.getInstance();
             var loader = FindChildWithTag(ArcGisMapComponent.gameObject, "Location");
             _locationComponent = loader.GetComponent<ArcGISLocationComponent>();
             _rootPos = loader.GetComponent<HPTransform>().UniversePosition;
@@ -112,24 +117,37 @@ namespace POLARIS
         // Sends the Request to get features from the service
         private IEnumerator GetFeatures() //Action<UnityWebRequest> callback
         {
-            // To learn more about the Feature Layer rest API and all the things that are possible checkout
-            // https://developers.arcgis.com/rest/services-reference/enterprise/query-feature-service-layer-.htm
-
-            var queryRequestURL = FeatureLayerURL + "/Query?" + MakeRequestHeaders();
-            Debug.Log(queryRequestURL);
-            var request = UnityWebRequest.Get(queryRequestURL);
-            
-            yield return request.SendWebRequest();
-            if (request.result != UnityWebRequest.Result.Success)
+            var jsonTravelModeAsset = Resources.Load("UCF_BuildingNa_ArcGIS_Query") as TextAsset;
+            if (jsonTravelModeAsset != null)
             {
-                Debug.Log(request.error);
+                var jsonText = JObject.Parse(jsonTravelModeAsset.text).ToString();
+                
+                // Wait until locations are filled to use numEvents of each building for coloring
+                while (_locationManager.dataList.Count == 0) yield return null;
+                
+                CreateGameObjectsFromResponse(jsonText);
             }
             else
             {
-                // Wait until locations are filled to use numEvents of each building for coloring
-                while (locationManager.dataList.Count == 0) yield return null;
+                // To learn more about the Feature Layer rest API and all the things that are possible checkout
+                // https://developers.arcgis.com/rest/services-reference/enterprise/query-feature-service-layer-.htm
+
+                var queryRequestURL = FeatureLayerURL + "/Query?" + MakeRequestHeaders();
+                Debug.Log(queryRequestURL);
+                var request = UnityWebRequest.Get(queryRequestURL);
+            
+                yield return request.SendWebRequest();
+                if (request.result != UnityWebRequest.Result.Success)
+                {
+                    Debug.Log(request.error);
+                }
+                else
+                {
+                    // Wait until locations are filled to use numEvents of each building for coloring
+                    while (_locationManager.dataList.Count == 0) yield return null;
                 
-                CreateGameObjectsFromResponse(request.downloadHandler.text);
+                    CreateGameObjectsFromResponse(request.downloadHandler.text);
+                }
             }
         }
 
@@ -140,7 +158,6 @@ namespace POLARIS
             string[] outFields =
             {
                 "BuildingNa",
-                "BuildingNu",
             };
 
             var outFieldHeader = "outFields=";
@@ -162,7 +179,7 @@ namespace POLARIS
             {
                 "f=json",
                 "where=1=1",
-                "outSR=" + FeatureSRWKID.ToString(),
+                "outSR=" + FeatureSRWKID,
                 outFieldHeader
             };
 
@@ -209,25 +226,21 @@ namespace POLARIS
 
                 var numEventsOfBuilding = GetNumEventsBuilding(feature.attributes.BuildingNa);
                 var colorOfBuilding = Color.Lerp(
-                    baseBuildingColor, topBuildingColor, 1 - (1.0f / (numEventsOfBuilding + 1))
+                    BaseBuildingColor, TopBuildingColor, 1 - (1.0f / (numEventsOfBuilding + 1))
                     );
-                // Debug.Log("calculated r: " + baseBuildingColor.r * (1.0f / (numEventsOfBuilding + 1)));
-                // Debug.Log("calculated g: " + baseBuildingColor.g * (1.0f / (numEventsOfBuilding + 1)));
-                // Debug.Log("calculated b: " + baseBuildingColor.b * (1.0f / (numEventsOfBuilding + 1)));
-                //Debug.Log("Building " + feature.attributes.BuildingNa + " has new color: " + colorOfBuilding);
-                _polyExtruder.createPrism(feature.attributes.BuildingNa, 50.0f, vertices2D, 
-                    colorOfBuilding, true, false, true);
-                // TODO: Add mesh collider to walls
-                // gameObject.AddComponent<MeshCollider>();
+
+                var height = _customHeights.GetValueOrDefault(feature.attributes.BuildingNa, DefaultHeight);
+                _polyExtruder.createPrism(feature.attributes.BuildingNa, height, vertices2D, 
+                                          colorOfBuilding, true, false, true);
             }
         }
         
-        private int GetNumEventsBuilding(String buildingName)
+        private int GetNumEventsBuilding(string buildingName)
         {
             LocationData foundBuilding = null;
-            foreach (LocationData building in locationManager.dataList)
+            foreach (var building in _locationManager.dataList)
             {
-                if (String.Equals(buildingName, building.BuildingName,
+                if (string.Equals(buildingName, building.BuildingName,
                         StringComparison.OrdinalIgnoreCase))
                 {
                     foundBuilding = building;
@@ -235,19 +248,14 @@ namespace POLARIS
                 }
 
                 if (building.BuildingAllias == null) continue;
-                foreach (string alias in building.BuildingAllias)
+                if (building.BuildingAllias.Any(alias => string.Equals(buildingName, alias,
+                                                    StringComparison.OrdinalIgnoreCase)))
                 {
-                    if (String.Equals(buildingName, alias,
-                            StringComparison.OrdinalIgnoreCase))
-                    {
-                        foundBuilding = building;
-                        break;
-                    }
+                    foundBuilding = building;
                 }
             }
 
-            if (foundBuilding == null || foundBuilding.BuildingEvents == null) return 0;
-            return foundBuilding.BuildingEvents.Length;
+            return foundBuilding?.BuildingEvents?.Length ?? 0;
         }
         
         private static GameObject FindChildWithTag(GameObject parent, string tag)

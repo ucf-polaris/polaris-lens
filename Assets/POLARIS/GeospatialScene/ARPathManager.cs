@@ -4,25 +4,37 @@ using System.Collections.Generic;
 using System.Linq;
 using Google.XR.ARCoreExtensions;
 using POLARIS.MainScene;
+using QuickEye.UIToolkit;
 using Unity.XR.CoreUtils;
 using UnityEngine;
-using UnityEngine.InputSystem.Controls;
+using UnityEngine.UIElements;
 using UnityEngine.XR.ARFoundation;
 
 namespace POLARIS.GeospatialScene
 {
     public class ARPathManager : MonoBehaviour
     {
+        public Camera Camera;
+        public GameObject PathPrefab;
+        public GameObject RouteInfo;
+        
         private readonly List<GameObject> _pathAnchorObjects = new();
         private LineRenderer _lineRenderer;
         private ArrowPoint _arrow;
-        
-        public Camera Camera;
-        public GameObject PathPrefab;
+
+        private bool _lastRouting = false;
+        private bool _closed = false;
+        private Label _routingSrcLabel;
+        private Label _routingDestLabel;
+        private Label _routingInfoLabel;
+        private VisualElement _routingBox;
+        private Button _slideButton;
+        private Button _stopButton;
 
         private void Start()
         {
             _lineRenderer = gameObject.AddComponent<LineRenderer>();
+            _lineRenderer.enabled = false;
             _lineRenderer.material = new Material(Shader.Find("Sprites/Default"));
             _lineRenderer.widthMultiplier = 0.2f;
             _lineRenderer.startColor = Color.blue;
@@ -36,24 +48,33 @@ namespace POLARIS.GeospatialScene
             var goList = new List<GameObject>();
             Camera.gameObject.GetChildGameObjects(goList);
             _arrow = goList.Find(go => go.name.Equals("Arrow")).GetComponent<ArrowPoint>();
+            
+            var rootVisual = RouteInfo.GetComponent<UIDocument>().rootVisualElement;
+            _routingSrcLabel = rootVisual.Q<Label>("RoutingSrc");
+            _routingDestLabel = rootVisual.Q<Label>("RoutingDest");
+            _routingInfoLabel = rootVisual.Q<Label>("RoutingInfos");
+            _routingBox = rootVisual.Q<VisualElement>("RoutingInfo");
+            _slideButton = rootVisual.Q<Button>("SlideButton");
+            _stopButton = rootVisual.Q<Button>("StopButton");
+            
+            _slideButton.clickable.clicked += ToggleSlide;
+            _stopButton.clickable.clicked += StopClicked;
         }
 
         // Update is called once per frame
         private void Update()
         {
-            if (_pathAnchorObjects.Count < 2)
-            {
-                return;
-            }
-
+            if (!PersistData.Routing || _pathAnchorObjects.Count < 2) return;
+            
+            // Disable past route points
             var closest = GetClosestPathPoint();
-
+                
             _lineRenderer.positionCount = _pathAnchorObjects.Count - closest;
             _lineRenderer.SetPositions(_pathAnchorObjects.Skip(closest).Select(anchor => anchor.transform.position).ToArray());
 
-            for (var i = 0; i < closest; i++)
+            for (var i = 0; i < _pathAnchorObjects.Count; i++)
             {
-                _pathAnchorObjects[i].gameObject.SetActive(false);
+                _pathAnchorObjects[i].gameObject.SetActive(i >= closest);
             }
 
             // Set arrows
@@ -65,6 +86,17 @@ namespace POLARIS.GeospatialScene
                 
                 _pathAnchorObjects[i].transform.rotation = Quaternion.Euler(lookRot.eulerAngles.x, lookRot.eulerAngles.y, lookRot.eulerAngles.z);
             }
+
+            var percentage = UcfRouteManager.PointPercentage(
+                _pathAnchorObjects.Select(anchor => anchor.transform.position).ToArray(), closest);
+            
+            UpdateRouteInfo(percentage);
+            
+            if (PersistData.Routing != _lastRouting)
+            {
+                _lastRouting = PersistData.Routing;
+                StartCoroutine(ToggleRouting(PersistData.Routing));
+            }
         }
 
         public void ClearPath(List<GameObject> anchorObjects)
@@ -75,6 +107,7 @@ namespace POLARIS.GeospatialScene
             }
             _pathAnchorObjects.Clear();
             _lineRenderer.positionCount = 0;
+            _lineRenderer.enabled = false;
             _arrow.SetEnabled(false);
         }
 
@@ -82,15 +115,18 @@ namespace POLARIS.GeospatialScene
         {
             // remove old anchors
             ClearPath(anchorObjects);
-            
+
             foreach (var point in PersistData.PathPoints)
             {
                 PlacePathGeospatialAnchor(point, anchorObjects, anchorManager);
             }
 
             _lineRenderer.positionCount = PersistData.PathPoints.Count;
+            _lineRenderer.enabled = PersistData.Routing;
+            _arrow.SetEnabled(PersistData.Routing);
             
-            _arrow.SetEnabled(true);
+            _routingSrcLabel.text = PersistData.SrcName;
+            _routingDestLabel.text = PersistData.DestName;
         }
 
         private ARGeospatialAnchor PlacePathGeospatialAnchor(
@@ -101,7 +137,7 @@ namespace POLARIS.GeospatialScene
             var promise =
                 anchorManager.ResolveAnchorOnTerrainAsync(
                     point[0], point[1],
-                    -6, Quaternion.Euler(90, 0, 90));
+                    0, Quaternion.Euler(90, 0, 90));
 
             StartCoroutine(CheckTerrainPromise(promise, anchorObjects));
             return null;
@@ -148,6 +184,40 @@ namespace POLARIS.GeospatialScene
             }
 
             return smallestIndex;
+        }
+
+        private void UpdateRouteInfo(float pointPercent)
+        {
+            _routingInfoLabel.text = $"Routing - {(PersistData.TravelMinutes*pointPercent):0} min. ({(PersistData.TravelMiles*pointPercent):0.0} mi.)";
+        }
+        
+        private void ToggleSlide()
+        {
+            _closed = !_closed;
+            _routingBox.style.left = Length.Percent(_closed ? -67f : -5f);
+            _slideButton.style.rotate = new Rotate(_closed ? 180 : 0);
+            _stopButton.style.width = _stopButton.style.height = _closed ? 0 : 100;
+        }
+
+        private void StopClicked()
+        {
+            PersistData.Routing = false;
+        }
+
+        private IEnumerator ToggleRouting(bool routing)
+        {
+            if (routing)
+            {
+                _routingBox.style.left = Length.Percent(-80f);
+                _routingBox.ToggleDisplayStyle(true);
+                _routingBox.style.left = Length.Percent(-5f);
+            }
+            else
+            {
+                _routingBox.style.left = Length.Percent(-80f);
+                yield return new WaitForSeconds(0.3f);
+                _routingBox.ToggleDisplayStyle(false);
+            }
         }
     }
 }

@@ -732,10 +732,6 @@ MonoBehaviour:
   StreetscapeGeometryMaterialBuilding: []
   StreetscapeGeometryMaterialTerrain: {fileID: 2100000, guid: 22262639920f43d6be32430e4e58350d,
     type: 2}
-  GeospatialPrefab: {fileID: 5831908950388203684, guid: f09a13e3d47394ab588884ffd124d732,
-    type: 3}
-  TerrainPrefab: {fileID: 5831908950388203684, guid: a46bc1cf69cc345ba81f34525c7e1b09,
-    type: 3}
   PrivacyPromptCanvas: {fileID: 782365343}
   VPSCheckCanvas: {fileID: 61745207}
   ARViewCanvas: {fileID: 1041456683}
@@ -2556,6 +2552,7 @@ MonoBehaviour:
     schedule: []
     visited: []
     currScene: 
+    suggested: 
   codeData:
     userID: 
     token: 
@@ -2827,8 +2824,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0.5}
   m_AnchorMax: {x: 1, y: 0.5}
-  m_AnchoredPosition: {x: 0, y: -33.94}
-  m_SizeDelta: {x: -50, y: 100}
+  m_AnchoredPosition: {x: 56.999718, y: -33.940002}
+  m_SizeDelta: {x: -164.00056, y: 100}
   m_Pivot: {x: 0.5, y: 0}
 --- !u!114 &1587000028
 MonoBehaviour:
@@ -3111,7 +3108,7 @@ RectTransform:
   m_AnchorMin: {x: 0.5, y: 0}
   m_AnchorMax: {x: 0.5, y: 0}
   m_AnchoredPosition: {x: 0, y: -150}
-  m_SizeDelta: {x: 1180, y: 341}
+  m_SizeDelta: {x: 1435.2, y: 341}
   m_Pivot: {x: 0.5, y: 0}
 --- !u!114 &1769789003
 MonoBehaviour:
@@ -3187,7 +3184,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 896.1, y: 224.24}
+  m_AnchoredPosition: {x: 1020.4, y: 224.24}
   m_SizeDelta: {x: 280, y: 70}
   m_Pivot: {x: 0, y: 1}
 --- !u!114 &1782521151
