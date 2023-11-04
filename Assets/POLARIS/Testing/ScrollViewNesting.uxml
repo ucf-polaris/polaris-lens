@@ -1,0 +1,8 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" xsi="http://www.w3.org/2001/XMLSchema-instance" engine="UnityEngine.UIElements" editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+    <ui:ScrollView nested-interaction-kind="StopScrolling" touch-scroll-type="Clamped" focusable="false" horizontal-scroller-visibility="AlwaysVisible" name="ParentScroll" style="background-color: rgb(0, 0, 0); height: 61%; width: 100%;">
+        <ui:ScrollView nested-interaction-kind="StopScrolling" horizontal-scroller-visibility="Auto" tabindex="1" focusable="false" name="NestedScroll" style="background-color: rgb(255, 0, 0); height: 736px; position: relative; width: 73%; top: 392px; left: 148px;">
+            <ui:VisualElement style="flex-grow: 1; width: 63px; height: 65px; position: absolute; top: 444px; left: 684px; background-color: rgb(255, 233, 0);" />
+            <ui:VisualElement style="flex-grow: 1; width: 63px; height: 65px; position: absolute; top: 1096px; left: 676px; background-color: rgb(255, 233, 0);" />
+        </ui:ScrollView>
+    </ui:ScrollView>
+</ui:UXML>
