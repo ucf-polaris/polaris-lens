@@ -72,6 +72,7 @@ namespace POLARIS
 
         private UserManager userManager;
         private Queue<string> suggestedLocations;
+        [SerializeField] private int numSuggestions = 3;
 
         private void Start()
         {
@@ -103,7 +104,7 @@ namespace POLARIS
             _stopButton.clickable.clicked += StopClicked;
 
             userManager = UserManager.getInstance();
-            suggestedLocations = new Queue<string>(3);
+            suggestedLocations = new Queue<string>(numSuggestions);
         }
         
         private async void Update()
@@ -170,7 +171,8 @@ namespace POLARIS
                                     var stopNamesArray = _stopNames.ToArray();
                                     _srcName = stopNamesArray[0];
                                     _destName = stopNamesArray[1];
-                                    HandleSuggestedLocations(_destName);
+                                    // No filthy coordinates in my suggestions
+                                    if (!_destName.Contains(',')) HandleSuggestedLocations(_destName);
 
                                     var results = await FetchRoute(_stops.ToArray());
 
@@ -538,7 +540,7 @@ namespace POLARIS
             // Remove duplicates
             suggestedLocations = new Queue<string>(suggestedLocations.Where(x => x != suggestion));
             // Keep capacity at 3
-            if (suggestedLocations.Count >= 3) suggestedLocations.Dequeue();
+            if (suggestedLocations.Count >= numSuggestions) suggestedLocations.Dequeue();
             // Add suggestion
             suggestedLocations.Enqueue(suggestion);
             

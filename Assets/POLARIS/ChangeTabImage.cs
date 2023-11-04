@@ -17,6 +17,7 @@ public class ChangeTabImage : MonoBehaviour
 	private Label _header;
 	public static string _lastPressed = "location";
 	private bool _menuOpen = false;
+	public static bool justRaised = false;
 
 	private MenUI_Panels panelFuncts;
 
@@ -63,6 +64,7 @@ public class ChangeTabImage : MonoBehaviour
 
     private void OnClickArrow(ClickEvent evt)
     {
+	    justRaised = !_menuOpen;
 	    _menuOpen = !_menuOpen;
 	    _spacer.style.height = Length.Percent(_menuOpen ?  15 : 82.5f);
 	    _arrow.style.rotate = new Rotate(_menuOpen ? 90 : 270);
@@ -72,6 +74,7 @@ public class ChangeTabImage : MonoBehaviour
 
     private void MoveUI(string pressed)
     {
+	    justRaised = (!_menuOpen && !(_menuOpen && _lastPressed == pressed)); 
 	    _menuOpen = !(_menuOpen && _lastPressed == pressed);
 	    _lastPressed = pressed;
 
@@ -83,8 +86,11 @@ public class ChangeTabImage : MonoBehaviour
 
     public void RaiseMenu(FocusEvent e)
     {
+	    justRaised = true;
 	    _menuOpen = true;
 	    _spacer.style.height = Length.Percent(15);
 	    _arrow.style.rotate = new Rotate(90);
 	}
 }
+
+

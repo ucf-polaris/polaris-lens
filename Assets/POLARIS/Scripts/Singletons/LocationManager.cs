@@ -153,7 +153,7 @@ namespace POLARIS.Managers
                 }
             }
         }
-        public List<LocationData> GetBuildingsFromSearch(string query, bool fuzzySearch, bool returnAll)
+        public List<LocationData> GetBuildingsFromSearch(string query, bool fuzzySearch)
         {
             const int TOLERANCE = 1;
 

@@ -1,9 +1,11 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UIElements;
 using POLARIS.MainScene;
 using POLARIS.Managers;
+using Unity.Mathematics;
 
 public class BuildingListEntryController
 {
@@ -85,9 +87,17 @@ public class BuildingListEntryController
     public void SetBuildingData(LocationData buildingData)
     {
         NameLabel.text = buildingData.BuildingName;
-        DistanceLabel.text = "N miles";
-        AddressLabel.text = buildingData.BuildingAddress == "none" ? "" : buildingData.BuildingAddress + " - ";
-        EventLabel.text = (buildingData.BuildingEvents != null ? buildingData.BuildingEvents.Length.ToString() : "0") + " Events";
+        if (GetUserCurrentLocation.displayLocation)
+        {
+            var distanceToBuilding = DistanceInMiBetweenEarthCoordinates(new double2(GetUserCurrentLocation._latitude, GetUserCurrentLocation._longitude), new double2(buildingData.BuildingLat, buildingData.BuildingLong));
+            DistanceLabel.text = $"{distanceToBuilding:0.00} miles";
+        }
+        else
+        {
+            DistanceLabel.text = "N miles";
+        }
+        AddressLabel.text = buildingData.BuildingAddress == null ? "No Address Found - " : buildingData.BuildingAddress + " - ";
+        EventLabel.text = (buildingData.BuildingEvents != null ? buildingData.BuildingEvents.Length : "0") + " Events";
 
         LocationData location = locationManager.GetFromName(NameLabel.text);
 
@@ -102,6 +112,28 @@ public class BuildingListEntryController
             FavoriteElement.RemoveFromClassList("isFavorited");
             FavoriteElement.AddToClassList("isNotFavorited");
         }
+    }
+    
+    private double DistanceInMiBetweenEarthCoordinates(double2 pointA, double2 pointB) 
+    {
+        const int earthRadiusKm = 6371;
+        const double KmToMi = 0.621371;
+
+        var distLat = DegreesToRadians(pointB.x - pointA.x);
+        var distLon = DegreesToRadians(pointB.y - pointA.y);
+
+        var latA = DegreesToRadians(pointA.x);
+        var latB = DegreesToRadians(pointB.x);
+
+        var a = Math.Sin(distLat / 2) * Math.Sin(distLat / 2) +
+                Math.Sin(distLon / 2) * Math.Sin(distLon / 2) * Math.Cos(latA) * Math.Cos(latB); 
+        var c = 2 * Math.Atan2(Math.Sqrt(a), Math.Sqrt(1 - a)); 
+        return earthRadiusKm * c * KmToMi;
+    }
+        
+    private static double DegreesToRadians(double degrees) 
+    {
+        return degrees * Math.PI / 180;
     }
 }
 

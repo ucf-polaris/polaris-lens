@@ -13,8 +13,10 @@ public class GetUserCurrentLocation : MonoBehaviour
     public GameObject LocationMarker;
     public float DesiredAccuracy;
     
-    private float _longitude = 0f;
-    private float _latitude = 0f;
+    public static float _longitude;
+    public static float _latitude;
+    public static bool displayLocation;
+    private bool created;
     private float lonMin = -81.209995f;
     private float lonMax = -81.181589f;
     private float latMin = 28.580255f;
@@ -27,22 +29,23 @@ public class GetUserCurrentLocation : MonoBehaviour
         _hpRoot = FindObjectOfType<HPRoot>();
         _arcGisMapComponent = FindObjectOfType<ArcGISMapComponent>();
         StartCoroutine(LocationCoroutine());
-        CreateLocationMarker();
     }
 
     private void Update()
     {
-        // if (_latitude != 0f) Debug.Log($"Latitude: {_latitude}");
-        // if (_longitude != 0f) Debug.Log($"Longitude: {_longitude}");
-        
-        // Location service running and location updated
+        // Location service running and in bounds of map
         if (Input.location.status == LocationServiceStatus.Running &&
-            PointInBounds(Input.location.lastData.longitude, Input.location.lastData.latitude) &&
-            (_longitude != Input.location.lastData.longitude || _latitude != Input.location.lastData.latitude))
+            PointInBounds(Input.location.lastData.longitude, Input.location.lastData.latitude))
         {
+            displayLocation = true;
             _longitude = Input.location.lastData.longitude;
             _latitude = Input.location.lastData.latitude;
-            UpdateLocationMarker(_longitude, _latitude);
+            if (!created) CreateLocationMarker();
+            else UpdateLocationMarker();
+        }
+        else
+        {
+            displayLocation = false;
         }
     }
     
@@ -120,6 +123,7 @@ public class GetUserCurrentLocation : MonoBehaviour
             
             _longitude = Input.location.lastData.longitude;
             _latitude = Input.location.lastData.latitude;
+            CreateLocationMarker();
         }
         
         // Stop service if there is no need to query location updates continuously
@@ -128,31 +132,29 @@ public class GetUserCurrentLocation : MonoBehaviour
 
     private void CreateLocationMarker()
     {
-        // Random default coordinates I chose
-        _longitude = -81.1991396266178f;
-        _latitude = 28.6024642823258f;
-        CreateLocationMarkerComponent(_longitude, _latitude);
+        CreateLocationMarkerComponent();
         SetElevation(LocationMarker);
         Debug.Log("Marker created!");
+        created = true;
     }
     
-    private void CreateLocationMarkerComponent(float lon, float lat)
+    private void CreateLocationMarkerComponent()
     {
         var location = LocationMarker.AddComponent<ArcGISLocationComponent>();
-        location.Position = new ArcGISPoint(lon, lat, 2f, new ArcGISSpatialReference(4326));
+        location.Position = new ArcGISPoint(_longitude, _latitude, 2f, new ArcGISSpatialReference(4326));
     }
 
-    private void UpdateLocationMarker(float lon, float lat)
+    private void UpdateLocationMarker()
     {
-        UpdateLocationMarkerComponent(lon, lat);
+        UpdateLocationMarkerComponent();
         SetElevation(LocationMarker);
         Debug.Log("Marker updated!");
     }
     
-    private void UpdateLocationMarkerComponent(float lon, float lat)
+    private void UpdateLocationMarkerComponent()
     {
         var location = LocationMarker.GetComponent<ArcGISLocationComponent>();
-        location.Position = new ArcGISPoint(lon, lat, 2f, new ArcGISSpatialReference(4326));
+        location.Position = new ArcGISPoint(_longitude, _latitude, 2f, new ArcGISSpatialReference(4326));
     }
     
     private void SetElevation(GameObject locationMarker)

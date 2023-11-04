@@ -15,6 +15,8 @@ namespace POLARIS.MainScene {
         //misc. variables
         private string currentTab;
         private bool _waitingForResponse = false;
+        private Label header;
+        [SerializeField] private bool showSuggestions = true;
 
         //Managers
         private UserManager userManager;
@@ -49,6 +51,7 @@ namespace POLARIS.MainScene {
 
             var uiDoc = GetComponent<UIDocument>();
             var rootVisual = uiDoc.rootVisualElement;
+            header = rootVisual.Q<Label>("Identifier");
             ExtendedScrollView = new extendedScrollView(rootVisual.Q<VisualElement>("ExtendedScrollContainer"));
             //passing back variables
             listController.Initialize(rootVisual, EventListEntryTemplate, LocationListEntryTemplate, ListController.SwitchType.locations);
@@ -65,23 +68,70 @@ namespace POLARIS.MainScene {
             _searchField.selectAllOnFocus = true;
             SetPlaceholderText(_searchField, currentTab == "location" ? "Search for locations" : "Search for events");
 
-            StartCoroutine(FillSearchOnStart());
+            StartCoroutine(FillSearch());
         }
 
-        private IEnumerator FillSearchOnStart()
+        private IEnumerator FillSearch()
         {
             if (currentTab == "location")
             {
                 while (locationManager.dataList.Count == 0) yield return null;
-                List<LocationData> buildings = locationManager.dataList;
+                List<LocationData> buildings = new List<LocationData>();
+                if (showSuggestions)
+                {
+                    header.text = "Suggested Locations";
+                    buildings = new List<LocationData>();
+                    foreach (string buildingName in userManager.data.Suggested.Split("~"))
+                    {
+                        LocationData building = GetBuildingFromName(buildingName);
+                        if (building != null) buildings.Add(building);
+                    }
+                }
+                else
+                {
+                    header.text = "Locations";
+                    buildings = locationManager.dataList;
+                }
                 UpdateBuildingSearchUI(buildings);
             }
             else
             {
                 while (eventManager.dataList.Count == 0) yield return null;
+                if (showSuggestions)
+                {
+                    header.text = "Suggested Events";
+                }
+                else
+                {
+                    header.text = "Events";
+                }
                 List<EventData> events = eventManager.dataList;
                 UpdateEventSearchUI(events);
             }
+        }
+        
+        private LocationData GetBuildingFromName(string buildingName)
+        {
+            foreach (LocationData building in locationManager.dataList)
+            {
+                if (string.Equals(buildingName, building.BuildingName,
+                        StringComparison.OrdinalIgnoreCase))
+                {
+                    return building;
+                }
+
+                if (building.BuildingAllias == null) continue;
+                foreach (string alias in building.BuildingAllias)
+                {
+                    if (String.Equals(buildingName, alias,
+                            StringComparison.OrdinalIgnoreCase))
+                    {
+                        return building;
+                    }
+                }
+            }
+
+            return null;
         }
 
         // Update is called once per frame
@@ -91,8 +141,14 @@ namespace POLARIS.MainScene {
             // Tried doing same thing for ExtendedScrollView, but didn't work :(
             userOnListView = listController.EntryList.panel.focusController.focusedElement == listController.EntryList || ExtendedScrollView.Extended;
             
-            if (ChangeTabImage._lastPressed == currentTab) return;
+            if (ChangeTabImage.justRaised)
+            {
+                StartCoroutine(FillSearch());
+                ChangeTabImage.justRaised = false;
+            }
             
+            if (ChangeTabImage._lastPressed == currentTab) return;
+
             // Just swapped tabs
             currentTab = ChangeTabImage._lastPressed;
             ClearSearchResults(true);
@@ -102,6 +158,7 @@ namespace POLARIS.MainScene {
         
         private void OnSearchValueChanged(ChangeEvent<string> evt)
         {
+            if (ChangeTabImage.justRaised) ChangeTabImage.justRaised = false;
             string newText = evt.newValue;
 
             //from something to empty string
@@ -113,15 +170,38 @@ namespace POLARIS.MainScene {
             }
 
             //when you replace placeholder by focusing on text box
-            bool flag = ((evt.previousValue == "Search for locations" || evt.previousValue == "Search for events") && evt.newValue == "");
+            bool flag = (evt.previousValue == "Search for locations" || evt.previousValue == "Search for events") && evt.newValue == "";
             if (currentTab == "location")
             {
-                List<LocationData> buildings = locationManager.GetBuildingsFromSearch(newText, newText.Length > 0 && newText[0] == '~', newText == "");
-                UpdateBuildingSearchUI(buildings, !flag);
+                if (showSuggestions && newText == "")
+                {
+                    header.text = "Suggested Locations";
+                    List<LocationData> buildings = new List<LocationData>();
+                    foreach (string buildingName in userManager.data.Suggested.Split("~"))
+                    {
+                        LocationData building = GetBuildingFromName(buildingName);
+                        if (building != null) buildings.Add(building);
+                    }
+                    UpdateBuildingSearchUI(buildings);
+                }
+                else
+                {
+                    header.text = "Locations";
+                    List<LocationData> buildings = locationManager.GetBuildingsFromSearch(newText, newText.Length > 0 && newText[0] == '~');
+                    UpdateBuildingSearchUI(buildings, !flag);
+                }
             }
             else
             {
-                List<EventData> events = eventManager.GetEventsFromSearch(newText, newText.Length > 0 && newText[0] == '~', newText == "");
+                if (showSuggestions && newText == "")
+                {
+                    header.text = "Suggested Events";
+                }
+                else
+                {
+                    header.text = "Events";
+                }
+                List<EventData> events = eventManager.GetEventsFromSearch(newText, newText.Length > 0 && newText[0] == '~');
                 UpdateEventSearchUI(events, !flag);
             }
         }
@@ -134,7 +214,6 @@ namespace POLARIS.MainScene {
                 ReturnGoToTop();
                 ExtendedScrollView.Extended = false;
             }
-            
         }
 
         private void UpdateEventSearchUI(List<EventData> events, bool shouldReset = true)
@@ -210,61 +289,6 @@ namespace POLARIS.MainScene {
             }
         }
 
-        private string LongestCommonSubsequence(string source, string target)
-        {
-            int[,] C = LongestCommonSubsequenceLengthTable(source, target);
-
-            return Backtrack(C, source, target, source.Length, target.Length);
-        }
-
-        private int[,] LongestCommonSubsequenceLengthTable(string source, string target)
-        {
-            int[,] C = new int[source.Length + 1, target.Length + 1];
-
-            for (int i = 0; i < source.Length + 1; i++) { C[i, 0] = 0; }
-            for (int j = 0; j < target.Length + 1; j++) { C[0, j] = 0; }
-
-            for (int i = 1; i < source.Length + 1; i++)
-            {
-                for (int j = 1; j < target.Length + 1; j++)
-                {
-                    if (source[i - 1].Equals(target[j - 1]))
-                    {
-                        C[i, j] = C[i - 1, j - 1] + 1;
-                    }
-                    else
-                    {
-                        C[i, j] = Math.Max(C[i, j - 1], C[i - 1, j]);
-                    }
-                }
-            }
-
-            return C;
-        }
-
-        private string Backtrack(int[,] C, string source, string target, int i, int j)
-        {
-            if (i == 0 || j == 0)
-            {
-                return "";
-            }
-            else if (source[i - 1].Equals(target[j - 1]))
-            {
-                return Backtrack(C, source, target, i - 1, j - 1) + source[i - 1];
-            }
-            else
-            {
-                if (C[i, j - 1] > C[i - 1, j])
-                {
-                    return Backtrack(C, source, target, i, j - 1);
-                }
-                else
-                {
-                    return Backtrack(C, source, target, i - 1, j);
-                }
-            }
-        }
-
         public void ReturnGoToTop()
         {
             ScrollView SV = listController.GetScrollView();
@@ -272,6 +296,7 @@ namespace POLARIS.MainScene {
             SV.scrollDecelerationRate = 0.0f;
         }
     }
+    
     [Serializable]
     public class extendedScrollView
     {

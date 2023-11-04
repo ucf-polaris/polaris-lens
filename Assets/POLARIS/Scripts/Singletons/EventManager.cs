@@ -150,14 +150,14 @@ namespace POLARIS.Managers
                 }
             }
         }
-        public List<EventData> GetEventsFromSearch(string query, bool fuzzySearch, bool returnAll)
+        public List<EventData> GetEventsFromSearch(string query, bool fuzzySearch)
         {
             const int TOLERANCE = 1;
 
             List<EventData> events = new List<EventData>();
             foreach (EventData UCFEvent in dataList)
             {
-                if (returnAll || UCFEvent.Name.IndexOf(query, StringComparison.OrdinalIgnoreCase) >= 0 ||
+                if (UCFEvent.Name.IndexOf(query, StringComparison.OrdinalIgnoreCase) >= 0 ||
                     (fuzzySearch && FuzzyMatch(UCFEvent.Name, query, TOLERANCE)))
                 {
                     events.Add(UCFEvent);

@@ -57,6 +57,7 @@ public class ListController
 
     //event data
     List<EventData> _eventSearchList;
+    
     public ScrollView GetScrollView()
     {
         return EntryList.Q<ScrollView>();
@@ -118,7 +119,7 @@ public class ListController
             // Initialize controller script
             EntryLogic.SetVisualElement(newEntry);
 
-            // return root of new instansiated element
+            // return root of new instantiated element
             return newEntry;
         };
 
