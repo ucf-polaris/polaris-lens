@@ -61,8 +61,8 @@ public class BuildingListEntryController
         EventLabel = visualElement.Q<Label>(className: "panelTextEvents");
 
         FavoriteElement = visualElement.Q<VisualElement>(className: "panelFavoritesIcon");
-        PanelEntity.UnregisterCallback<ClickEvent>(OnFavoritesClick);
-        PanelEntity.RegisterCallback<ClickEvent>(OnFavoritesClick);
+        FavoriteElement.UnregisterCallback<ClickEvent>(OnFavoritesClick);
+        FavoriteElement.RegisterCallback<ClickEvent>(OnFavoritesClick);
 
         NavigationElement = visualElement.Q<VisualElement>(className: "panelNavigationIcon");
         image = visualElement.Q<VisualElement>(className: "panelImage");
