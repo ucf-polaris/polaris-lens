@@ -137,8 +137,8 @@ namespace POLARIS.Managers{
             data.Token = PlayerPrefs.GetString("AuthToken");
             data.Realname = PlayerPrefs.GetString("realName");
             data.Username = PlayerPrefs.GetString("username");
-            // Default to SU, Library, and Engineering 2 (displayed in reverse order from string)
-            data.Suggested = PlayerPrefs.GetString("suggested", "Engineering Building II~John C. Hitt Library~Student Union");
+            // Default to SU, Library, and Engineering 2 (shoutout to Komila)
+            data.Suggested = PlayerPrefs.GetString("suggested", "Student Union~John C. Hitt Library~Engineering Building II");
             LoadFavorites(data);
 
             return data.UserID1 != "" && data.Token != "";
