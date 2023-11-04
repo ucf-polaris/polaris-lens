@@ -188,7 +188,7 @@ namespace POLARIS.Managers
         [SerializeField]
         private string listedLocation;
         [SerializeField]
-        private string EventID;
+        private string eventID;
         [SerializeField]
         private string locationQueryID;
         [SerializeField]
@@ -239,7 +239,7 @@ namespace POLARIS.Managers
         public DateTime EndsOn { get => endsOn; set => endsOn = value; }
         public string Image { get => image; set => image = value; }
         public string ListedLocation { get => listedLocation; set => listedLocation = value; }
-        public string EventID1 { get => EventID; set => EventID = value; }
+        public string EventID { get => eventID; set => eventID = value; }
         public string LocationQueryID { get => locationQueryID; set => locationQueryID = value; }
         public long TimeTilExpire { get => timeTilExpire; set => timeTilExpire = value; }
         #endregion
