@@ -1950,7 +1950,7 @@ GameObject:
   - component: {fileID: 1158057630}
   - component: {fileID: 1158057631}
   m_Layer: 5
-  m_Name: SwitchButton
+  m_Name: ARUI
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -2824,7 +2824,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0.5}
   m_AnchorMax: {x: 1, y: 0.5}
-  m_AnchoredPosition: {x: 56.999718, y: -33.940002}
+  m_AnchoredPosition: {x: 56.999718, y: -81.8}
   m_SizeDelta: {x: -164.00056, y: 100}
   m_Pivot: {x: 0.5, y: 0}
 --- !u!114 &1587000028
@@ -2901,6 +2901,7 @@ MonoBehaviour:
   Camera: {fileID: 1451910691}
   PathPrefab: {fileID: 7448986383624426494, guid: d4a1b7c9fe020fa44a846c4a08cb6b9c,
     type: 3}
+  RouteInfo: {fileID: 1158057628}
 --- !u!4 &1621438622
 Transform:
   m_ObjectHideFlags: 0
@@ -3184,7 +3185,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 1020.4, y: 224.24}
+  m_AnchoredPosition: {x: 1020.4, y: 170}
   m_SizeDelta: {x: 280, y: 70}
   m_Pivot: {x: 0, y: 1}
 --- !u!114 &1782521151

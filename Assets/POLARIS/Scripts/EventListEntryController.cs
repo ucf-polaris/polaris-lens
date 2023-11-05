@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using POLARIS;
 using UnityEngine;
 using UnityEngine.UIElements;
 using POLARIS.Managers;
@@ -20,6 +21,9 @@ public class EventListEntryController : ListEntryController
     string fullDescription = "";
     string fullTitle = "";
 
+    private UcfRouteManager _routeManager;
+    private EventData _eventData;
+
     public void OutputFunction(ClickEvent evt)
     {
         //error checking
@@ -34,6 +38,8 @@ public class EventListEntryController : ListEntryController
         extendedView.TitleText.text = fullTitle;
 
         extendedView.ExtendedView.verticalScroller.value = extendedView.ExtendedView.verticalScroller.lowValue;
+        
+        extendedView.NavButton.clickable.clicked += OnNavClick;
 
         extendedView.Extended = true;
     }
@@ -48,6 +54,13 @@ public class EventListEntryController : ListEntryController
         DescriptionLabel = visualElement.Q<Label>("Description");
         TimeLocationLabel = visualElement.Q<Label>("TimeLocation");
         image = visualElement.Q<VisualElement>(className: "panelImage") ;
+
+        if (Camera.main != null)
+        {
+            _routeManager = Camera.main.transform.parent.gameObject
+                                  .GetComponentInChildren<UcfRouteManager>();
+        }
+
         /*
     .panelShadow
     .panel 
@@ -66,8 +79,15 @@ public class EventListEntryController : ListEntryController
         */
     }
 
+    private void OnNavClick()
+    {
+        _routeManager.RouteToEvent(_eventData);
+    }
+
     public void SetEventData(EventData eventData)
     {
+        _eventData = eventData;
+        
         fullTitle = eventData.Name;
         NameLabel.text = cullText(eventData.Name, 35);
 

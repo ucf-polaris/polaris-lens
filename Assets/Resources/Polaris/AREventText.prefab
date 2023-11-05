@@ -141,8 +141,22 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: "hey everyone eeeeeee\neeeeeeeeeeee\n\n                         Location
-    loc\n                         Time time\n\ndescription\n\ndescription\nhie\ndsd"
+  m_text: '<style="EvTitle">Halloween Matsuri Teeeeeeeeeee</style>
+
+    <style="EvHost">Japanese
+    Heritage Student Association</style>
+
+    <style="EvTime">5:30 PM - Friday, November
+    03</style>
+
+    <style="EvLocation">Lake Claire Recreational Area</style>
+
+    <style="EvDescription">description
+    description hie dsd hie dsd hie dsd hie dsd hie dsd hie dsd hie dsd hie dsd hie
+    dsd hie dsd hie dsd hie dsd hie dsd hie dsd hie dsd hie dsd hie dsd hie dsd hie
+    dsd hie dsd hie dsd hie dsd hie dsd hie dsd hie dsd hie dsd hie dsd hie dsd hie
+    dsd hie dsd hie dsd hie dsd hie dsd hie dsd hie dsd hie dsd hie dsd hie dsd hie
+    dsd hie dsd hie dsd hie dsd</style>'
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 1aa50505c0f267c45a685914152180c5, type: 2}
   m_sharedMaterial: {fileID: -8572600303408819042, guid: 1aa50505c0f267c45a685914152180c5,

@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using Google.XR.ARCoreExtensions.Samples.Geospatial;
+using POLARIS.Managers;
 using UnityEngine;
 
 namespace POLARIS.GeospatialScene
@@ -11,6 +12,11 @@ namespace POLARIS.GeospatialScene
     [Serializable]
     public struct GeospatialAnchorContent
     {
+        /// <summary>
+        /// The location information of this geospatial anchor.
+        /// </summary>
+        public LocationData Location;
+        
         /// <summary>
         /// The text content of this geospatial anchor.
         /// </summary>
@@ -27,9 +33,10 @@ namespace POLARIS.GeospatialScene
         /// <param name="text">The time this Geospatial Anchor was created.</param>
         /// <param name="history">The anchor data.
         /// </param>
-        public GeospatialAnchorContent(string text, GeospatialAnchorHistory history)
+        public GeospatialAnchorContent(LocationData location, string text, GeospatialAnchorHistory history)
         {
             Text = text;
+            Location = location;
             History = history;
         }
         

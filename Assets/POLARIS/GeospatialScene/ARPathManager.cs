@@ -57,6 +57,7 @@ namespace POLARIS.GeospatialScene
             _slideButton = rootVisual.Q<Button>("SlideButton");
             _stopButton = rootVisual.Q<Button>("StopButton");
             
+            _routingBox.ToggleDisplayStyle(false);
             _slideButton.clickable.clicked += ToggleSlide;
             _stopButton.clickable.clicked += StopClicked;
         }

@@ -23,8 +23,8 @@ public class FavButton : MonoBehaviour, IPointerDownHandler
         _panel.FavoritedClicked();
     }
 
-    public void UpdateSprite()
+    public void UpdateSprite(bool favorited)
     {
-        gameObject.GetComponent<SpriteRenderer>().sprite = _panel.Favorited ? FavoritedSprite : UnfavoritedSprite;
+        gameObject.GetComponent<SpriteRenderer>().sprite = favorited ? FavoritedSprite : UnfavoritedSprite;
     }
 }

@@ -309,6 +309,8 @@ namespace POLARIS.MainScene {
         public Label EndDateText;
         public Label TitleText;
         public VisualElement image;
+        public Button NavButton;
+
 
         public extendedScrollView(VisualElement container)
         {
@@ -322,6 +324,8 @@ namespace POLARIS.MainScene {
             EndDateText = container.Q<Label>("EndDateText");
             TitleText = container.Q<Label>("TitleText");
             image = container.Q<VisualElement>("ImagePop");
+            NavButton = container.Q<Button>("NavButton");
+            
 
             //back click button
             container.Q<VisualElement>("BackClick").RegisterCallback<ClickEvent>(OnBackClick);
