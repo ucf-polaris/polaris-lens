@@ -94,7 +94,6 @@ namespace POLARIS
 
             _root = _arcGisMapComponent.GetComponent<HPRoot>();
             _lastRootPosition = _root.RootUniversePosition;
-            
 
             _mainCamera = Camera.main;
 
@@ -209,8 +208,8 @@ namespace POLARIS
                 var stopNamesArray = _stopNames.ToArray();
                 _srcName = stopNamesArray[0];
                 _destName = stopNamesArray[1];
-                // No filthy coordinates in my suggestions
-                if (!_destName.Contains(',')) HandleSuggestedLocations(_destName);
+                // No filthy coordinates or weird locations in my suggestions
+                if (!_destName.Contains(',') && !_destName.Equals("Other") && !_destName.Equals("Virtual")) HandleSuggestedLocations(_destName);
 
                 var results = await FetchRoute(_stops.ToArray());
 
@@ -488,6 +487,7 @@ namespace POLARIS
             LocationData location = null;
             foreach (var building in _locationManager.dataList)
             {
+                // BUT WHAT IF EVENT DATA DOESNT HAVE A BUILDING LAT OR LONG?
                 if (Math.Abs(building.BuildingLat - eventData.Location.BuildingLat) < 0.00001 &&
                     Math.Abs(building.BuildingLong - eventData.Location.BuildingLong) < 0.00001)
                 {
@@ -507,14 +507,18 @@ namespace POLARIS
             var worldPosition =
                 _root.TransformPoint(_arcGisMapComponent.View.GeographicToWorld(geoPosition)).ToVector3();
             PlaceMarker(worldPosition,  buildingName, true);
-
-            var curPosition = new ArcGISPoint(GetUserCurrentLocation._longitude,
-                                              GetUserCurrentLocation._latitude,
-                                              0f,
-                                              new ArcGISSpatialReference(4326));
-            var curWorldPosition =
-                _root.TransformPoint(_arcGisMapComponent.View.GeographicToWorld(curPosition)).ToVector3();
-            PlaceMarker(curWorldPosition, "My Location", true);
+            
+            // TODO: MAKE IT SO CLICKING THE "CHOOSE STARTING POINT MENU" SELECTS USER CURRENT LOCATION
+            if (GetUserCurrentLocation.displayLocation)
+            {
+                var curPosition = new ArcGISPoint(GetUserCurrentLocation._longitude,
+                    GetUserCurrentLocation._latitude,
+                    0f,
+                    new ArcGISSpatialReference(4326));
+                var curWorldPosition =
+                    _root.TransformPoint(_arcGisMapComponent.View.GeographicToWorld(curPosition)).ToVector3();
+                PlaceMarker(curWorldPosition, "My Location", true);
+            }
         }
 
         private void ToggleSlide()
