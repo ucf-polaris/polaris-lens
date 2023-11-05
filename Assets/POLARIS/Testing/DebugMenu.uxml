@@ -1,0 +1,9 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" xsi="http://www.w3.org/2001/XMLSchema-instance" engine="UnityEngine.UIElements" editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+    <Style src="project://database/Assets/POLARIS/Testing/DebugMenuUSS.uss?fileID=7433441132597879392&amp;guid=1288b17a57f26cc4d90c6390cdacebb8&amp;type=3#DebugMenuUSS" />
+    <ui:VisualElement name="Container" style="flex-grow: 0; width: 43%; flex-direction: row; left: -33%; top: 30%; transition-duration: 0.3s;">
+        <ui:VisualElement name="TextContainer" style="flex-grow: 0; width: 80%; height: auto; flex-shrink: 0; top: auto; background-color: rgba(113, 113, 113, 0.55);" />
+        <ui:VisualElement name="PopOut" style="flex-grow: 0; background-color: rgba(113, 113, 113, 0.55); width: 100px; height: 100px; left: auto; top: auto; position: relative;">
+            <ui:VisualElement style="flex-grow: 0; background-image: url(&apos;project://database/Assets/POLARIS/arrow.png?fileID=2800000&amp;guid=d01daccc5e8044ce09b187ecdcf84c3d&amp;type=3#arrow&apos;); rotate: 90deg; width: 70%; height: 56%; position: absolute; top: 22px; left: 13px;" />
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>
