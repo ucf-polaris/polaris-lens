@@ -19,7 +19,6 @@ using POLARIS.MainScene;
 using POLARIS.Managers;
 using QuickEye.UIToolkit;
 using Unity.Mathematics;
-using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.UIElements;
 
@@ -190,7 +189,7 @@ namespace POLARIS
             }
 
             _stops.Push(routeMarker);
-            _stopNames.Push(locationName.StartsWith("ArcGISGameObject_") ? $"{locationComponent.Position.Y:00.00000}, {locationComponent.Position.X:00.00000}" : locationName);
+            _stopNames.Push(locationName.StartsWith("Isgameobject_") ? $"{locationComponent.Position.Y:00.00000}, {locationComponent.Position.X:00.00000}" : locationName);
 
             if (_stops.Count > StopCount)
             {

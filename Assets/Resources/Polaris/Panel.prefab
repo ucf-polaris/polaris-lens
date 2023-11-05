@@ -301,7 +301,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: -9087230933869019084, guid: 603f10c492281704c97555249ff70cd4, type: 2}
+  - {fileID: -3305312117766283812, guid: f280660fe9fac9a4a98b3d61d63570c2, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -347,8 +347,8 @@ MonoBehaviour:
     welcome to our app :)\n\n<indent=0%>\u2022 Hello</indent>\n\nWelcome to the <color=green>Fun
     Zone</color>\n\n</style>"
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 603f10c492281704c97555249ff70cd4, type: 2}
-  m_sharedMaterial: {fileID: -9087230933869019084, guid: 603f10c492281704c97555249ff70cd4,
+  m_fontAsset: {fileID: 11400000, guid: f280660fe9fac9a4a98b3d61d63570c2, type: 2}
+  m_sharedMaterial: {fileID: -3305312117766283812, guid: f280660fe9fac9a4a98b3d61d63570c2,
     type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
@@ -373,7 +373,7 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 37.25
+  m_fontSize: 29.4
   m_fontSizeBase: 36
   m_fontWeight: 400
   m_enableAutoSizing: 1

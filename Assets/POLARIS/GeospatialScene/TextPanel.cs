@@ -11,6 +11,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.XR.ARFoundation;
 using POLARIS.Managers;
+using UnityEngine.Android;
 
 namespace POLARIS.GeospatialScene
 {
@@ -23,7 +24,7 @@ namespace POLARIS.GeospatialScene
         public GeospatialAnchorContent Content;
 
         public bool Loaded;
-        public bool Visited;
+        public bool Visited = false;
 
         private ARGeospatialAnchor _anchor;
 
@@ -36,13 +37,11 @@ namespace POLARIS.GeospatialScene
         private bool _eventsLoaded;
 
         private EventManager _eventManager;
-        private LocationManager _locationManager;
         private UserManager _userManager;
 
         private void Start()
         {
             _eventManager = EventManager.getInstance();
-            _locationManager = LocationManager.getInstance();
             _userManager = UserManager.getInstance();
         }
 
@@ -147,18 +146,18 @@ namespace POLARIS.GeospatialScene
             _bottomPanel = goList.Find(go => go.name.Equals("BottomPanel"));
             _bottomLayout = _bottomPanel.GetComponentInChildren<VerticalLayoutGroup>().gameObject;
             
+            // TODO: FIX NULL REF ERROR
+            
             // Check for favorited / visited
+            if (!Visited)
+            {
+                _visitedIndicator = goList.Find(go => go.name.Equals("VisitedPin"));
+                _visitedIndicator.SetActive(true);
+            }
+
             if (_userManager.isFavorite(Content.Location))
             {
                 GetComponentInChildren<FavButton>().UpdateSprite(true);
-            }
-
-            if (!Visited)
-            {
-                _visitedIndicator =
-                    Instantiate(Resources.Load("Polaris/simplearrow") as GameObject, CurrentPrefab.transform);
-                _visitedIndicator.transform.localPosition = Vector3.up;
-                _visitedIndicator.transform.localScale = new Vector3(0.5f, 0.5f, 0.5f);
             }
         }
 
@@ -175,7 +174,7 @@ namespace POLARIS.GeospatialScene
             if (Visited) return;
             
             Visited = true;
-            Destroy(_visitedIndicator);
+            _visitedIndicator.SetActive(false);
             // Update API
         }
 
