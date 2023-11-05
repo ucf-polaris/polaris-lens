@@ -16,10 +16,10 @@ public class DebugMenuGeoSpacial : MonoBehaviour
     void Start()
     {
         panelManager = GameObject.Find("PanelManager").GetComponent<PanelManager>();
-        if (!Debug.isDebugBuild && !Application.isEditor)
+        /*if (!Debug.isDebugBuild && !Application.isEditor)
         {
             gameObject.SetActive(false);
-        }
+        }*/
         var UIDoc = GetComponent<UIDocument>();
         container = UIDoc.rootVisualElement.Q<VisualElement>("TextContainer");
         cont = UIDoc.rootVisualElement.Q<VisualElement>("Container");
