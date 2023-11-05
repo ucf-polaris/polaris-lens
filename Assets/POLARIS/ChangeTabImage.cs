@@ -91,6 +91,16 @@ public class ChangeTabImage : MonoBehaviour
 	    _spacer.style.height = Length.Percent(15);
 	    _arrow.style.rotate = new Rotate(90);
 	}
+
+	public void CollapseMenu(FocusEvent e)
+	{
+		justRaised = false;
+		_menuOpen = false;
+		_spacer.style.height = Length.Percent(82.5f);
+		_arrow.style.rotate = new Rotate(270);
+		panelFuncts.CollapseBothExtendedViews();
+		panelFuncts.ReturnGoToTop();
+	}
 }
 
 

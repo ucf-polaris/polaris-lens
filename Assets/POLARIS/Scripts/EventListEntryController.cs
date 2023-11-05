@@ -19,6 +19,7 @@ public class EventListEntryController : ListEntryController
 
     private UcfRouteManager _routeManager;
     private EventData _eventData;
+    private GameObject MenuUI;
 
     private void OutputFunction(ClickEvent evt)
     {
@@ -59,6 +60,8 @@ public class EventListEntryController : ListEntryController
                                   .GetComponentInChildren<UcfRouteManager>();
         }
 
+        MenuUI = GameObject.Find("MenuUI");
+
         /*
     .panelShadow
     .panel 
@@ -80,6 +83,13 @@ public class EventListEntryController : ListEntryController
     private void OnNavClick()
     {
         _routeManager.RouteToEvent(_eventData);
+        extendedView.Extended = false;
+        otherView.Extended = false;
+        if(MenuUI != null)
+        {
+            var tabImage = MenuUI.GetComponent<ChangeTabImage>();
+            tabImage.CollapseMenu(null);
+        }
     }
 
     public void SetEventData(EventData eventData)
