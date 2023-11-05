@@ -13,29 +13,28 @@ public class EventListEntryController : ListEntryController
     VisualElement image;
     VisualElement PanelEntity;
     //since it's all the same extended view, don't keep cloning a reference to the same extended view
-    public static extendedScrollView extendedView;
-    string location = "";
-    string startDate = "";
-    string endDate = "";
-    string fullDescription = "";
-    string fullTitle = "";
+    public static eventExtendedView extendedView;
+    public static locationExtendedView otherView;
+    EventData eventData;
 
-    public void OutputFunction(ClickEvent evt)
+    private void OutputFunction(ClickEvent evt)
     {
         //error checking
         if (extendedView == null) return;
 
         //set variables
-        extendedView.DescriptionText.text = fullDescription;
+        extendedView.DescriptionText.text = HtmlParser.RichParse(eventData.Description);
         extendedView.image.style.backgroundImage = image.style.backgroundImage;
-        extendedView.LocationText.text = location;
-        extendedView.StartDateText.text = startDate;
-        extendedView.EndDateText.text = endDate;
-        extendedView.TitleText.text = fullTitle;
+        extendedView.LocationText.text = eventData.ListedLocation;
+        extendedView.StartDateText.text = eventData.DateTime.ToString("f") + " to";
+        extendedView.EndDateText.text = eventData.EndsOn.ToString("f");
+        extendedView.TitleText.text = eventData.Name;
+        extendedView.HostText.text = eventData.Host;
 
         extendedView.ExtendedView.verticalScroller.value = extendedView.ExtendedView.verticalScroller.lowValue;
 
         extendedView.Extended = true;
+        otherView.Extended = false;
     }
 
     public void SetVisualElement(VisualElement visualElement)
@@ -68,17 +67,12 @@ public class EventListEntryController : ListEntryController
 
     public void SetEventData(EventData eventData)
     {
-        fullTitle = eventData.Name;
+        this.eventData = eventData;
         NameLabel.text = cullText(eventData.Name, 35);
 
-        fullDescription = HtmlParser.RichParse(eventData.Description);
-        DescriptionLabel.text = cullText(fullDescription, 180);
+        DescriptionLabel.text = cullText(HtmlParser.RichParse(eventData.Description), 180);
 
-        location = eventData.ListedLocation;
-        startDate = eventData.DateTime.ToString("f") + " to";
-        endDate = eventData.EndsOn.ToString("f");
-
-        var splitDate = startDate.Split(",");
+        var splitDate = eventData.DateTime.ToString("f").Split(",");
         string useDate = splitDate[1] + splitDate[2];
         TimeLocationLabel.text = cullText(useDate.Trim() + " - " + eventData.ListedLocation, 60);
         

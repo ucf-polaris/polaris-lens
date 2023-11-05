@@ -6,6 +6,7 @@ using UnityEngine.UIElements;
 using POLARIS.MainScene;
 using POLARIS.Managers;
 using Unity.Mathematics;
+using System.Linq;
 
 public class BuildingListEntryController
 {
@@ -17,25 +18,120 @@ public class BuildingListEntryController
     VisualElement FavoriteElement;
     VisualElement NavigationElement;
     VisualElement PanelEntity;
+    LocationData locationData;
 
     UserManager userManager;
     LocationManager locationManager;
+    EventManager eventManager;
     //since it's all the same extended view, don't keep cloning a reference to the same extended view
-    public static extendedScrollView extendedView;
+    public static locationExtendedView extendedView;
+    public static eventExtendedView otherView;
 
     private void OutputFunction(ClickEvent evt)
     {
-        Debug.Log(NameLabel.text);
+        //handle informational fields
+        extendedView.TitleText.text = locationData.BuildingName;
+        extendedView.AddressText.text = locationData.BuildingAddress;
+        extendedView.DescriptionText.text = string.IsNullOrEmpty(locationData.BuildingDesc) ? "None" : locationData.BuildingDesc;
+
+        //handle favorites
+        extendedView.FavoritesIcon.UnregisterCallback<ClickEvent>(OnFavoritesClick);
+        extendedView.FavoritesIcon.RegisterCallback<ClickEvent>(OnFavoritesClick);
+
+        if (userManager.isFavorite(locationData))
+        {
+            extendedView.FavoritesIcon.RemoveFromClassList("isNotFavorited");
+            extendedView.FavoritesIcon.AddToClassList("isFavorited");
+        }
+        else
+        {
+            extendedView.FavoritesIcon.RemoveFromClassList("isFavorited");
+            extendedView.FavoritesIcon.AddToClassList("isNotFavorited");
+        }
+
+        //handle visited
+        toggleVisited();
+
+        //handle events list
+        int len = locationData.BuildingEvents != null ? locationData.BuildingEvents.Length : 0;
+        extendedView.EventHeaderText.text = "Events (" + len.ToString() + ")";
+        extendedView.EventList.Clear();
+
+        //if not null or empty, populate list
+        if(otherView != null && locationData.BuildingEvents != null && locationData.BuildingEvents.Length != 0)
+        {
+            var events = eventManager.dataList.Where(evt => locationData.BuildingEvents.Any(s => s.Equals(evt.EventID)));
+            foreach (var e in events)
+            {
+                Label label = new Label(e.Name);
+                label.AddToClassList("EventText");
+                label.RegisterCallback<ClickEvent, EventData>(OutputFunctionsForEvents, e);
+
+                extendedView.EventList.Add(label);
+            }
+        }
+        else
+        {
+            Label noneLabel = new Label("None");
+            noneLabel.AddToClassList("EventText");
+            extendedView.EventList.Add(noneLabel);
+        }
+
+        //extend location view, put down event view
+        extendedView.Extended = true;
+        otherView.Extended = false;
+    }
+
+    private void toggleVisited()
+    {
+        if (locationData.IsVisited)
+        {
+            extendedView.VisitedIcon.RemoveFromClassList("notVisited");
+            extendedView.VisitedIcon.AddToClassList("Visited");
+        }
+        else
+        {
+            extendedView.VisitedIcon.RemoveFromClassList("Visited");
+            extendedView.VisitedIcon.AddToClassList("notVisited");
+        }
+    }
+
+    public void OutputFunctionsForEvents(ClickEvent evn, EventData evt)
+    {
+        //error checking
+        if (extendedView == null) return;
+
+        //set variables
+        otherView.DescriptionText.text = HtmlParser.RichParse(evt.Description);
+        otherView.image.style.backgroundImage = evt.rawImage;
+        otherView.LocationText.text = evt.ListedLocation;
+        otherView.StartDateText.text = evt.DateTime.ToString("f") + " to";
+        otherView.EndDateText.text = evt.EndsOn.ToString("f");
+        otherView.TitleText.text = evt.Name;
+        otherView.HostText.text = evt.Host;
+
+        otherView.ExtendedView.verticalScroller.value = otherView.ExtendedView.verticalScroller.lowValue;
+
+        otherView.Extended = true;
     }
 
     private void OnFavoritesClick(ClickEvent evt)
     {
+        
         LocationData location = locationManager.GetFromName(NameLabel.text);
         //not favorite -> favorite
         if (!userManager.isFavorite(location))
         {
             FavoriteElement.RemoveFromClassList("isNotFavorited");
             FavoriteElement.AddToClassList("isFavorited");
+
+            //update extended view
+            if(extendedView.FavoritesIcon != null)
+            {
+                extendedView.FavoritesIcon.RemoveFromClassList("isNotFavorited");
+                extendedView.FavoritesIcon.AddToClassList("isFavorited");
+            }
+
             userManager.UpdateFavorites(true, location);
         }
         //favorite -> not favorite
@@ -43,14 +139,24 @@ public class BuildingListEntryController
         {
             FavoriteElement.RemoveFromClassList("isFavorited");
             FavoriteElement.AddToClassList("isNotFavorited");
+
+            if(extendedView.FavoritesIcon != null)
+            {
+                extendedView.FavoritesIcon.RemoveFromClassList("isFavorited");
+                extendedView.FavoritesIcon.AddToClassList("isNotFavorited");
+            }
+
             userManager.UpdateFavorites(false, location);
         }
+        evt.StopPropagation();
     }
 
     public void SetVisualElement(VisualElement visualElement)
     {
         userManager = UserManager.getInstance();
         locationManager = LocationManager.getInstance();
+        eventManager = EventManager.getInstance();
+
         PanelEntity = visualElement.Q<VisualElement>(className: "panelEntity");
         PanelEntity.UnregisterCallback<ClickEvent>(OutputFunction);
         PanelEntity.RegisterCallback<ClickEvent>(OutputFunction);
@@ -112,6 +218,8 @@ public class BuildingListEntryController
             FavoriteElement.RemoveFromClassList("isFavorited");
             FavoriteElement.AddToClassList("isNotFavorited");
         }
+
+        this.locationData = buildingData;
     }
     
     private double DistanceInMiBetweenEarthCoordinates(double2 pointA, double2 pointB) 

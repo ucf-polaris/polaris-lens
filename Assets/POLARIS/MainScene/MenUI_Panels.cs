@@ -36,7 +36,8 @@ namespace POLARIS.MainScene {
         VisualTreeAsset EventListEntryTemplate;
 
         public ListController listController;
-        public extendedScrollView ExtendedScrollView;
+        public eventExtendedView ExtendedEventView;
+        public locationExtendedView ExtendedLocationView;
 
         public static bool userOnListView;
         // Start is called before the first frame update
@@ -52,11 +53,18 @@ namespace POLARIS.MainScene {
             var uiDoc = GetComponent<UIDocument>();
             var rootVisual = uiDoc.rootVisualElement;
             header = rootVisual.Q<Label>("Identifier");
-            ExtendedScrollView = new extendedScrollView(rootVisual.Q<VisualElement>("ExtendedScrollContainer"));
+
+            //define extended views
+            ExtendedEventView = new eventExtendedView(rootVisual.Q<VisualElement>("ExtendedEventView"));
+            ExtendedLocationView = new locationExtendedView(rootVisual.Q<VisualElement>("ExtendedLocationView"));
+
             //passing back variables
             listController.Initialize(rootVisual, EventListEntryTemplate, LocationListEntryTemplate, ListController.SwitchType.locations);
-            EventListEntryController.extendedView = ExtendedScrollView;
-            BuildingListEntryController.extendedView = ExtendedScrollView;
+            EventListEntryController.extendedView = ExtendedEventView;
+            BuildingListEntryController.extendedView = ExtendedLocationView;
+
+            EventListEntryController.otherView = ExtendedLocationView;
+            BuildingListEntryController.otherView = ExtendedEventView;
 
             //set up the search bar
             _searchField = rootVisual.Q<TextField>("SearchBar");
@@ -139,7 +147,7 @@ namespace POLARIS.MainScene {
         {
             // Can move around map at top on event/location list view, but not when clicking on specific event
             // Tried doing same thing for ExtendedScrollView, but didn't work :(
-            userOnListView = listController.EntryList.panel.focusController.focusedElement == listController.EntryList || ExtendedScrollView.Extended;
+            userOnListView = listController.EntryList.panel.focusController.focusedElement == listController.EntryList || ExtendedEventView.Extended || ExtendedLocationView.Extended;
             
             if (ChangeTabImage.justRaised)
             {
@@ -212,7 +220,7 @@ namespace POLARIS.MainScene {
             if (shouldReset)
             {
                 ReturnGoToTop();
-                ExtendedScrollView.Extended = false;
+                CollapseBothExtendedViews();
             }
         }
 
@@ -222,7 +230,7 @@ namespace POLARIS.MainScene {
             if (shouldReset)
             {
                 ReturnGoToTop();
-                ExtendedScrollView.Extended = false;
+                CollapseBothExtendedViews();
             }
         }
         
@@ -295,22 +303,22 @@ namespace POLARIS.MainScene {
             SV.verticalScroller.value = SV.verticalScroller.lowValue;
             SV.scrollDecelerationRate = 0.0f;
         }
+
+        public void CollapseBothExtendedViews()
+        {
+            ExtendedEventView.Extended = false;
+            ExtendedLocationView.Extended = false;
+        }
     }
-    
     [Serializable]
-    public class extendedScrollView
+    public class eventExtendedView : extendedScrollView
     {
-        public ScrollView ExtendedView;
-        public VisualElement ExtendedContainerView;
-        private bool extended;
-        public Label DescriptionText;
         public Label LocationText;
         public Label StartDateText;
         public Label EndDateText;
-        public Label TitleText;
-        public VisualElement image;
+        public Label HostText;
 
-        public extendedScrollView(VisualElement container)
+        public eventExtendedView(VisualElement container)
         {
             //ExtendScrollContainer
             ExtendedContainerView = container;
@@ -322,17 +330,64 @@ namespace POLARIS.MainScene {
             EndDateText = container.Q<Label>("EndDateText");
             TitleText = container.Q<Label>("TitleText");
             image = container.Q<VisualElement>("ImagePop");
+            HostText = container.Q<Label>("HostText");
 
             //back click button
             container.Q<VisualElement>("BackClick").RegisterCallback<ClickEvent>(OnBackClick);
         }
+    }
+    [Serializable]
+    public class locationExtendedView : extendedScrollView
+    {
+        public Label AddressText;
+        public VisualElement EventList;
+        public Label EventHeaderText;
+        public VisualElement FavoritesIcon;
+        public VisualElement VisitedIcon;
 
-        //also close when...
+        public locationExtendedView(VisualElement container)
+        {
+            //ExtendScrollContainer
+            ExtendedContainerView = container;
+            ExtendedView = container.Q<ScrollView>("ExtendedScrollView");
+            EventList = container.Q<VisualElement>("EventList");
+            EventHeaderText = container.Q<Label>("EventsLabel");
+            AddressText = container.Q<Label>("AddressText");
+            DescriptionText = container.Q<Label>("DescriptionText");
+
+            image = container.Q<VisualElement>("ImagePop");
+            VisitedIcon = container.Q<VisualElement>("VisitedIcon");
+            FavoritesIcon = container.Q<VisualElement>("FavoriteIcon");
+            TitleText = container.Q<Label>("TitleText");
+
+            //back click button
+            container.Q<VisualElement>("BackClick").RegisterCallback<ClickEvent>(OnBackClick);
+        }
+    }
+    
+    [Serializable]
+    public class extendedScrollView
+    {
+        public ScrollView ExtendedView;
+        public VisualElement ExtendedContainerView;
+        public Label DescriptionText;
+        public VisualElement image;
+        public Label TitleText;
+        private bool extended;
+
+        //also close when... (Events)
         //1. Search something new
         //2. Switch tab
         //3. Collapse Menu
         //only really concerned with what happens within this scene. Any scene swaps will reset everything
-        private void OnBackClick(ClickEvent evt)
+
+        //also close when... (Locations)
+        //1. Search something new
+        //2. Switch tab
+        //3. Collapse Menu
+        //4. Press Events in Events List (maybe)
+        //only really concerned with what happens within this scene. Any scene swaps will reset everything
+        protected void OnBackClick(ClickEvent evt)
         {
             Extended = false;
         }
