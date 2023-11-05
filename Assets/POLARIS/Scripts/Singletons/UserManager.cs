@@ -20,12 +20,15 @@ namespace POLARIS.Managers{
         private const string UserGetURL = BaseApiURL + "/user/get";
         private const string FavoritesFileName = "favorites.json";
         private string FavoritesFilePath;
+        private const string VisitedFileName = "visited.json";
+        private string VisitedFilePath;
         public bool Testing = false;
 
         void Awake()
         {
             FavoritesFilePath = Path.Combine(Application.persistentDataPath, FavoritesFileName);
             Debug.Log(FavoritesFilePath);
+            VisitedFilePath = Path.Combine(Application.persistentDataPath, VisitedFileName);
             Initialize();
         }
 
@@ -118,6 +121,7 @@ namespace POLARIS.Managers{
             PlayerPrefs.DeleteKey("realName");
             PlayerPrefs.DeleteKey("username");
             ClearFavorites();
+            ClearVisited();
             data = new UserData();
 
             /*
@@ -140,15 +144,16 @@ namespace POLARIS.Managers{
             // Default to SU, Library, and Engineering 2 (shoutout to Komila)
             data.Suggested = PlayerPrefs.GetString("suggested", "Student Union~John C. Hitt Library~Engineering Building II");
             LoadFavorites(data);
+            LoadVisited(data);
 
             return data.UserID1 != "" && data.Token != "";
         }
         class StoreInFile
         {
-            public List<string> favorites;
+            public List<string> listy;
             public StoreInFile(List<string> lst)
             {
-                favorites = lst;
+                listy = lst;
             }
         }
 
@@ -167,18 +172,47 @@ namespace POLARIS.Managers{
             {
                 string json = File.ReadAllText(FavoritesFilePath);
                 StoreInFile obj = JsonConvert.DeserializeObject<StoreInFile>(json);
-                data.favorite = obj.favorites;
+                data.favorite = obj.listy;
             }
         }
 
         public void ClearFavorites()
         {
-            if (File.Exists(FavoritesFilePath))
+            if (File.Exists(VisitedFilePath))
             {
-                File.Delete(FavoritesFilePath);
+                File.Delete(VisitedFilePath);
             }
-            data.favorite.Clear();
+            data.visited.Clear();
         }
+
+        public void SaveVisited()
+        {
+            StoreInFile s = new StoreInFile(data.visited);
+            string json = JsonConvert.SerializeObject(s);
+            //string json = JsonUtility.ToJson(data.favorite.ToArray());
+            Debug.Log(json);
+            File.WriteAllText(VisitedFilePath, json);
+        }
+
+        public void LoadVisited(UserData data)
+        {
+            if (File.Exists(VisitedFilePath))
+            {
+                string json = File.ReadAllText(VisitedFilePath);
+                StoreInFile obj = JsonConvert.DeserializeObject<StoreInFile>(json);
+                data.visited = obj.listy;
+            }
+        }
+
+        public void ClearVisited()
+        {
+            if (File.Exists(VisitedFilePath))
+            {
+                File.Delete(VisitedFilePath);
+            }
+            data.visited.Clear();
+        }
+
         public void UpdateBackendCall(IDictionary<string, string> request)
         {
             //make backend call to update here (or implement system to avoid spams to backend)
@@ -375,6 +409,32 @@ namespace POLARIS.Managers{
             else
                 Debug.Log(add ? "Building is already favorited, why favorite again?" : "Building isn't even favorited, why defavorite?!?");
             SaveFavorites();
+        }
+
+        public bool isVisited(LocationData building)
+        {
+            if (data.visited == null) return false;
+            return data.visited.Contains(building.BuildingName);
+        }
+
+        public void UpdateVisited(bool add, LocationData building)
+        {
+            if (data.visited == null) data.visited = new List<string>();
+            if (add && !data.visited.Contains(building.BuildingName))
+            {
+                Debug.Log("ADded");
+                data.visited.Add(building.BuildingName);
+                building.IsVisited = true;
+            }
+            else if (!add && data.visited.Contains(building.BuildingName))
+            {
+                Debug.Log("Deleted");
+                data.visited.Remove(building.BuildingName);
+                building.IsVisited = false;
+            }
+            else
+                Debug.Log(add ? "Building is already visited, why visit again?" : "Building isn't even visited, why try to unvisit??!?!");
+            SaveVisited();
         }
 
 
