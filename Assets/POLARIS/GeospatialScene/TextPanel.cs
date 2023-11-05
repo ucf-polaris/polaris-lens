@@ -24,7 +24,7 @@ namespace POLARIS.GeospatialScene
         public GeospatialAnchorContent Content;
 
         public bool Loaded;
-        public bool Visited = false;
+        public bool Visited;
 
         private ARGeospatialAnchor _anchor;
 
@@ -145,11 +145,11 @@ namespace POLARIS.GeospatialScene
             CurrentPrefab.GetChildGameObjects(goList);
             _bottomPanel = goList.Find(go => go.name.Equals("BottomPanel"));
             _bottomLayout = _bottomPanel.GetComponentInChildren<VerticalLayoutGroup>().gameObject;
-            
+
             // TODO: FIX NULL REF ERROR
-            
+
             // Check for favorited / visited
-            if (!Visited)
+            if (!_userManager.isVisited(Content.Location))
             {
                 _visitedIndicator = goList.Find(go => go.name.Equals("VisitedPin"));
                 _visitedIndicator.SetActive(true);
@@ -171,11 +171,12 @@ namespace POLARIS.GeospatialScene
 
         public void VisitedPanel()
         {
+            Visited = _userManager.isVisited(Content.Location);
             if (Visited) return;
             
-            Visited = true;
             _visitedIndicator.SetActive(false);
             // Update API
+            _userManager.UpdateVisited(true, Content.Location);
         }
 
         public void FavoritedClicked()
