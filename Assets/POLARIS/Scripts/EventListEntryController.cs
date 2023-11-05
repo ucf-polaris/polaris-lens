@@ -26,13 +26,13 @@ public class EventListEntryController : ListEntryController
         if (extendedView == null) return;
 
         //set variables
-        extendedView.DescriptionText.text = HtmlParser.RichParse(eventData.Description);
+        extendedView.DescriptionText.text = HtmlParser.RichParse(_eventData.Description);
         extendedView.image.style.backgroundImage = image.style.backgroundImage;
-        extendedView.LocationText.text = eventData.ListedLocation;
-        extendedView.StartDateText.text = eventData.DateTime.ToString("f") + " to";
-        extendedView.EndDateText.text = eventData.EndsOn.ToString("f");
-        extendedView.TitleText.text = eventData.Name;
-        extendedView.HostText.text = eventData.Host;
+        extendedView.LocationText.text = _eventData.ListedLocation;
+        extendedView.StartDateText.text = _eventData.DateTime.ToString("f") + " to";
+        extendedView.EndDateText.text = _eventData.EndsOn.ToString("f");
+        extendedView.TitleText.text = _eventData.Name;
+        extendedView.HostText.text = _eventData.Host;
 
         extendedView.ExtendedView.verticalScroller.value = extendedView.ExtendedView.verticalScroller.lowValue;
         
