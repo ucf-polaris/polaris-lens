@@ -317,6 +317,8 @@ namespace POLARIS.MainScene {
         public Label StartDateText;
         public Label EndDateText;
         public Label HostText;
+        public Button NavButton;
+
 
         public eventExtendedView(VisualElement container)
         {
@@ -330,6 +332,8 @@ namespace POLARIS.MainScene {
             EndDateText = container.Q<Label>("EndDateText");
             TitleText = container.Q<Label>("TitleText");
             image = container.Q<VisualElement>("ImagePop");
+            NavButton = container.Q<Button>("NavButton");
+            
             HostText = container.Q<Label>("HostText");
 
             //back click button

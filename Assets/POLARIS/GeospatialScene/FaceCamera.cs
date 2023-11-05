@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Unity.Mathematics;
 using Unity.XR.CoreUtils;
 using UnityEngine;
 
@@ -11,6 +12,8 @@ namespace POLARIS.GeospatialScene
         
         private GameObject _arCamera;
         private GameObject _bottomPanel;
+        
+        private float _forwardAmount;
 
         // Start is called before the first frame update
         private void Start()
@@ -20,6 +23,15 @@ namespace POLARIS.GeospatialScene
             var goList = new List<GameObject>();
             gameObject.GetChildGameObjects(goList);
             _bottomPanel = goList.Find(go => go.name.Equals("BottomPanel"));
+
+            var fov = _arCamera.GetComponent<Camera>().fieldOfView;
+            var panelWidth = _bottomPanel.GetComponent<BoxCollider>().size.x 
+                             * _bottomPanel.transform.localScale.x 
+                             * _bottomPanel.transform.parent.localScale.x;
+
+            _forwardAmount = (float)((panelWidth / 2) / math.tan(PanelManager.DegreesToRadians(fov / 2)));
+            // Add margin
+            _forwardAmount *= 2f;
         }
 
         // Update is called once per frame
@@ -28,10 +40,11 @@ namespace POLARIS.GeospatialScene
             var objTransform = transform;
             if (Zoomed)
             {
-                var zoomPos = Vector3.forward * 3.3f;
+                // TODO: Scale down panel to set size
+                var zoomPos = Vector3.forward * _forwardAmount;
                 if (_bottomPanel.activeSelf)
                 {
-                    zoomPos = (Vector3.forward * 3.3f) + (Vector3.up * 1f);
+                    zoomPos = (Vector3.forward * _forwardAmount) + (Vector3.up * (_forwardAmount / 3));
                 }
                 
                 objTransform.SetLocalPositionAndRotation(
@@ -60,11 +73,6 @@ namespace POLARIS.GeospatialScene
                 Vector3.Slerp(transform.position, 
                 new Vector3(outerPosition.x, outerPosition.y + 0.3f, outerPosition.z), Speed * Time.deltaTime),
                 Quaternion.Slerp(transform.rotation, targetRotation, Speed * Time.deltaTime));
-        }
-
-        public static void TestFunction(Vector2 val)
-        {
-            print("zz I have been tested: " + val);
         }
 
         // private static Vector3 getClosestPointOnCircle(Vector3 point, Vector3 circleCenter, float radius)

@@ -4,6 +4,7 @@
 // You may obtain a copy of the License at: http://www.apache.org/licenses/LICENSE-2.0
 //
 
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -56,6 +57,7 @@ namespace POLARIS
 
         private readonly HttpClient _client = new();
 
+        private HPRoot _root;
         private double3 _lastRootPosition;
 
         private Camera _mainCamera;
@@ -74,6 +76,7 @@ namespace POLARIS
         private float _travelMiles = 0f;
 
         private UserManager userManager;
+        private LocationManager _locationManager;
         private Queue<string> suggestedLocations;
         [SerializeField] private int numSuggestions = 3;
 
@@ -89,7 +92,9 @@ namespace POLARIS
             _lineRenderer.numCornerVertices = 4;
             _lineRenderer.positionCount = 0;
 
-            _lastRootPosition = _arcGisMapComponent.GetComponent<HPRoot>().RootUniversePosition;
+            _root = _arcGisMapComponent.GetComponent<HPRoot>();
+            _lastRootPosition = _root.RootUniversePosition;
+            
 
             _mainCamera = Camera.main;
 
@@ -107,9 +112,10 @@ namespace POLARIS
             _stopButton.clickable.clicked += StopClicked;
 
             userManager = UserManager.getInstance();
+            _locationManager = LocationManager.getInstance();
             suggestedLocations = new Queue<string>(numSuggestions);
         }
-        
+
         private async void Update()
         {
             if (MenUI_Panels.userOnListView) return;
@@ -143,51 +149,9 @@ namespace POLARIS
 
                             if (Physics.Raycast(ray, out var hit))
                             {
-                                var routeMarker = Instantiate(RouteMarker, hit.point, Quaternion.identity, _arcGisMapComponent.transform);
-
-                                var geoPosition = HitToGeoPosition(hit, 30);
-
-                                var locationComponent = routeMarker.GetComponent<ArcGISLocationComponent>();
-                                locationComponent.enabled = true;
-                                locationComponent.Position = geoPosition;
-                                locationComponent.Rotation = new ArcGISRotation(0, 180, 0);
-
-                                _stops.Push(routeMarker);
                                 var locationName = hit.transform.name;
-                                _stopNames.Push(locationName.StartsWith("ArcGISGameObject_") ? $"{locationComponent.Position.Y:00.00000}, {locationComponent.Position.X:00.00000}" : GetBuilding.ToTitleCase(locationName[4..]));
 
-                                if (_stops.Count > StopCount)
-                                {
-                                    Destroy(_stops.Pop());
-                                    _stopNames.Pop();
-                                }
-
-                                if (_stops.Count == 1)
-                                {
-                                    _destName = _stopNames.Peek();
-                                    UpdateRouteInfoIncomplete();
-                                    _destSelected = true;
-                                }
-                    
-                                if (_stops.Count == StopCount)
-                                {
-                                    var stopNamesArray = _stopNames.ToArray();
-                                    _srcName = stopNamesArray[0];
-                                    _destName = stopNamesArray[1];
-                                    // No filthy coordinates in my suggestions
-                                    if (!_destName.Contains(',')) HandleSuggestedLocations(_destName);
-
-                                    var results = await FetchRoute(_stops.ToArray());
-
-                                    if (results.Contains("error"))
-                                    {
-                                        DisplayError(results);
-                                    }
-                                    else
-                                    {
-                                        StartCoroutine(DrawRoute(results));
-                                    }
-                                }
+                                PlaceMarker(hit.point, GetBuilding.ToTitleCase(locationName[4..]), false);
                             }
                         }
                         _pressTime = 0;
@@ -207,15 +171,69 @@ namespace POLARIS
             RebaseRoute();
         }
 
+        private async void PlaceMarker(Vector3 position, string locationName, bool adjustHeight)
+        {
+            var routeMarker = Instantiate(RouteMarker, position, Quaternion.identity, _arcGisMapComponent.transform);
+            
+            var locationComponent = routeMarker.GetComponent<ArcGISLocationComponent>();
+            locationComponent.enabled = true;
+            locationComponent.Rotation = new ArcGISRotation(0, 180, 0);
+
+            if (adjustHeight)
+            {
+                SetElevation(routeMarker, 30f);
+            }
+            else
+            {
+                locationComponent.Position = Vector3ToGeoPosition(position, 30);
+            }
+
+            _stops.Push(routeMarker);
+            _stopNames.Push(locationName.StartsWith("Isgameobject_") ? $"{locationComponent.Position.Y:00.00000}, {locationComponent.Position.X:00.00000}" : locationName);
+
+            if (_stops.Count > StopCount)
+            {
+                Destroy(_stops.Pop());
+                _stopNames.Pop();
+            }
+
+            if (_stops.Count == 1)
+            {
+                _destName = _stopNames.Peek();
+                UpdateRouteInfoIncomplete();
+                _destSelected = true;
+            }
+
+            if (_stops.Count == StopCount)
+            {
+                var stopNamesArray = _stopNames.ToArray();
+                _srcName = stopNamesArray[0];
+                _destName = stopNamesArray[1];
+                // No filthy coordinates in my suggestions
+                if (!_destName.Contains(',')) HandleSuggestedLocations(_destName);
+
+                var results = await FetchRoute(_stops.ToArray());
+
+                if (results.Contains("error"))
+                {
+                    DisplayError(results);
+                }
+                else
+                {
+                    StartCoroutine(DrawRoute(results, !adjustHeight));
+                }
+            }
+        }
+
         /// <summary>
         /// Return GeoPosition Based on RaycastHit; I.E. Where the user clicked in the Scene.
         /// </summary>
-        /// <param name="hit"></param>
+        /// <param name="point"></param>
         /// <param name="yOffset"></param>
         /// <returns></returns>
-        private ArcGISPoint HitToGeoPosition(RaycastHit hit, float yOffset = 0)
+        private ArcGISPoint Vector3ToGeoPosition(Vector3 point, float yOffset = 0)
         {
-            var worldPosition = math.inverse(_arcGisMapComponent.WorldMatrix).HomogeneousTransformPoint(hit.point.ToDouble3());
+            var worldPosition = math.inverse(_arcGisMapComponent.WorldMatrix).HomogeneousTransformPoint(point.ToDouble3());
 
             var geoPosition = _arcGisMapComponent.View.WorldToGeographic(worldPosition);
             var offsetPosition = new ArcGISPoint(geoPosition.X, geoPosition.Y, geoPosition.Z + yOffset, geoPosition.SpatialReference);
@@ -289,7 +307,7 @@ namespace POLARIS
             return breadcrumb;
         }
 
-        private IEnumerator DrawRoute(string routeInfo)
+        private IEnumerator DrawRoute(string routeInfo, bool includeSrc)
         {
             ClearRoute(false);
 
@@ -297,7 +315,7 @@ namespace POLARIS
             var routes = info.SelectToken("routes");
             var features = routes?.SelectToken("features");
 
-            UpdateRouteInfo(info, true);
+            UpdateRouteInfo(info, includeSrc);
 
             foreach (var feature in features)
             {
@@ -333,22 +351,22 @@ namespace POLARIS
         {
             foreach (var t in _breadcrumbs)
             {
-                SetElevation(t);
+                SetElevation(t, ElevationOffset);
             }
         }
 
         // Does a raycast to find the ground
-        private void SetElevation(GameObject breadcrumb)
+        private void SetElevation(GameObject breadcrumb, float offset)
         {
             // start the raycast in the air at an arbitrary to ensure it is above the ground
-            const int raycastHeight = 1000;
+            const int raycastHeight = 500;
             var position = breadcrumb.transform.position;
-            var raycastStart = new Vector3(position.x, position.y + raycastHeight, position.z);
+            var raycastStart = new Vector3(position.x, raycastHeight, position.z);
             
             if (!Physics.Raycast(raycastStart, Vector3.down, out var hitInfo)) return;
             
             var location = breadcrumb.GetComponent<ArcGISLocationComponent>();
-            location.Position = HitToGeoPosition(hitInfo, ElevationOffset);
+            location.Position = Vector3ToGeoPosition(hitInfo.point, offset);
         }
 
         private void UpdateRouteInfo(JToken info, bool includeSrc)
@@ -463,6 +481,40 @@ namespace POLARIS
                 _lineRenderer.colorGradient = gradient;
             }
             _lastRootPosition = rootPosition;
+        }
+
+        public void RouteToEvent(EventData eventData)
+        {
+            LocationData location = null;
+            foreach (var building in _locationManager.dataList)
+            {
+                if (Math.Abs(building.BuildingLat - eventData.Location.BuildingLat) < 0.00001 &&
+                    Math.Abs(building.BuildingLong - eventData.Location.BuildingLong) < 0.00001)
+                {
+                    location = building;
+                    break;
+                }
+            }
+
+            ClearRoute(true);
+
+            var buildingName = location?.BuildingName ??
+                               $"{eventData.Location.BuildingLat:00.00000}, {eventData.Location.BuildingLong:00.00000}";
+            var geoPosition = new ArcGISPoint(eventData.Location.BuildingLong,
+                                              eventData.Location.BuildingLat,
+                                              0f,
+                                              new ArcGISSpatialReference(4326));
+            var worldPosition =
+                _root.TransformPoint(_arcGisMapComponent.View.GeographicToWorld(geoPosition)).ToVector3();
+            PlaceMarker(worldPosition,  buildingName, true);
+
+            var curPosition = new ArcGISPoint(GetUserCurrentLocation._longitude,
+                                              GetUserCurrentLocation._latitude,
+                                              0f,
+                                              new ArcGISSpatialReference(4326));
+            var curWorldPosition =
+                _root.TransformPoint(_arcGisMapComponent.View.GeographicToWorld(curPosition)).ToVector3();
+            PlaceMarker(curWorldPosition, "My Location", true);
         }
 
         private void ToggleSlide()

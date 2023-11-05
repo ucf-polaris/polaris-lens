@@ -11,6 +11,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.XR.ARFoundation;
 using POLARIS.Managers;
+using UnityEngine.Android;
 
 namespace POLARIS.GeospatialScene
 {
@@ -23,8 +24,7 @@ namespace POLARIS.GeospatialScene
         public GeospatialAnchorContent Content;
 
         public bool Loaded;
-        public bool Visited;
-        public bool Favorited;
+        public bool Visited = false;
 
         private ARGeospatialAnchor _anchor;
 
@@ -36,11 +36,13 @@ namespace POLARIS.GeospatialScene
         private bool _bottomPanelShown;
         private bool _eventsLoaded;
 
-        private EventManager eventManager;
+        private EventManager _eventManager;
+        private UserManager _userManager;
 
         private void Start()
         {
-            eventManager = EventManager.getInstance();
+            _eventManager = EventManager.getInstance();
+            _userManager = UserManager.getInstance();
         }
 
         public void Instantiate(GeospatialAnchorContent content)
@@ -144,18 +146,18 @@ namespace POLARIS.GeospatialScene
             _bottomPanel = goList.Find(go => go.name.Equals("BottomPanel"));
             _bottomLayout = _bottomPanel.GetComponentInChildren<VerticalLayoutGroup>().gameObject;
             
+            // TODO: FIX NULL REF ERROR
+            
             // Check for favorited / visited
-            if (Favorited)
-            {
-                GetComponentInChildren<FavButton>().UpdateSprite();
-            }
-
             if (!Visited)
             {
-                _visitedIndicator =
-                    Instantiate(Resources.Load("Polaris/simplearrow") as GameObject, CurrentPrefab.transform);
-                _visitedIndicator.transform.localPosition = Vector3.up;
-                _visitedIndicator.transform.localScale = new Vector3(0.2f, 0.2f, 0.2f);
+                _visitedIndicator = goList.Find(go => go.name.Equals("VisitedPin"));
+                _visitedIndicator.SetActive(true);
+            }
+
+            if (_userManager.isFavorite(Content.Location))
+            {
+                GetComponentInChildren<FavButton>().UpdateSprite(true);
             }
         }
 
@@ -172,17 +174,15 @@ namespace POLARIS.GeospatialScene
             if (Visited) return;
             
             Visited = true;
-            Destroy(_visitedIndicator);
+            _visitedIndicator.SetActive(false);
             // Update API
         }
 
         public void FavoritedClicked()
         {
-            Favorited = !Favorited;
-            print("zz favorited? " + Favorited);
-            GetComponentInChildren<FavButton>().UpdateSprite();
-            
-            // Update API
+            var favorited = !_userManager.isFavorite(Content.Location);
+            _userManager.UpdateFavorites(favorited, Content.Location);
+            GetComponentInChildren<FavButton>().UpdateSprite(favorited);
         }
 
         public void PoiButtonClicked()
@@ -253,19 +253,12 @@ namespace POLARIS.GeospatialScene
 
         private void AddEvents()
         {
-            // Mock using student union coords 28.601927704512025, -81.20044219923692
-            if (eventManager?.dataList is null) return;
+            if (_eventManager.dataList is null) return;
 
-            var events = eventManager.dataList.Where(e =>
-                                                     Math.Abs(e.Location.BuildingLat -
-                                                             // 28.601927704512025) <
-                                                            Content.History.Latitude) <
-                                                     0.000001 &&
-                                                     Math.Abs(e.Location.BuildingLong -
-                                                             // -81.20044219923692) <
-                                                            Content.History.Longitude) <
-                                                     0.000001);
-            
+            var events = _eventManager.dataList.Where(e =>
+                                                          Content.Location.BuildingEvents.Any(
+                                                              s => s.Equals(e.EventID)));
+
             // TODO: APPEND HEADER somehow
             
             foreach (var e in events)
@@ -299,9 +292,9 @@ namespace POLARIS.GeospatialScene
             var sb = new StringBuilder();
 
             sb.Append("<style=\"EvTitle\">" + e.Name + "</style>\n");
+            sb.Append("<style=\"EvHost\">" + e.Host + "</style>\n");
             sb.Append("<style=\"EvTime\">" + GenerateTime(e.DateTime) + "</style>\n");
             sb.Append("<style=\"EvLocation\">" + e.ListedLocation + "</style>\n");
-            sb.Append("<style=\"EvHost\">" + e.Host + "</style>\n");
             sb.Append("<style=\"EvDescription\">" + HtmlParser.RichParse(e.Description) + "</style>");
 
             return sb.ToString();

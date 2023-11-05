@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using POLARIS;
 using UnityEngine;
 using UnityEngine.UIElements;
 using POLARIS.Managers;
@@ -15,7 +16,9 @@ public class EventListEntryController : ListEntryController
     //since it's all the same extended view, don't keep cloning a reference to the same extended view
     public static eventExtendedView extendedView;
     public static locationExtendedView otherView;
-    EventData eventData;
+
+    private UcfRouteManager _routeManager;
+    private EventData _eventData;
 
     private void OutputFunction(ClickEvent evt)
     {
@@ -32,6 +35,8 @@ public class EventListEntryController : ListEntryController
         extendedView.HostText.text = eventData.Host;
 
         extendedView.ExtendedView.verticalScroller.value = extendedView.ExtendedView.verticalScroller.lowValue;
+        
+        extendedView.NavButton.clickable.clicked += OnNavClick;
 
         extendedView.Extended = true;
         otherView.Extended = false;
@@ -47,6 +52,13 @@ public class EventListEntryController : ListEntryController
         DescriptionLabel = visualElement.Q<Label>("Description");
         TimeLocationLabel = visualElement.Q<Label>("TimeLocation");
         image = visualElement.Q<VisualElement>(className: "panelImage") ;
+
+        if (Camera.main != null)
+        {
+            _routeManager = Camera.main.transform.parent.gameObject
+                                  .GetComponentInChildren<UcfRouteManager>();
+        }
+
         /*
     .panelShadow
     .panel 
@@ -65,18 +77,24 @@ public class EventListEntryController : ListEntryController
         */
     }
 
+    private void OnNavClick()
+    {
+        _routeManager.RouteToEvent(_eventData);
+    }
+
     public void SetEventData(EventData eventData)
     {
-        this.eventData = eventData;
+        _eventData = eventData;
+        
         NameLabel.text = cullText(eventData.Name, 35);
 
-        DescriptionLabel.text = cullText(HtmlParser.RichParse(eventData.Description), 180);
+        DescriptionLabel.text = cullText(HtmlParser.RichParse(_eventData.Description), 180);
 
-        var splitDate = eventData.DateTime.ToString("f").Split(",");
+        var splitDate = _eventData.DateTime.ToString("f").Split(",");
         string useDate = splitDate[1] + splitDate[2];
-        TimeLocationLabel.text = cullText(useDate.Trim() + " - " + eventData.ListedLocation, 60);
+        TimeLocationLabel.text = cullText(useDate.Trim() + " - " + _eventData.ListedLocation, 60);
         
-        image.style.backgroundImage = eventData.rawImage;
+        image.style.backgroundImage = _eventData.rawImage;
     }
 
     private string cullText(string s, int length)

@@ -8,6 +8,7 @@ public class EventsButton : MonoBehaviour, IPointerDownHandler
     private PanelZoom _panelZoom;
     private TextPanel _panel;
     private SpriteRenderer _spriteRenderer;
+    private bool _hasEvents = true;
     
     // Start is called before the first frame update
     private void Start()
@@ -15,10 +16,18 @@ public class EventsButton : MonoBehaviour, IPointerDownHandler
         _spriteRenderer = gameObject.GetComponent<SpriteRenderer>();
         _panelZoom = transform.parent.GetComponent<PanelZoom>();
         _panel = _panelZoom.Panel;
+
+        if (_panel.Content.Location.BuildingEvents.Length == 0)
+        {
+            _hasEvents = false;
+            _spriteRenderer.color = new Color(100/256f, 100/256f, 100/256f);
+        }
     }
     
     public void OnPointerDown(PointerEventData eventData)
     {
+        if (!_hasEvents) return;
+        
         _panelZoom.TouchedPanel = true;
         _panel.EventsButtonClicked();
         StartCoroutine(ChangeIcon());

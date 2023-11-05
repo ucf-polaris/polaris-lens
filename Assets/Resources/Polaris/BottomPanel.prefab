@@ -27,7 +27,7 @@ RectTransform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1563541951863117203}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalPosition: {x: 0, y: 0, z: 0.0001466833}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 1
   m_Children:
@@ -37,7 +37,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 0}
-  m_AnchoredPosition: {x: 0, y: 99.99489}
+  m_AnchoredPosition: {x: 0, y: 99.99474}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0, y: 1}
 --- !u!222 &9000465366614926353
@@ -80,7 +80,7 @@ MonoBehaviour:
     m_Top: 0
     m_Bottom: 0
   m_ChildAlignment: 1
-  m_Spacing: 10
+  m_Spacing: 3
   m_ChildForceExpandWidth: 0
   m_ChildForceExpandHeight: 0
   m_ChildControlWidth: 0
@@ -155,8 +155,8 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 10907, guid: 0000000000000000f000000000000000, type: 0}
-  m_Type: 1
+  m_Sprite: {fileID: 21300000, guid: b76cacc0d35c30f40b01be37715a32c8, type: 3}
+  m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
   m_FillMethod: 4
@@ -385,8 +385,8 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 10917, guid: 0000000000000000f000000000000000, type: 0}
-  m_Type: 1
+  m_Sprite: {fileID: 21300000, guid: b76cacc0d35c30f40b01be37715a32c8, type: 3}
+  m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
   m_FillMethod: 4
@@ -492,7 +492,7 @@ MonoBehaviour:
   m_FallbackScreenDPI: 96
   m_DefaultSpriteDPI: 96
   m_DynamicPixelsPerUnit: 1
-  m_PresetInfoIsWorld: 1
+  m_PresetInfoIsWorld: 0
 --- !u!114 &1965345894947542236
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -536,7 +536,7 @@ PrefabInstance:
     - target: {fileID: 274256892992022552, guid: 2227dacfd6a33cd468135d6450e42568,
         type: 3}
       propertyPath: m_AnchorMax.y
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 274256892992022552, guid: 2227dacfd6a33cd468135d6450e42568,
         type: 3}
@@ -546,7 +546,7 @@ PrefabInstance:
     - target: {fileID: 274256892992022552, guid: 2227dacfd6a33cd468135d6450e42568,
         type: 3}
       propertyPath: m_AnchorMin.y
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 274256892992022552, guid: 2227dacfd6a33cd468135d6450e42568,
         type: 3}
@@ -556,7 +556,7 @@ PrefabInstance:
     - target: {fileID: 274256892992022552, guid: 2227dacfd6a33cd468135d6450e42568,
         type: 3}
       propertyPath: m_SizeDelta.y
-      value: 0
+      value: 93.88
       objectReference: {fileID: 0}
     - target: {fileID: 274256892992022552, guid: 2227dacfd6a33cd468135d6450e42568,
         type: 3}
@@ -596,12 +596,12 @@ PrefabInstance:
     - target: {fileID: 274256892992022552, guid: 2227dacfd6a33cd468135d6450e42568,
         type: 3}
       propertyPath: m_AnchoredPosition.x
-      value: 0
+      value: 50
       objectReference: {fileID: 0}
     - target: {fileID: 274256892992022552, guid: 2227dacfd6a33cd468135d6450e42568,
         type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: 0
+      value: -46.94
       objectReference: {fileID: 0}
     - target: {fileID: 274256892992022552, guid: 2227dacfd6a33cd468135d6450e42568,
         type: 3}
@@ -652,6 +652,11 @@ PrefabInstance:
       propertyPath: m_Name
       value: AREventText (1)
       objectReference: {fileID: 0}
+    - target: {fileID: 8358148089211284764, guid: 2227dacfd6a33cd468135d6450e42568,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -689,7 +694,7 @@ PrefabInstance:
     - target: {fileID: 274256892992022552, guid: 2227dacfd6a33cd468135d6450e42568,
         type: 3}
       propertyPath: m_AnchorMax.y
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 274256892992022552, guid: 2227dacfd6a33cd468135d6450e42568,
         type: 3}
@@ -699,17 +704,17 @@ PrefabInstance:
     - target: {fileID: 274256892992022552, guid: 2227dacfd6a33cd468135d6450e42568,
         type: 3}
       propertyPath: m_AnchorMin.y
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 274256892992022552, guid: 2227dacfd6a33cd468135d6450e42568,
         type: 3}
       propertyPath: m_SizeDelta.x
-      value: 105
+      value: 100
       objectReference: {fileID: 0}
     - target: {fileID: 274256892992022552, guid: 2227dacfd6a33cd468135d6450e42568,
         type: 3}
       propertyPath: m_SizeDelta.y
-      value: 0
+      value: 129.2
       objectReference: {fileID: 0}
     - target: {fileID: 274256892992022552, guid: 2227dacfd6a33cd468135d6450e42568,
         type: 3}
@@ -749,12 +754,12 @@ PrefabInstance:
     - target: {fileID: 274256892992022552, guid: 2227dacfd6a33cd468135d6450e42568,
         type: 3}
       propertyPath: m_AnchoredPosition.x
-      value: 0
+      value: 50
       objectReference: {fileID: 0}
     - target: {fileID: 274256892992022552, guid: 2227dacfd6a33cd468135d6450e42568,
         type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: 0
+      value: -64.6
       objectReference: {fileID: 0}
     - target: {fileID: 274256892992022552, guid: 2227dacfd6a33cd468135d6450e42568,
         type: 3}
@@ -771,39 +776,66 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: 1453376172901374990, guid: 2227dacfd6a33cd468135d6450e42568,
-        type: 3}
-      propertyPath: m_IsActive
-      value: 0
-      objectReference: {fileID: 0}
     - target: {fileID: 2875356506480361550, guid: 2227dacfd6a33cd468135d6450e42568,
         type: 3}
       propertyPath: m_text
-      value: '<style="EvTitle">Hey Everyone Title Teeeeeeeeeee</style>
+      value: '<style="EvTitle">Halloween Matsuri Teeeeeeeeeee</style>
 
-        <style="EvTime">Time
-        time</style>
+        <style="EvHost">Japanese
+        Heritage Student Association</style>
 
-        <style="EvLocation">Location loc</style>
+        <style="EvTime">5:30 PM - Friday,
+        November 03</style>
 
-        <style="EvHost">Hosty
-        host</style>
+        <style="EvLocation">Lake Claire Recreational
+        Area</style>
 
-        <style="EvDescription">description description
-
-        hie
+        <style="EvDescription">description description hie
         dsd hie dsd hie dsd hie dsd hie dsd hie dsd hie dsd hie dsd hie dsd hie dsd
-        hie dsd hie dsd hie dsd hie dsd</style>'
+        hie dsd hie dsd hie dsd hie dsd hie dsd hie dsd hie dsd hie dsd hie dsd hie
+        dsd hie dsd hie dsd hie dsd hie dsd hie dsd hie dsd hie dsd hie dsd hie dsd
+        hie dsd hie dsd hie dsd hie dsd hie dsd hie dsd hie dsd hie dsd hie dsd hie
+        dsd hie dsd hie dsd hie dsd</style>'
+      objectReference: {fileID: 0}
+    - target: {fileID: 2875356506480361550, guid: 2227dacfd6a33cd468135d6450e42568,
+        type: 3}
+      propertyPath: m_Enabled
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2875356506480361550, guid: 2227dacfd6a33cd468135d6450e42568,
+        type: 3}
+      propertyPath: m_margin.w
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 2875356506480361550, guid: 2227dacfd6a33cd468135d6450e42568,
+        type: 3}
+      propertyPath: m_margin.x
+      value: 7
+      objectReference: {fileID: 0}
+    - target: {fileID: 2875356506480361550, guid: 2227dacfd6a33cd468135d6450e42568,
+        type: 3}
+      propertyPath: m_margin.z
+      value: 7
       objectReference: {fileID: 0}
     - target: {fileID: 2875356506480361550, guid: 2227dacfd6a33cd468135d6450e42568,
         type: 3}
       propertyPath: m_hasFontAssetChanged
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 7555900135083968425, guid: 2227dacfd6a33cd468135d6450e42568,
+        type: 3}
+      propertyPath: m_CullTransparentMesh
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 8358148089211284764, guid: 2227dacfd6a33cd468135d6450e42568,
         type: 3}
       propertyPath: m_Name
       value: AREventText
+      objectReference: {fileID: 0}
+    - target: {fileID: 8358148089211284764, guid: 2227dacfd6a33cd468135d6450e42568,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

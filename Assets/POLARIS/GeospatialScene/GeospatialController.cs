@@ -631,15 +631,25 @@ namespace Google.XR.ARCoreExtensions.Samples.Geospatial
             
             if (earthTrackingState == TrackingState.Tracking)
             {
+                var acc = pose.HorizontalAccuracy switch
+                {
+                    < 1  => "Magnificent",
+                    < 2  => "Excellent",
+                    < 5  => "Great",
+                    < 10 => "Good",
+                    < 20 => "OK",
+                    _ => "Waiting"
+                };
+
                 InfoText.text = string.Format(
-                "GPS Accuracy: {3:F6}m)    Rotation Accuracy: {7:F1}",
+                "Accuracy: {8}",
                 Environment.NewLine, pose.Latitude, pose.Longitude, 
                 pose.HorizontalAccuracy, pose.Altitude, pose.VerticalAccuracy,
-                pose.EunRotation.ToString("F1"), pose.OrientationYawAccuracy);
+                pose.EunRotation.ToString("F1"), pose.OrientationYawAccuracy, acc);
             }
             else
             {
-                InfoText.text = "Geospatial not tracking :(";
+                InfoText.text = "Not tracking :(";
             }
         }
 
