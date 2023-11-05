@@ -1048,7 +1048,7 @@ MonoBehaviour:
   blockingScreen: {fileID: 1482851210}
   closed: 0
   enterName: SettingsWheel
-  exitName: Arrow
+  exitName: ClickArea
 --- !u!114 &1006044609
 MonoBehaviour:
   m_ObjectHideFlags: 0

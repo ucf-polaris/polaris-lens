@@ -6,6 +6,7 @@
             <ui:VisualElement name="Title" style="flex-grow: 0; flex-shrink: 0; top: 8%; right: auto; left: 12%; width: auto; min-height: auto;">
                 <ui:VisualElement name="Arrow" style="flex-grow: 0; background-image: url(&apos;project://database/Assets/POLARIS/arrow.png?fileID=2800000&amp;guid=d01daccc5e8044ce09b187ecdcf84c3d&amp;type=3#arrow&apos;); width: 6%; height: 24%; position: relative; flex-shrink: 0; rotate: 270deg; left: auto; right: 90px; bottom: auto; top: 68%;" />
                 <ui:Label tabindex="-1" text="Edit Profile" parse-escape-sequences="true" display-tooltip-when-elided="true" name="Title" style="-unity-font: url(&apos;project://database/Assets/POLARIS/Fonts/Poppins-SemiBold.ttf?fileID=12800000&amp;guid=15f8e98d892ff47b380d631e4356477f&amp;type=3#Poppins-SemiBold&apos;); color: rgb(255, 255, 255); font-size: 100px; width: auto; -unity-font-style: bold;" />
+                <ui:VisualElement name="ClickArea" style="flex-grow: 1; position: absolute; height: 176px; width: 708px; top: 16px; left: -88px;" />
             </ui:VisualElement>
             <ui:VisualElement name="Fields" style="flex-grow: 0; flex-shrink: 0; position: relative; top: 15%; left: auto; justify-content: flex-start; align-items: center;">
                 <ui:VisualElement name="EmailField" class="userField">
