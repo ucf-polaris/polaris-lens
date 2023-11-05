@@ -56,6 +56,7 @@ namespace POLARIS.Managers
             }
             //since this isn't inherent to the building, needs to be set from userAccess
             UpdateFavoritesInBuildings();
+            UpdateVisitedInBuildings();
         }
 
         override protected IEnumerator Scan(IDictionary<string, string> request)
@@ -205,6 +206,11 @@ namespace POLARIS.Managers
         private void UpdateVisitedInBuildings()
         {
             //unimplemented for now
+            foreach(var building in dataList)
+            {
+                if (userAccess.isVisited(building))
+                    building.IsVisited = true;
+            }
         }
 
         public LocationData GetFromName(string name)

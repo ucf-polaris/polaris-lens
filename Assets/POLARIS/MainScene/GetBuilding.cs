@@ -61,11 +61,12 @@ namespace POLARIS.MainScene
             if (Time.time - _lastTapTime <= DoubleTapThreshold)
             {
                 _lastTapTime = 0;
+                // UnsetLastBuildingColor();
 
                 var buildingName = ToTitleCase(locationName[4..]);
                 _uiDocLabel.text = $"{buildingName}";
                 var closestBuilding = GetClosestBuilding(buildingName);
-                Debug.Log(
+                if (closestBuilding != null) Debug.Log(
                     $"Name: {closestBuilding.BuildingName ?? ""}\n" +
                     $"Aliases: {((closestBuilding.BuildingAllias != null) ? string.Join(", ", closestBuilding.BuildingAllias) : "")}\n" +
                     $"Abbreviations: {((closestBuilding.BuildingAbbreviation != null) ? string.Join(", ", closestBuilding.BuildingAbbreviation) : "")}\n" +
@@ -96,10 +97,8 @@ namespace POLARIS.MainScene
             var coords = GeoUtils.ProjectToSpatialReference(offsetPosition, new ArcGISSpatialReference(4326));
             Debug.Log($"Hit position: {coords.X}, {coords.Y}, {coords.Z}");
 
-            if (hit.transform.parent.gameObject != _lastSelected)
-            {
-                UnsetLastBuildingColor();
-            }
+            UnsetLastBuildingColor();
+
             return hit;
         }
 
