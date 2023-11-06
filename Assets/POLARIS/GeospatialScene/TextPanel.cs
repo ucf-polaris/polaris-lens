@@ -11,7 +11,6 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.XR.ARFoundation;
 using POLARIS.Managers;
-using UnityEngine.Android;
 
 namespace POLARIS.GeospatialScene
 {
@@ -38,6 +37,7 @@ namespace POLARIS.GeospatialScene
 
         private EventManager _eventManager;
         private UserManager _userManager;
+        private DisplayPanel _display;
 
         private void Start()
         {
@@ -45,9 +45,10 @@ namespace POLARIS.GeospatialScene
             _userManager = UserManager.getInstance();
         }
 
-        public void Instantiate(GeospatialAnchorContent content)
+        public void Instantiate(GeospatialAnchorContent content, DisplayPanel display)
         {
             Content = content;
+            _display = display;
             PanelPrefab = Resources.Load("Polaris/PanelParent") as GameObject;
             LoadingPrefab = Resources.Load("Polaris/Capsule") as GameObject;
         }
@@ -139,7 +140,9 @@ namespace POLARIS.GeospatialScene
             CurrentPrefab = Instantiate(PanelPrefab, _anchor.transform);
             
             CurrentPrefab.GetComponentInChildren<TextMeshPro>().SetText(Content.Text);
-            CurrentPrefab.GetComponentInChildren<PanelZoom>().Panel = this;
+            var panelZoom = CurrentPrefab.GetComponentInChildren<PanelZoom>();
+            panelZoom.Panel = this;
+            panelZoom.Display = _display;
             
             var goList = new List<GameObject>();
             CurrentPrefab.GetChildGameObjects(goList);

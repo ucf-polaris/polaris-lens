@@ -695,6 +695,7 @@ GameObject:
   m_Component:
   - component: {fileID: 325939928}
   - component: {fileID: 325939929}
+  - component: {fileID: 325939930}
   m_Layer: 0
   m_Name: PanelManager
   m_TagString: PanelManager
@@ -731,6 +732,20 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   Camera: {fileID: 1451910691}
   AnchorManager: {fileID: 691323916}
+--- !u!114 &325939930
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 325939927}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a9804e59dd84e644bb2c84b21694027c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  Camera: {fileID: 1451910691}
+  ManuallyZoomed: 0
 --- !u!1 &384014290
 GameObject:
   m_ObjectHideFlags: 0
