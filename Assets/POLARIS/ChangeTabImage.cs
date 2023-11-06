@@ -16,7 +16,7 @@ public class ChangeTabImage : MonoBehaviour
 	private VisualElement _arrow;
 	private Label _header;
 	public static string _lastPressed = "location";
-	private bool _menuOpen = false;
+	public static bool _menuOpen = false;
 	public static bool justRaised = false;
 
 	private MenUI_Panels panelFuncts;

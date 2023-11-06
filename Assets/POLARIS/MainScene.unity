@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 0.752
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 0}
-  m_IndirectSpecularColor: {r: 0.38321012, g: 0.42590976, b: 0.4971956, a: 0.752}
+  m_IndirectSpecularColor: {r: 0.38103238, g: 0.42310908, b: 0.49497706, a: 0.752}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -960,7 +960,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6b021cc1d5d6d5146bbcbfc080d4d506, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  geo: {fileID: 2062164022}
   showSuggestions: 1
   LocationListEntryTemplate: {fileID: 9197481963319205126, guid: a6efed181fb96594d9670d265b13e76e,
     type: 3}
@@ -2261,7 +2260,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   addressMarkerTemplate: {fileID: 292355411060058802, guid: 87db09fb19325924b8263cc17e7306cd,
     type: 3}
-  addressMarkerScale: 1
+  addressMarkerScale: 0
   locationMarkerTemplate: {fileID: 4122667162209955305, guid: 03458b7caef582b4387ba5bd468061d2,
     type: 3}
   locationMarkerScale: 1

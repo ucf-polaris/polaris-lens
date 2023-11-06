@@ -77,7 +77,6 @@ namespace POLARIS.MainScene
                     $"Events: {((closestBuilding.BuildingEvents != null) ? string.Join(", ", closestBuilding.BuildingEvents) : "")}\n");
                             
                 UpdateBuildingColor(hit.transform.gameObject, BuildingSelect);
-                StartCoroutine(ToggleLabelHeight());
             }
             else
             {
@@ -100,15 +99,6 @@ namespace POLARIS.MainScene
             UnsetLastBuildingColor();
 
             return hit;
-        }
-
-        private IEnumerator ToggleLabelHeight()
-        {
-            _uiDocLabel.ToggleInClassList("RaisedLabel");
-            _uiDocLabel.ToggleInClassList("BuildingTopLabel");
-            yield return new WaitForSeconds(2.0f);
-            _uiDocLabel.ToggleInClassList("RaisedLabel");
-            _uiDocLabel.ToggleInClassList("BuildingTopLabel");
         }
 
         private void UpdateBuildingColor(GameObject buildingPart, Color color)
