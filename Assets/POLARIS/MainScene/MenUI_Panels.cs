@@ -24,8 +24,6 @@ namespace POLARIS.MainScene {
 
         //UI Toolkit elements
         private TextField _searchField;
-        private Button _searchButton;
-        private Button _clearButton;
 
         //UI Toolkit Objects
         [SerializeField]
@@ -410,6 +408,7 @@ namespace POLARIS.MainScene {
         }
         public void ExtendMenu(LocationData locData, bool closeOther)
         {
+            if (locData == null) return;
             locationData = locData;
             OutputFunction(closeOther);
         }
@@ -467,7 +466,7 @@ namespace POLARIS.MainScene {
                 noneLabel.AddToClassList("EventText");
                 EventList.Add(noneLabel);
             }
-
+            Debug.Log("made it");
             //extend location view, put down event view
             Extended = true;
             if(closeOther) OtherView.Extended = false;

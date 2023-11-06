@@ -23,7 +23,7 @@ public class BuildingListEntryController
 
     UserManager userManager;
     LocationManager locationManager;
-    EventManager eventManager;
+
     //since it's all the same extended view, don't keep cloning a reference to the same extended view
     public static locationExtendedView extendedView;
     public static eventExtendedView otherView;
@@ -59,7 +59,6 @@ public class BuildingListEntryController
     {
         userManager = UserManager.getInstance();
         locationManager = LocationManager.getInstance();
-        eventManager = EventManager.getInstance();
 
         PanelEntity = visualElement.Q<VisualElement>(className: "panelEntity");
         PanelEntity.UnregisterCallback<ClickEvent>(OnPanelClick);
