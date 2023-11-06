@@ -805,6 +805,8 @@ namespace Google.XR.ARCoreExtensions.Samples.Geospatial
 
         private void PlaceAnchorByScreenTap(Vector2 position)
         {
+            return;
+            
             if (_streetscapeGeometryVisibility)
             {
                 // Raycast against streetscapeGeometry.

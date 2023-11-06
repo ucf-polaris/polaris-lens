@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 0.752
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 0}
-  m_IndirectSpecularColor: {r: 0.38103238, g: 0.42310908, b: 0.49497706, a: 0.752}
+  m_IndirectSpecularColor: {r: 0.38321012, g: 0.42590976, b: 0.4971956, a: 0.752}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -714,7 +714,7 @@ MonoBehaviour:
   RouteInfo: {fileID: 985640667}
   LocationMarker: {fileID: 70745446}
   PathStart: {r: 0.34509805, g: 0.34509805, b: 0.34509805, a: 0}
-  PathEnd: {r: 0.18777141, g: 0.2816463, b: 0.7264151, a: 1}
+  PathEnd: {r: 0.9716981, g: 0.89196336, b: 0.19708972, a: 1}
   numSuggestions: 3
 --- !u!1 &972164396
 GameObject:
@@ -1047,7 +1047,7 @@ MonoBehaviour:
   blockingScreen: {fileID: 1482851210}
   closed: 0
   enterName: SettingsWheel
-  exitName: ClickArea
+  exitName: Arrow
 --- !u!114 &1006044609
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1268,59 +1268,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1 &1359912931
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 1359912932}
-  - component: {fileID: 1359912933}
-  m_Layer: 5
-  m_Name: DebugUI
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 0
---- !u!224 &1359912932
-RectTransform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1359912931}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 1939349958}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0.5, y: 0.5}
-  m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 100, y: 100}
-  m_Pivot: {x: 0.5, y: 0.5}
---- !u!114 &1359912933
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1359912931}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 19102, guid: 0000000000000000e000000000000000, type: 0}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  m_PanelSettings: {fileID: 11400000, guid: 066bf3ac8a5ef4228ab73b54ac5c7636, type: 2}
-  m_ParentUI: {fileID: 0}
-  sourceAsset: {fileID: 9197481963319205126, guid: 80f128a57f4f8df4686ec72a5f944c15,
-    type: 3}
-  m_SortingOrder: 50
 --- !u!1 &1371312186
 GameObject:
   m_ObjectHideFlags: 0
@@ -2206,7 +2153,6 @@ RectTransform:
   - {fileID: 1006044604}
   - {fileID: 985640669}
   - {fileID: 1267588321}
-  - {fileID: 1359912932}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
@@ -2258,14 +2204,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d162b2b9732f78347a5413eead607c99, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  addressMarkerTemplate: {fileID: 292355411060058802, guid: 87db09fb19325924b8263cc17e7306cd,
-    type: 3}
-  addressMarkerScale: 0
-  locationMarkerTemplate: {fileID: 4122667162209955305, guid: 03458b7caef582b4387ba5bd468061d2,
-    type: 3}
-  locationMarkerScale: 1
-  addressCardTemplate: {fileID: 8794308439353200324, guid: f732526b2a4912c43b3b6a5d0d19fc08,
-    type: 3}
 --- !u!1 &2103678088
 GameObject:
   m_ObjectHideFlags: 0
