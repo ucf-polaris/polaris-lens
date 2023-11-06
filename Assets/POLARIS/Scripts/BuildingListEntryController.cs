@@ -31,116 +31,18 @@ public class BuildingListEntryController
     private Geocoder geo;
     private UcfRouteManager _routeManager;
     private GameObject MenuUI;
-
-    private void OutputFunction(ClickEvent evt)
+    private void OnPanelClick(ClickEvent evt)
     {
-        //handle informational fields
-        extendedView.TitleText.text = locationData.BuildingName;
-        extendedView.AddressText.text = locationData.BuildingAddress;
-        extendedView.DescriptionText.text = string.IsNullOrEmpty(locationData.BuildingDesc) ? "None" : locationData.BuildingDesc;
-
-        //handle favorites
-        extendedView.FavoritesIcon.UnregisterCallback<ClickEvent>(OnFavoritesClick);
-        extendedView.FavoritesIcon.RegisterCallback<ClickEvent>(OnFavoritesClick);
-
-        if (userManager.isFavorite(locationData))
-        {
-            extendedView.FavoritesIcon.RemoveFromClassList("isNotFavorited");
-            extendedView.FavoritesIcon.AddToClassList("isFavorited");
-        }
-        else
-        {
-            extendedView.FavoritesIcon.RemoveFromClassList("isFavorited");
-            extendedView.FavoritesIcon.AddToClassList("isNotFavorited");
-        }
-
-        //handle visited
-        toggleVisited();
-
-        //handle navigation
-        extendedView.NavButton.UnregisterCallback<ClickEvent>(OnNavClick);
-        extendedView.NavButton.RegisterCallback<ClickEvent>(OnNavClick);
-
-        //handle events list
-        int len = locationData.BuildingEvents != null ? locationData.BuildingEvents.Length : 0;
-        extendedView.EventHeaderText.text = "Events (" + len + ")";
-        extendedView.EventList.Clear();
-
-        //if not null or empty, populate list
-        if(otherView != null && locationData.BuildingEvents != null && locationData.BuildingEvents.Length != 0)
-        {
-            var events = eventManager.dataList.Where(evt => locationData.BuildingEvents.Any(s => s.Equals(evt.EventID)));
-            foreach (var e in events)
-            {
-                Label label = new Label(e.Name);
-                label.AddToClassList("EventText");
-                label.RegisterCallback<ClickEvent, EventData>(OutputFunctionsForEvents, e);
-
-                extendedView.EventList.Add(label);
-            }
-        }
-        else
-        {
-            Label noneLabel = new Label("None");
-            noneLabel.AddToClassList("EventText");
-            extendedView.EventList.Add(noneLabel);
-        }
-
-        //extend location view, put down event view
-        extendedView.Extended = true;
-        otherView.Extended = false;
+        extendedView.ExtendMenu(locationData, true);
     }
-
-    private void toggleVisited()
-    {
-        if (locationData.IsVisited)
-        {
-            extendedView.VisitedIcon.RemoveFromClassList("notVisited");
-            extendedView.VisitedIcon.AddToClassList("Visited");
-        }
-        else
-        {
-            extendedView.VisitedIcon.RemoveFromClassList("Visited");
-            extendedView.VisitedIcon.AddToClassList("notVisited");
-        }
-    }
-
-    public void OutputFunctionsForEvents(ClickEvent evn, EventData evt)
-    {
-        //error checking
-        if (extendedView == null) return;
-
-        //set variables
-        otherView.DescriptionText.text = HtmlParser.RichParse(evt.Description);
-        otherView.image.style.backgroundImage = evt.rawImage;
-        otherView.LocationText.text = evt.ListedLocation;
-        otherView.StartDateText.text = evt.DateTime.ToString("f") + " to";
-        otherView.EndDateText.text = evt.EndsOn.ToString("f");
-        otherView.TitleText.text = evt.Name;
-        otherView.HostText.text = evt.Host;
-
-        otherView.ExtendedView.verticalScroller.value = otherView.ExtendedView.verticalScroller.lowValue;
-
-        otherView.Extended = true;
-    }
-
     private void OnFavoritesClick(ClickEvent evt)
     {
-        
         LocationData location = locationManager.GetFromName(NameLabel.text);
         //not favorite -> favorite
         if (!userManager.isFavorite(location))
         {
             FavoriteElement.RemoveFromClassList("isNotFavorited");
             FavoriteElement.AddToClassList("isFavorited");
-
-            //update extended view
-            if(extendedView.FavoritesIcon != null)
-            {
-                extendedView.FavoritesIcon.RemoveFromClassList("isNotFavorited");
-                extendedView.FavoritesIcon.AddToClassList("isFavorited");
-            }
-
             userManager.UpdateFavorites(true, location);
         }
         //favorite -> not favorite
@@ -148,13 +50,6 @@ public class BuildingListEntryController
         {
             FavoriteElement.RemoveFromClassList("isFavorited");
             FavoriteElement.AddToClassList("isNotFavorited");
-
-            if(extendedView.FavoritesIcon != null)
-            {
-                extendedView.FavoritesIcon.RemoveFromClassList("isFavorited");
-                extendedView.FavoritesIcon.AddToClassList("isNotFavorited");
-            }
-
             userManager.UpdateFavorites(false, location);
         }
         evt.StopPropagation();
@@ -167,8 +62,8 @@ public class BuildingListEntryController
         eventManager = EventManager.getInstance();
 
         PanelEntity = visualElement.Q<VisualElement>(className: "panelEntity");
-        PanelEntity.UnregisterCallback<ClickEvent>(OutputFunction);
-        PanelEntity.RegisterCallback<ClickEvent>(OutputFunction);
+        PanelEntity.UnregisterCallback<ClickEvent>(OnPanelClick);
+        PanelEntity.RegisterCallback<ClickEvent>(OnPanelClick);
 
         NameLabel = visualElement.Q<Label>(className: "panelTextLocation");
         DistanceLabel = visualElement.Q<Label>(className: "panelTextDistance");

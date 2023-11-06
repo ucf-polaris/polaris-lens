@@ -34,7 +34,7 @@ namespace POLARIS.MainScene {
         [SerializeField]
         VisualTreeAsset EventListEntryTemplate;
 
-        public ListController listController;
+        public static ListController listController;
         public eventExtendedView ExtendedEventView;
         public locationExtendedView ExtendedLocationView;
 
@@ -57,12 +57,14 @@ namespace POLARIS.MainScene {
             ExtendedEventView = new eventExtendedView(rootVisual.Q<VisualElement>("ExtendedEventView"));
             ExtendedLocationView = new locationExtendedView(rootVisual.Q<VisualElement>("ExtendedLocationView"));
 
+            ExtendedEventView.OtherView = ExtendedLocationView;
+            ExtendedLocationView.OtherView = ExtendedEventView;
+
             //passing back variables
             listController.Initialize(rootVisual, EventListEntryTemplate, LocationListEntryTemplate, ListController.SwitchType.locations);
             EventListEntryController.extendedView = ExtendedEventView;
             BuildingListEntryController.extendedView = ExtendedLocationView;
 
-            EventListEntryController.otherView = ExtendedLocationView;
             BuildingListEntryController.otherView = ExtendedEventView;
 
             //set up the search bar
@@ -307,6 +309,7 @@ namespace POLARIS.MainScene {
             ExtendedLocationView.Extended = false;
         }
     }
+    //----------------------------------EVENT EXTENDED VIEW----------------------------------
     [Serializable]
     public class eventExtendedView : extendedScrollView
     {
@@ -314,27 +317,64 @@ namespace POLARIS.MainScene {
         public Label StartDateText;
         public Label EndDateText;
         public Label HostText;
+        private EventData _eventData;
+        public locationExtendedView OtherView;
 
-        public eventExtendedView(VisualElement container)
+        public eventExtendedView(VisualElement container) : base(container)
         {
-            //ExtendScrollContainer
-            ExtendedContainerView = container;
-            ExtendedView = container.Q<ScrollView>("ExtendedScrollView");
-
-            DescriptionText = container.Q<Label>("DescriptionText");
             LocationText = container.Q<Label>("LocationText");
             StartDateText = container.Q<Label>("StartDateText");
             EndDateText = container.Q<Label>("EndDateText");
-            TitleText = container.Q<Label>("TitleText");
-            image = container.Q<VisualElement>("ImagePop");
-            NavButton = container.Q<Button>("NavButton");
-            
             HostText = container.Q<Label>("HostText");
 
             //back click button
             container.Q<VisualElement>("BackClick").RegisterCallback<ClickEvent>(OnBackClick);
         }
+        public void ExtendMenu(EventData evtData, bool closeOther)
+        {
+            _eventData = evtData;
+            OutputFunction(closeOther);
+        }
+        private void OutputFunction(bool closeOther)
+        {
+            //error checking
+            if(_eventData == null)
+            {
+                Debug.Log("EventData is NULL");
+                return;
+            }
+
+            //set variables
+            DescriptionText.text = HtmlParser.RichParse(_eventData.Description);
+            image.style.backgroundImage = _eventData.rawImage;
+            LocationText.text = _eventData.ListedLocation;
+            StartDateText.text = _eventData.DateTime.ToString("f") + " to";
+            EndDateText.text = _eventData.EndsOn.ToString("f");
+            TitleText.text = _eventData.Name;
+            HostText.text = _eventData.Host;
+
+            ExtendedView.verticalScroller.value = ExtendedView.verticalScroller.lowValue;
+
+            NavButton.UnregisterCallback<ClickEvent>(OnNavClick);
+            NavButton.RegisterCallback<ClickEvent>(OnNavClick);
+
+            Extended = true;
+            if(closeOther) OtherView.Extended = false;
+        }
+
+        private void OnNavClick(ClickEvent evt)
+        {
+            _routeManager.RouteToEvent(_eventData);
+            Extended = false;
+            OtherView.Extended = false;
+            if (MenuUI != null)
+            {
+                var tabImage = MenuUI.GetComponent<ChangeTabImage>();
+                tabImage.CollapseMenu(null);
+            }
+        }
     }
+    //----------------------------------LOCATION EXTENDED VIEW----------------------------------
     [Serializable]
     public class locationExtendedView : extendedScrollView
     {
@@ -343,28 +383,151 @@ namespace POLARIS.MainScene {
         public Label EventHeaderText;
         public VisualElement FavoritesIcon;
         public VisualElement VisitedIcon;
+        private LocationData locationData;
+        private UserManager userManager;
+        private EventManager eventManager;
+        private LocationManager locationManager;
+        private Geocoder geo;
+        public eventExtendedView OtherView;
 
-        public locationExtendedView(VisualElement container)
+        public locationExtendedView(VisualElement container) : base(container)
         {
-            //ExtendScrollContainer
-            ExtendedContainerView = container;
-            ExtendedView = container.Q<ScrollView>("ExtendedScrollView");
             EventList = container.Q<VisualElement>("EventList");
             EventHeaderText = container.Q<Label>("EventsLabel");
             AddressText = container.Q<Label>("AddressText");
-            DescriptionText = container.Q<Label>("DescriptionText");
-
-            image = container.Q<VisualElement>("ImagePop");
+            
             VisitedIcon = container.Q<VisualElement>("VisitedIcon");
             FavoritesIcon = container.Q<VisualElement>("FavoriteIcon");
-            TitleText = container.Q<Label>("TitleText");
-            NavButton = container.Q<Button>("NavButton");
+            eventManager = EventManager.getInstance();
+            userManager = UserManager.getInstance();
+            locationManager = LocationManager.getInstance();
 
-            //back click button
-            container.Q<VisualElement>("BackClick").RegisterCallback<ClickEvent>(OnBackClick);
+            if (Camera.main != null)
+            {
+                geo = Camera.main.transform.parent.gameObject
+                    .GetComponentInChildren<Geocoder>();
+            }
+        }
+        public void ExtendMenu(LocationData locData, bool closeOther)
+        {
+            locationData = locData;
+            OutputFunction(closeOther);
+        }
+        private void OutputFunction(bool closeOther)
+        {
+            //handle informational fields
+            TitleText.text = locationData.BuildingName;
+            AddressText.text = locationData.BuildingAddress;
+            DescriptionText.text = string.IsNullOrEmpty(locationData.BuildingDesc) ? "None" : locationData.BuildingDesc;
+
+            //handle favorites
+            FavoritesIcon.UnregisterCallback<ClickEvent>(OnFavoritesClick);
+            FavoritesIcon.RegisterCallback<ClickEvent>(OnFavoritesClick);
+
+            if (userManager.isFavorite(locationData))
+            {
+                FavoritesIcon.RemoveFromClassList("isNotFavorited");
+                FavoritesIcon.AddToClassList("isFavorited");
+            }
+            else
+            {
+                FavoritesIcon.RemoveFromClassList("isFavorited");
+                FavoritesIcon.AddToClassList("isNotFavorited");
+            }
+
+            //handle visited
+            toggleVisited();
+
+            //handle navigation
+            NavButton.UnregisterCallback<ClickEvent>(OnNavClick);
+            NavButton.RegisterCallback<ClickEvent>(OnNavClick);
+
+            //handle events list
+            int len = locationData.BuildingEvents != null ? locationData.BuildingEvents.Length : 0;
+            EventHeaderText.text = "Events (" + len + ")";
+            EventList.Clear();
+
+            //if not null or empty, populate list
+            if (OtherView != null && locationData.BuildingEvents != null && locationData.BuildingEvents.Length != 0)
+            {
+                //location Manager datalist
+                var events = eventManager.dataList.Where(evt => locationData.BuildingEvents.Any(s => s.Equals(evt.EventID)));
+                foreach (var e in events)
+                {
+                    Label label = new Label(e.Name);
+                    label.AddToClassList("EventText");
+                    label.RegisterCallback<ClickEvent, EventData>(OpenOtherView, e);
+
+                    EventList.Add(label);
+                }
+            }
+            else
+            {
+                Label noneLabel = new Label("None");
+                noneLabel.AddToClassList("EventText");
+                EventList.Add(noneLabel);
+            }
+
+            //extend location view, put down event view
+            Extended = true;
+            if(closeOther) OtherView.Extended = false;
+        }
+
+        private void OnFavoritesClick(ClickEvent evt)
+        {
+            LocationData location = locationManager.GetFromName(TitleText.text);
+            //not favorite -> favorite
+            if (!userManager.isFavorite(location))
+            {
+                FavoritesIcon.RemoveFromClassList("isNotFavorited");
+                FavoritesIcon.AddToClassList("isFavorited");
+                userManager.UpdateFavorites(true, location);
+            }
+            //favorite -> not favorite
+            else
+            {
+                FavoritesIcon.RemoveFromClassList("isFavorited");
+                FavoritesIcon.AddToClassList("isNotFavorited");
+                userManager.UpdateFavorites(false, location);
+            }
+            MenUI_Panels.listController.EntryList.Rebuild();
+        }
+
+        private void toggleVisited()
+        {
+            if (locationData.IsVisited)
+            {
+                VisitedIcon.RemoveFromClassList("notVisited");
+                VisitedIcon.AddToClassList("Visited");
+            }
+            else
+            {
+                VisitedIcon.RemoveFromClassList("Visited");
+                VisitedIcon.AddToClassList("notVisited");
+            }
+        }
+
+        private void OnNavClick(ClickEvent evt)
+        {
+            geo.MoveCameraToCoordinates(locationData.BuildingLong, locationData.BuildingLat);
+            _routeManager.RouteToLocation(locationData);
+            Extended = false;
+            OtherView.Extended = false;
+
+            if (MenuUI != null)
+            {
+                var tabImage = MenuUI.GetComponent<ChangeTabImage>();
+                tabImage.CollapseMenu(null);
+            }
+            evt.StopPropagation();
+        }
+
+        private void OpenOtherView(ClickEvent evt, EventData ev)
+        {
+            OtherView.ExtendMenu(ev, false);
         }
     }
-    
+    //----------------------------------BASE EXTENDED VIEW----------------------------------
     [Serializable]
     public class extendedScrollView
     {
@@ -375,6 +538,29 @@ namespace POLARIS.MainScene {
         public Label TitleText;
         private bool extended;
         public Button NavButton;
+        protected UcfRouteManager _routeManager;
+        protected GameObject MenuUI;
+
+        public extendedScrollView(VisualElement container)
+        {
+            ExtendedContainerView = container;
+            ExtendedView = container.Q<ScrollView>("ExtendedScrollView");
+            image = container.Q<VisualElement>("ImagePop");
+            DescriptionText = container.Q<Label>("DescriptionText");
+            TitleText = container.Q<Label>("TitleText");
+            NavButton = container.Q<Button>("NavButton");
+
+            //back click button
+            container.Q<VisualElement>("BackClick").RegisterCallback<ClickEvent>(OnBackClick);
+
+            if (Camera.main != null)
+            {
+                _routeManager = Camera.main.transform.parent.gameObject
+                                      .GetComponentInChildren<UcfRouteManager>();
+            }
+
+            MenuUI = GameObject.Find("MenuUI");
+        }
 
         //also close when... (Events)
         //1. Search something new

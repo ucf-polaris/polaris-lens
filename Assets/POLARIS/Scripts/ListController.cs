@@ -149,7 +149,6 @@ public class ListController
 
         sw = SwitchType.events;
     }
-
     private void OnScreenTouch(PointerDownEvent evt)
     {
         GetScrollView().scrollDecelerationRate = scrollDeceleration;

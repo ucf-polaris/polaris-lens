@@ -29,7 +29,7 @@ namespace POLARIS.MainScene
         
         private ArcGISMapComponent _arcGisMapComponent;
         private LocationManager locationManager;
-
+        private MenUI_Panels menUI;
 
         private void Start()
         {
@@ -37,6 +37,7 @@ namespace POLARIS.MainScene
             _mainCamera = Camera.main;
             _uiDocLabel = gameObject.GetComponent<UIDocument>().rootVisualElement.Q<Label>("BuildingTopLabel");
             _arcGisMapComponent = FindObjectOfType<ArcGISMapComponent>();
+            menUI = GameObject.Find("MenuUI").GetComponent<MenUI_Panels>();
         }
         
         private void Update()
