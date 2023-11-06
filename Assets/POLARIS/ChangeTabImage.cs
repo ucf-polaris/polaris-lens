@@ -67,7 +67,7 @@ public class ChangeTabImage : MonoBehaviour
 	    justRaised = !_menuOpen;
 	    _menuOpen = !_menuOpen;
 	    _spacer.style.height = Length.Percent(_menuOpen ?  15 : 82.5f);
-	    _arrow.style.rotate = new Rotate(_menuOpen ? 90 : 270);
+	    _arrow.style.rotate = new Rotate(_menuOpen ? 180 : 0);
 		panelFuncts.CollapseBothExtendedViews();
 		panelFuncts.ReturnGoToTop();
 	}
@@ -79,7 +79,7 @@ public class ChangeTabImage : MonoBehaviour
 	    _lastPressed = pressed;
 
 	    _spacer.style.height = Length.Percent(_menuOpen ?  15 : 82.5f);
-	    _arrow.style.rotate = new Rotate(_menuOpen ? 90 : 270);
+	    _arrow.style.rotate = new Rotate(_menuOpen ? 180 : 0);
 		panelFuncts.CollapseBothExtendedViews();
 		panelFuncts.ReturnGoToTop();
 	}
@@ -89,7 +89,7 @@ public class ChangeTabImage : MonoBehaviour
 	    justRaised = true;
 	    _menuOpen = true;
 	    _spacer.style.height = Length.Percent(15);
-	    _arrow.style.rotate = new Rotate(90);
+	    _arrow.style.rotate = new Rotate(180);
 	}
 
 	public void CollapseMenu(FocusEvent e)
@@ -97,7 +97,7 @@ public class ChangeTabImage : MonoBehaviour
 		justRaised = false;
 		_menuOpen = false;
 		_spacer.style.height = Length.Percent(82.5f);
-		_arrow.style.rotate = new Rotate(270);
+		_arrow.style.rotate = new Rotate(0);
 		panelFuncts.CollapseBothExtendedViews();
 		panelFuncts.ReturnGoToTop();
 	}
