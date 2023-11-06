@@ -1,4 +1,3 @@
-using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -19,7 +18,7 @@ namespace POLARIS.GeospatialScene
         public GameObject RouteInfo;
         
         private readonly List<GameObject> _pathAnchorObjects = new();
-        private LineRenderer _lineRenderer;
+        // private LineRenderer _lineRenderer;
         private ArrowPoint _arrow;
 
         private bool _lastRouting = false;
@@ -33,15 +32,15 @@ namespace POLARIS.GeospatialScene
 
         private void Start()
         {
-            _lineRenderer = gameObject.AddComponent<LineRenderer>();
-            _lineRenderer.enabled = false;
-            _lineRenderer.material = new Material(Shader.Find("Sprites/Default"));
-            _lineRenderer.widthMultiplier = 0.2f;
-            _lineRenderer.startColor = Color.blue;
-            _lineRenderer.endColor = Color.cyan;
-            _lineRenderer.positionCount = 0;
-            _lineRenderer.numCapVertices = 6;
-            _lineRenderer.numCornerVertices = 6;
+            // _lineRenderer = gameObject.AddComponent<LineRenderer>();
+            // _lineRenderer.enabled = false;
+            // _lineRenderer.material = new Material(Shader.Find("Sprites/Default"));
+            // _lineRenderer.widthMultiplier = 0.2f;
+            // _lineRenderer.startColor = Color.blue;
+            // _lineRenderer.endColor = Color.cyan;
+            // _lineRenderer.positionCount = 0;
+            // _lineRenderer.numCapVertices = 6;
+            // _lineRenderer.numCornerVertices = 6;
             
             PathPrefab = Resources.Load("Polaris/RaisedArrow") as GameObject;
             
@@ -65,13 +64,19 @@ namespace POLARIS.GeospatialScene
         // Update is called once per frame
         private void Update()
         {
+            if (PersistData.Routing != _lastRouting)
+            {
+                _lastRouting = PersistData.Routing;
+                StartCoroutine(ToggleRouting(PersistData.Routing));
+            }
+            
             if (!PersistData.Routing || _pathAnchorObjects.Count < 2) return;
             
             // Disable past route points
             var closest = GetClosestPathPoint();
                 
-            _lineRenderer.positionCount = _pathAnchorObjects.Count - closest;
-            _lineRenderer.SetPositions(_pathAnchorObjects.Skip(closest).Select(anchor => anchor.transform.position).ToArray());
+            // _lineRenderer.positionCount = _pathAnchorObjects.Count - closest;
+            // _lineRenderer.SetPositions(_pathAnchorObjects.Skip(closest).Select(anchor => anchor.transform.position).ToArray());
 
             for (var i = 0; i < _pathAnchorObjects.Count; i++)
             {
@@ -92,12 +97,6 @@ namespace POLARIS.GeospatialScene
                 _pathAnchorObjects.Select(anchor => anchor.transform.position).ToArray(), closest);
             
             UpdateRouteInfo(percentage);
-            
-            if (PersistData.Routing != _lastRouting)
-            {
-                _lastRouting = PersistData.Routing;
-                StartCoroutine(ToggleRouting(PersistData.Routing));
-            }
         }
 
         public void ClearPath(List<GameObject> anchorObjects)
@@ -107,8 +106,8 @@ namespace POLARIS.GeospatialScene
                 anchorObjects.Remove(anchor);
             }
             _pathAnchorObjects.Clear();
-            _lineRenderer.positionCount = 0;
-            _lineRenderer.enabled = false;
+            // _lineRenderer.positionCount = 0;
+            // _lineRenderer.enabled = false;
             _arrow.SetEnabled(false);
         }
 
@@ -122,12 +121,19 @@ namespace POLARIS.GeospatialScene
                 PlacePathGeospatialAnchor(point, anchorObjects, anchorManager);
             }
 
-            _lineRenderer.positionCount = PersistData.PathPoints.Count;
-            _lineRenderer.enabled = PersistData.Routing;
+            // _lineRenderer.positionCount = PersistData.PathPoints.Count;
+            // _lineRenderer.enabled = PersistData.Routing;
             _arrow.SetEnabled(PersistData.Routing);
             
             _routingSrcLabel.text = PersistData.SrcName;
             _routingDestLabel.text = PersistData.DestName;
+            _routingInfoLabel.text = $"Routing - {PersistData.TravelMinutes:0} min. ({PersistData.TravelMiles:0.0} mi.)";
+
+            if (PersistData.Routing)
+            {
+                _lastRouting = PersistData.Routing;
+                StartCoroutine(ToggleRouting(PersistData.Routing));
+            }
         }
 
         private ARGeospatialAnchor PlacePathGeospatialAnchor(

@@ -27,7 +27,8 @@ public class BuildingListEntryController
     //since it's all the same extended view, don't keep cloning a reference to the same extended view
     public static locationExtendedView extendedView;
     public static eventExtendedView otherView;
-
+    
+    private Geocoder geo;
     private UcfRouteManager _routeManager;
     private GameObject MenuUI;
 
@@ -62,7 +63,7 @@ public class BuildingListEntryController
 
         //handle events list
         int len = locationData.BuildingEvents != null ? locationData.BuildingEvents.Length : 0;
-        extendedView.EventHeaderText.text = "Events (" + len.ToString() + ")";
+        extendedView.EventHeaderText.text = "Events (" + len + ")";
         extendedView.EventList.Clear();
 
         //if not null or empty, populate list
@@ -188,6 +189,8 @@ public class BuildingListEntryController
         {
             _routeManager = Camera.main.transform.parent.gameObject
                                   .GetComponentInChildren<UcfRouteManager>();
+            geo = Camera.main.transform.parent.gameObject
+                .GetComponentInChildren<Geocoder>();
         }
 
         MenuUI = GameObject.Find("MenuUI");
@@ -249,6 +252,7 @@ public class BuildingListEntryController
 
     private void OnNavClick(ClickEvent evt)
     {
+        geo.MoveCameraToCoordinates(locationData.BuildingLong, locationData.BuildingLat);
         _routeManager.RouteToLocation(locationData);
         extendedView.Extended = false;
         otherView.Extended = false;

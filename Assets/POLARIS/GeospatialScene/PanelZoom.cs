@@ -8,6 +8,7 @@ namespace POLARIS.GeospatialScene
     public class PanelZoom : MonoBehaviour, IPointerDownHandler
     {
         public TextPanel Panel;
+        public DisplayPanel Display;
         public bool TouchedPanel;
 
         private GameObject _arCamera;
@@ -40,7 +41,8 @@ namespace POLARIS.GeospatialScene
                 return;
             };
             if (TouchedPanel) return;
-            
+
+            Display.ManuallyZoomed = false;
             DisableZoom();
         }
 
@@ -50,10 +52,11 @@ namespace POLARIS.GeospatialScene
 
             if (_faceCamera.Zoomed) return;
 
+            Display.ManuallyZoomed = true;
             EnableZoom();
         }
 
-        private void EnableZoom()
+        public void EnableZoom()
         {
             // Disable other zooms
             try

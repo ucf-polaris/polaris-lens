@@ -17,7 +17,8 @@ public class EventsButton : MonoBehaviour, IPointerDownHandler
         _panelZoom = transform.parent.GetComponent<PanelZoom>();
         _panel = _panelZoom.Panel;
 
-        if (_panel.Content.Location.BuildingEvents.Length == 0)
+        if (_panel.Content.Location.BuildingEvents == null 
+            || _panel.Content.Location.BuildingEvents.Length < 1)
         {
             _hasEvents = false;
             _spriteRenderer.color = new Color(100/256f, 100/256f, 100/256f);

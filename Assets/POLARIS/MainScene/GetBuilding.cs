@@ -66,28 +66,25 @@ namespace POLARIS.MainScene
                     _lastTapTime = 0;
                     // UnsetLastBuildingColor();
 
-                    var buildingName = ToTitleCase(locationName[4..]);
-                    _uiDocLabel.text = $"{buildingName}";
-                    var closestBuilding = GetClosestBuilding(buildingName);
-                    if (closestBuilding != null) Debug.Log(
-                        $"Name: {closestBuilding.BuildingName ?? ""}\n" +
-                        $"Aliases: {((closestBuilding.BuildingAllias != null) ? string.Join(", ", closestBuilding.BuildingAllias) : "")}\n" +
-                        $"Abbreviations: {((closestBuilding.BuildingAbbreviation != null) ? string.Join(", ", closestBuilding.BuildingAbbreviation) : "")}\n" +
-                        $"Description: {closestBuilding.BuildingDesc ?? ""}\n" +
-                        $"Longitude: {closestBuilding.BuildingLong}\n" +
-                        $"Latitude: {closestBuilding.BuildingLat}\n" +
-                        $"Address: {closestBuilding.BuildingAddress ?? ""}\n" +
-                        $"Events: {((closestBuilding.BuildingEvents != null) ? string.Join(", ", closestBuilding.BuildingEvents) : "")}\n");
-
-                    UpdateBuildingColor(hit.transform.gameObject, BuildingSelect);
-                    StartCoroutine(ToggleLabelHeight());
-                }
-                else
-                {
-                    _lastTapTime = Time.time;
-                }
+                var buildingName = ToTitleCase(locationName[4..]);
+                _uiDocLabel.text = $"{buildingName}";
+                var closestBuilding = GetClosestBuilding(buildingName);
+                if (closestBuilding != null) Debug.Log(
+                    $"Name: {closestBuilding.BuildingName ?? ""}\n" +
+                    $"Aliases: {((closestBuilding.BuildingAllias != null) ? string.Join(", ", closestBuilding.BuildingAllias) : "")}\n" +
+                    $"Abbreviations: {((closestBuilding.BuildingAbbreviation != null) ? string.Join(", ", closestBuilding.BuildingAbbreviation) : "")}\n" +
+                    $"Description: {closestBuilding.BuildingDesc ?? ""}\n" +
+                    $"Longitude: {closestBuilding.BuildingLong}\n" +
+                    $"Latitude: {closestBuilding.BuildingLat}\n" +
+                    $"Address: {closestBuilding.BuildingAddress ?? ""}\n" +
+                    $"Events: {((closestBuilding.BuildingEvents != null) ? string.Join(", ", closestBuilding.BuildingEvents) : "")}\n");
+                            
+                UpdateBuildingColor(hit.transform.gameObject, BuildingSelect);
             }
-            
+            else
+            {
+                _lastTapTime = Time.time;
+            }
         }
 
         private RaycastHit MapRaycast(Touch touch)
@@ -105,15 +102,6 @@ namespace POLARIS.MainScene
             UnsetLastBuildingColor();
 
             return hit;
-        }
-
-        private IEnumerator ToggleLabelHeight()
-        {
-            _uiDocLabel.ToggleInClassList("RaisedLabel");
-            _uiDocLabel.ToggleInClassList("BuildingTopLabel");
-            yield return new WaitForSeconds(2.0f);
-            _uiDocLabel.ToggleInClassList("RaisedLabel");
-            _uiDocLabel.ToggleInClassList("BuildingTopLabel");
         }
 
         private void UpdateBuildingColor(GameObject buildingPart, Color color)

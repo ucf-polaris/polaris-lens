@@ -17,6 +17,7 @@ namespace POLARIS.GeospatialScene
         private LocationManager locationManager;
         public Camera Camera;
         public ARAnchorManager AnchorManager;
+        private DisplayPanel _display;
         
         private readonly List<TextPanel> _panels;
         
@@ -28,10 +29,13 @@ namespace POLARIS.GeospatialScene
 
         //public IDictionary<string, float> panel_Test = new Dictionary<string, float>();
         //public List<LocationData> location_test = new List<LocationData>();
+        
         void Start()
         {
+            _display = GetComponent<DisplayPanel>();
             locationManager = LocationManager.getInstance();
         }
+        
         public PanelManager()
         {
             _loadLocation = new double2(0, 0);
@@ -39,6 +43,11 @@ namespace POLARIS.GeospatialScene
             _panels = new List<TextPanel>();
         }
 
+        public List<TextPanel> GetPanels()
+        {
+            return _panels;
+        }
+        
         public List<GeospatialAnchorContent> FetchNearbyIfNeeded(double2 currentLocation, List<GameObject> anchorObjects)
         {
             // Wait at least 5 seconds
@@ -64,7 +73,12 @@ namespace POLARIS.GeospatialScene
             if (Camera.gameObject.GetNamedChild("Panel")) return null;
 
             var panel = AnchorManager.AddComponent<TextPanel>();
-            panel.Instantiate(new GeospatialAnchorContent(new LocationData(), "WHY HELLO THERE <style=Description>third panel <color=green>hello</color></style>", history));
+            panel.Instantiate(
+                new GeospatialAnchorContent(
+                    new LocationData(), 
+                    "WHY HELLO THERE <style=Description>third panel <color=green>hello</color></style>",
+                    history), 
+                _display);
             var anchor = panel.PlacePanelGeospatialAnchor(anchorObjects, AnchorManager);
             _panels.Add(panel);
 
@@ -138,7 +152,7 @@ namespace POLARIS.GeospatialScene
             foreach (var newPanel in addPanels)
             {
                 var panel = AnchorManager.AddComponent<TextPanel>();
-                panel.Instantiate(contentList[newPanel]);
+                panel.Instantiate(contentList[newPanel], _display);
                 panel.PlacePanelGeospatialAnchor(anchorObjects, AnchorManager);
                 _panels.Add(panel);
             }
@@ -187,7 +201,7 @@ namespace POLARIS.GeospatialScene
             // .Where(data => data.BuildingEvents?.Length > 0).ToList();
         }
         
-        private static double DistanceInKmBetweenEarthCoordinates(double2 pointA, double2 pointB) {
+        public static double DistanceInKmBetweenEarthCoordinates(double2 pointA, double2 pointB) {
             const int earthRadiusKm = 6371;
 
             var distLat = DegreesToRadians(pointB.x - pointA.x);

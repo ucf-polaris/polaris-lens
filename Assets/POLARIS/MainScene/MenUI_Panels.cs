@@ -10,7 +10,6 @@ using POLARIS.Managers;
 namespace POLARIS.MainScene {
     public class MenUI_Panels : MonoBehaviour
     {
-        public Geocoder geo;
 
         //misc. variables
         private string currentTab;
@@ -145,9 +144,7 @@ namespace POLARIS.MainScene {
         // Update is called once per frame
         private void Update()
         {
-            // Can move around map at top on event/location list view, but not when clicking on specific event
-            // Tried doing same thing for ExtendedScrollView, but didn't work :(
-            userOnListView = listController.EntryList.panel.focusController.focusedElement == listController.EntryList || ExtendedEventView.Extended || ExtendedLocationView.Extended;
+            userOnListView = ChangeTabImage._menuOpen || ExtendedEventView.Extended || ExtendedLocationView.Extended;
             
             if (ChangeTabImage.justRaised)
             {
