@@ -48,41 +48,46 @@ namespace POLARIS.MainScene
             if (touch.phase != TouchPhase.Began) return;
 
             var hit = MapRaycast(touch);
-            var locationName = hit.transform.name;
-            print("My object is clicked by mouse " + locationName);
-
-            if (string.IsNullOrWhiteSpace(locationName) ||
-                locationName.StartsWith("ArcGISGameObject_") ||
-                locationName.Length <= 4)
+            if(hit.transform != null)
             {
-                return;
-            }
+                var locationName = hit.transform.name;
 
-            if (Time.time - _lastTapTime <= DoubleTapThreshold)
-            {
-                _lastTapTime = 0;
-                // UnsetLastBuildingColor();
+                print("My object is clicked by mouse " + locationName);
 
-                var buildingName = ToTitleCase(locationName[4..]);
-                _uiDocLabel.text = $"{buildingName}";
-                var closestBuilding = GetClosestBuilding(buildingName);
-                if (closestBuilding != null) Debug.Log(
-                    $"Name: {closestBuilding.BuildingName ?? ""}\n" +
-                    $"Aliases: {((closestBuilding.BuildingAllias != null) ? string.Join(", ", closestBuilding.BuildingAllias) : "")}\n" +
-                    $"Abbreviations: {((closestBuilding.BuildingAbbreviation != null) ? string.Join(", ", closestBuilding.BuildingAbbreviation) : "")}\n" +
-                    $"Description: {closestBuilding.BuildingDesc ?? ""}\n" +
-                    $"Longitude: {closestBuilding.BuildingLong}\n" +
-                    $"Latitude: {closestBuilding.BuildingLat}\n" +
-                    $"Address: {closestBuilding.BuildingAddress ?? ""}\n" +
-                    $"Events: {((closestBuilding.BuildingEvents != null) ? string.Join(", ", closestBuilding.BuildingEvents) : "")}\n");
-                            
-                UpdateBuildingColor(hit.transform.gameObject, BuildingSelect);
-                StartCoroutine(ToggleLabelHeight());
+                if (string.IsNullOrWhiteSpace(locationName) ||
+                    locationName.StartsWith("ArcGISGameObject_") ||
+                    locationName.Length <= 4)
+                {
+                    return;
+                }
+
+                if (Time.time - _lastTapTime <= DoubleTapThreshold)
+                {
+                    _lastTapTime = 0;
+                    // UnsetLastBuildingColor();
+
+                    var buildingName = ToTitleCase(locationName[4..]);
+                    _uiDocLabel.text = $"{buildingName}";
+                    var closestBuilding = GetClosestBuilding(buildingName);
+                    if (closestBuilding != null) Debug.Log(
+                        $"Name: {closestBuilding.BuildingName ?? ""}\n" +
+                        $"Aliases: {((closestBuilding.BuildingAllias != null) ? string.Join(", ", closestBuilding.BuildingAllias) : "")}\n" +
+                        $"Abbreviations: {((closestBuilding.BuildingAbbreviation != null) ? string.Join(", ", closestBuilding.BuildingAbbreviation) : "")}\n" +
+                        $"Description: {closestBuilding.BuildingDesc ?? ""}\n" +
+                        $"Longitude: {closestBuilding.BuildingLong}\n" +
+                        $"Latitude: {closestBuilding.BuildingLat}\n" +
+                        $"Address: {closestBuilding.BuildingAddress ?? ""}\n" +
+                        $"Events: {((closestBuilding.BuildingEvents != null) ? string.Join(", ", closestBuilding.BuildingEvents) : "")}\n");
+
+                    UpdateBuildingColor(hit.transform.gameObject, BuildingSelect);
+                    StartCoroutine(ToggleLabelHeight());
+                }
+                else
+                {
+                    _lastTapTime = Time.time;
+                }
             }
-            else
-            {
-                _lastTapTime = Time.time;
-            }
+            
         }
 
         private RaycastHit MapRaycast(Touch touch)
