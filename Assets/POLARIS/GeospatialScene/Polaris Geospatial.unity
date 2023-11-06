@@ -383,7 +383,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!114 &158542447
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -731,7 +731,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   Camera: {fileID: 1451910691}
   AnchorManager: {fileID: 691323916}
-  location_test: []
 --- !u!1 &384014290
 GameObject:
   m_ObjectHideFlags: 0

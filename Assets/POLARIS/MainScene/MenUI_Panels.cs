@@ -317,8 +317,6 @@ namespace POLARIS.MainScene {
         public Label StartDateText;
         public Label EndDateText;
         public Label HostText;
-        public Button NavButton;
-
 
         public eventExtendedView(VisualElement container)
         {
@@ -363,6 +361,7 @@ namespace POLARIS.MainScene {
             VisitedIcon = container.Q<VisualElement>("VisitedIcon");
             FavoritesIcon = container.Q<VisualElement>("FavoriteIcon");
             TitleText = container.Q<Label>("TitleText");
+            NavButton = container.Q<Button>("NavButton");
 
             //back click button
             container.Q<VisualElement>("BackClick").RegisterCallback<ClickEvent>(OnBackClick);
@@ -378,6 +377,7 @@ namespace POLARIS.MainScene {
         public VisualElement image;
         public Label TitleText;
         private bool extended;
+        public Button NavButton;
 
         //also close when... (Events)
         //1. Search something new

@@ -26,8 +26,8 @@ namespace POLARIS.GeospatialScene
         private const float LoadDistance = 1.5f; // km
         private const float RenderDistance = 200f; // m
 
-        public IDictionary<string, float> panel_Test = new Dictionary<string, float>();
-        public List<LocationData> location_test = new List<LocationData>();
+        //public IDictionary<string, float> panel_Test = new Dictionary<string, float>();
+        //public List<LocationData> location_test = new List<LocationData>();
         void Start()
         {
             locationManager = LocationManager.getInstance();
@@ -80,7 +80,7 @@ namespace POLARIS.GeospatialScene
         {
             // Fetch from internal DB
             var locations = GetLocationsWithinRadius(currentLocation, LoadDistance);
-            location_test = locations.ToList<LocationData>();
+            //location_test = locations.ToList<LocationData>();
 
             var contentList = locations.Select(location => 
                                                    new GeospatialAnchorContent(
@@ -148,7 +148,7 @@ namespace POLARIS.GeospatialScene
 
         public void LoadNearby()
         {
-            panel_Test.Clear();
+            //panel_Test.Clear();
             foreach (var panel in _panels)
             {
                 if (panel.CurrentPrefab == null) continue;
@@ -156,7 +156,7 @@ namespace POLARIS.GeospatialScene
                 var withinThresh =
                     Vector3.Distance(panel.CurrentPrefab.transform.position, Camera.transform.position) <
                     RenderDistance;
-                panel_Test.Add(panel.Content.Location.BuildingName, Vector3.Distance(panel.CurrentPrefab.transform.position, Camera.transform.position));
+                //panel_Test.Add(panel.Content.Location.BuildingName, Vector3.Distance(panel.CurrentPrefab.transform.position, Camera.transform.position));
 
                 switch (panel.Loaded)
                 {

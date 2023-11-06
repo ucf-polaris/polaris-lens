@@ -1,6 +1,6 @@
 <ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" xsi="http://www.w3.org/2001/XMLSchema-instance" engine="UnityEngine.UIElements" editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
     <Style src="project://database/Assets/POLARIS/UI%20Assets/EntryStyles.uss?fileID=7433441132597879392&amp;guid=629c839b3d5f78642bc3d93c6d881c59&amp;type=3#EntryStyles" />
-    <ui:VisualElement class="panelEntity" style="flex-grow: 0; position: relative;">
+    <ui:VisualElement picking-mode="Ignore" class="panelEntity" style="flex-grow: 0; position: relative;">
         <Shadow class="panelShadow" />
         <ui:VisualElement class="panel" style="flex-grow: 1;">
             <ui:VisualElement class="panelImage" style="flex-grow: 1;" />
@@ -13,7 +13,9 @@
                 </ui:VisualElement>
                 <ui:Label tabindex="-1" text="Label" parse-escape-sequences="true" display-tooltip-when-elided="true" class="panelTextEvents" />
             </ui:VisualElement>
-            <ui:VisualElement class="panelNavigationIcon" style="flex-grow: 1;" />
+            <ui:Button parse-escape-sequences="true" display-tooltip-when-elided="true" name="navigationButton" picking-mode="Ignore" style="position: absolute; top: 86%; left: 87%; width: 7%; height: 9%; background-color: rgb(149, 149, 149);">
+                <ui:VisualElement style="flex-grow: 1; background-image: url(&apos;project://database/Assets/UI%20Toolkit/UnityThemes/UnityDefaultRuntimeTheme.tss?fileID=8300712400058098730&amp;guid=822ceb35a710d9b4bb5d07a9e09d4681&amp;type=3#dropdown-arrow@2x&apos;); rotate: 270deg; -unity-background-image-tint-color: rgb(255, 255, 255);" />
+            </ui:Button>
             <ui:VisualElement tabindex="1" class="panelFavoritesIcon isNotFavorited" style="flex-grow: 1;" />
         </ui:VisualElement>
     </ui:VisualElement>

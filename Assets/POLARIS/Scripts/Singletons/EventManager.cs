@@ -223,7 +223,7 @@ namespace POLARIS.Managers
             else
             {
                 rawImage = ((DownloadHandlerTexture)request.downloadHandler).texture;
-                Debug.Log(name + " successfully downloaded");
+                //Debug.Log(name + " successfully downloaded");
             }
                 
         }

@@ -521,6 +521,35 @@ namespace POLARIS
             }
         }
 
+        public void RouteToLocation(LocationData locationData)
+        {
+            LocationData location = locationData;
+
+            ClearRoute(true);
+
+            var buildingName = location?.BuildingName ??
+                               $"{location.BuildingLat:00.00000}, {location.BuildingLong:00.00000}";
+            var geoPosition = new ArcGISPoint(location.BuildingLong,
+                                              location.BuildingLat,
+                                              0f,
+                                              new ArcGISSpatialReference(4326));
+            var worldPosition =
+                _root.TransformPoint(_arcGisMapComponent.View.GeographicToWorld(geoPosition)).ToVector3();
+            PlaceMarker(worldPosition, buildingName, true);
+
+            // TODO: MAKE IT SO CLICKING THE "CHOOSE STARTING POINT MENU" SELECTS USER CURRENT LOCATION
+            if (GetUserCurrentLocation.displayLocation)
+            {
+                var curPosition = new ArcGISPoint(GetUserCurrentLocation._longitude,
+                    GetUserCurrentLocation._latitude,
+                    0f,
+                    new ArcGISSpatialReference(4326));
+                var curWorldPosition =
+                    _root.TransformPoint(_arcGisMapComponent.View.GeographicToWorld(curPosition)).ToVector3();
+                PlaceMarker(curWorldPosition, "My Location", true);
+            }
+        }
+
         private void ToggleSlide()
         {
             _closed = !_closed;

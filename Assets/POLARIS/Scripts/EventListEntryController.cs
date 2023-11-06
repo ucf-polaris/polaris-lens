@@ -36,7 +36,8 @@ public class EventListEntryController : ListEntryController
         extendedView.HostText.text = _eventData.Host;
 
         extendedView.ExtendedView.verticalScroller.value = extendedView.ExtendedView.verticalScroller.lowValue;
-        
+
+        extendedView.NavButton.clickable.clicked -= OnNavClick;
         extendedView.NavButton.clickable.clicked += OnNavClick;
 
         extendedView.Extended = true;

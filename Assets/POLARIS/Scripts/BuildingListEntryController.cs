@@ -7,6 +7,7 @@ using POLARIS.MainScene;
 using POLARIS.Managers;
 using Unity.Mathematics;
 using System.Linq;
+using POLARIS;
 
 public class BuildingListEntryController
 {
@@ -16,7 +17,7 @@ public class BuildingListEntryController
     Label EventLabel;
     public VisualElement image;
     VisualElement FavoriteElement;
-    VisualElement NavigationElement;
+    Button NavigationButton;
     VisualElement PanelEntity;
     LocationData locationData;
 
@@ -26,6 +27,9 @@ public class BuildingListEntryController
     //since it's all the same extended view, don't keep cloning a reference to the same extended view
     public static locationExtendedView extendedView;
     public static eventExtendedView otherView;
+
+    private UcfRouteManager _routeManager;
+    private GameObject MenuUI;
 
     private void OutputFunction(ClickEvent evt)
     {
@@ -51,6 +55,10 @@ public class BuildingListEntryController
 
         //handle visited
         toggleVisited();
+
+        //handle navigation
+        extendedView.NavButton.UnregisterCallback<ClickEvent>(OnNavClick);
+        extendedView.NavButton.RegisterCallback<ClickEvent>(OnNavClick);
 
         //handle events list
         int len = locationData.BuildingEvents != null ? locationData.BuildingEvents.Length : 0;
@@ -170,24 +178,19 @@ public class BuildingListEntryController
         FavoriteElement.UnregisterCallback<ClickEvent>(OnFavoritesClick);
         FavoriteElement.RegisterCallback<ClickEvent>(OnFavoritesClick);
 
-        NavigationElement = visualElement.Q<VisualElement>(className: "panelNavigationIcon");
+        NavigationButton = visualElement.Q<Button>("navigationButton");
+        NavigationButton.UnregisterCallback<ClickEvent>(OnNavClick);
+        NavigationButton.RegisterCallback<ClickEvent>(OnNavClick);
+
         image = visualElement.Q<VisualElement>(className: "panelImage");
-        /*
-    .panelShadow
-    .panel 
-    .panelEntity
-    .panelImage 
-    .panelBlocker
-    .panelTextArea
-    .panelTextDistance
-    .panelTextEvents
-    .panelTextAddress
-    .panelLocationGroup
-    .panelTextLocation
-    .panelNavigationIcon
-    .panelFavoritesIcon 
-    .spacing 
-        */
+
+        if (Camera.main != null)
+        {
+            _routeManager = Camera.main.transform.parent.gameObject
+                                  .GetComponentInChildren<UcfRouteManager>();
+        }
+
+        MenuUI = GameObject.Find("MenuUI");
     }
 
     public void SetBuildingData(LocationData buildingData)
@@ -242,6 +245,20 @@ public class BuildingListEntryController
     private static double DegreesToRadians(double degrees) 
     {
         return degrees * Math.PI / 180;
+    }
+
+    private void OnNavClick(ClickEvent evt)
+    {
+        _routeManager.RouteToLocation(locationData);
+        extendedView.Extended = false;
+        otherView.Extended = false;
+
+        if (MenuUI != null)
+        {
+            var tabImage = MenuUI.GetComponent<ChangeTabImage>();
+            tabImage.CollapseMenu(null);
+        }
+        evt.StopPropagation();
     }
 }
 

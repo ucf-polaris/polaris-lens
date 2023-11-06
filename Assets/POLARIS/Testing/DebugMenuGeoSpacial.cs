@@ -31,7 +31,7 @@ public class DebugMenuGeoSpacial : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        container.Clear();
+        /*container.Clear();
         Label l = new Label("LoadNearby: ");
         l.AddToClassList("textSequence");
         container.Add(l);
@@ -52,7 +52,7 @@ public class DebugMenuGeoSpacial : MonoBehaviour
             Label label = new Label(building.BuildingName);
             label.AddToClassList("textSequence");
             container.Add(label);
-        }
+        }*/
     }
 
     void OnClick(ClickEvent evt)
