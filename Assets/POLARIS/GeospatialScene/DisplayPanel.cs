@@ -19,6 +19,7 @@ public class DisplayPanel : MonoBehaviour
 
     private PanelManager _panelManager;
     private TextPanel _lastBestPanel;
+    private Vector3 _lastPosition;
 
     // Start is called before the first frame update
     private void Start()
@@ -33,44 +34,53 @@ public class DisplayPanel : MonoBehaviour
         
         var panels = _panelManager.GetPanels();
         var bestPanel = GetBestPanel(panels);
+        
+        print("Best panel " + (bestPanel ? bestPanel.Content.Location.BuildingName : "null"));
 
         if (bestPanel == _lastBestPanel) return;
         
         if (bestPanel == null)
         {
-            _lastBestPanel.GetComponentInChildren<PanelZoom>().DisableZoom();
+            print("last best " + _lastBestPanel);
+            _lastBestPanel.CurrentPrefab.GetComponentInChildren<PanelZoom>().DisableZoom();
         }
-        else
+        else if (_lastBestPanel == null)
         {
-            bestPanel.GetComponentInChildren<PanelZoom>().EnableZoom();
+            print("bestest " + bestPanel);
+            bestPanel.CurrentPrefab.GetComponentInChildren<PanelZoom>().EnableZoom();
         }
 
         _lastBestPanel = bestPanel;
-
     }
 
     private TextPanel GetBestPanel(List<TextPanel> panels)
     {
+        var cameraPos = Camera.transform.position;
+        
         TextPanel bestPanel = null;
         var bestDist = float.MaxValue;
         foreach (var panel in panels)
-        {   
+        {
+            var panelPos = panel.transform.position;
+            if (panel == _lastBestPanel && panel != null)
+            {
+                panelPos = _lastPosition;
+            }
+            
             // Within distance threshold
-            var dist = Vector3.Distance(panel.CurrentPrefab.transform.position,
-                                        Camera.transform.position);
+            var dist = Vector3.Distance(panelPos, cameraPos);
             if (!(dist < MaxDist)) continue;
             
             // Within angle threshold
-            var withinAngle =
-                Vector3.Angle(Camera.transform.forward,
-                              panel.CurrentPrefab.transform.position) < MaxAngle;
+            var withinAngle = Vector3.Angle(Camera.transform.forward, panelPos - cameraPos) < MaxAngle;
             if (!withinAngle) continue;
-            
+
             // Now sort by dist
             if (dist < bestDist)
             {
                 bestDist = dist;
                 bestPanel = panel;
+                _lastPosition = panelPos;
             }
         }
 
