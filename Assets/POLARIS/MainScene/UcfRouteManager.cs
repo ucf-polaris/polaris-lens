@@ -394,7 +394,7 @@ namespace POLARIS
 
         private void UpdateRouteInfoIncomplete()
         {
-            _routingInfoLabel.text = "Choose starting point...";
+            _routingInfoLabel.text = "Hold to pick starting point";
             _routingSrcLabel.text = "Waiting";
             _routingDestLabel.text = _destName;
             

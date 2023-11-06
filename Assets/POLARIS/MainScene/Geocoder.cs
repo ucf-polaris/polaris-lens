@@ -76,7 +76,7 @@ namespace POLARIS.MainScene
             _oldCameraPosition = new double3(_cameraLocation.Position.X, _cameraLocation.Position.Y, _cameraLocation.Position.Z);
             _oldCameraRotation = new double3(_cameraLocation.Rotation.Heading, _cameraLocation.Rotation.Pitch, _cameraLocation.Rotation.Roll);
 
-            _newCameraRotation = new double3(0, 0, 0);
+            _newCameraRotation = new double3(_cameraLocation.Rotation.Heading, _cameraLocation.Rotation.Pitch, _cameraLocation.Rotation.Roll);
             _newCameraPosition = new double3(lon, lat, _cameraLocation.Position.Z);
 
             _shouldMoveCamera = true;

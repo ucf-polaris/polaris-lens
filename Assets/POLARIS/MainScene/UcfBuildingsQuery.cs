@@ -85,7 +85,11 @@ namespace POLARIS
             { "STUDENT UNION", 50 },
             { "WATER TOWER", 50 },
             { "ARBORETUM GREENHOUSE", 10 },
-            { "ARBORETUM PORTABLE", 10}
+            { "ARBORETUM PORTABLE", 10 },
+            { "VETERANS COMMEMORATIVE", 1 },
+            { "JOHN T. WASHINGTON CENTER", 20 },
+            { "JOHN C. HITT LIBRARY", 50 },
+            { "CHEMISTRY BUILDING", 50 }
         };
 
         // Get all the features when the script starts
