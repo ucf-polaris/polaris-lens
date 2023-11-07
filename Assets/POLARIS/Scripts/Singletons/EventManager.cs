@@ -4,6 +4,7 @@ using Newtonsoft.Json.Linq;
 using UnityEngine;
 using UnityEngine.Networking;
 using System.Collections.Generic;
+using POLARIS.MainScene;
 
 namespace POLARIS.Managers
 {
@@ -142,7 +143,11 @@ namespace POLARIS.Managers
                 if (!string.IsNullOrEmpty(data.Image))
                 {
                     if (data.rawImage == null)
+                    {
+                        data.rawImage = Resources.Load<Texture2D>("UCF_Logo");
                         StartCoroutine(data.DownloadImage("https://knightconnect.campuslabs.com/engage/image/" + data.Image));
+                    }
+                        
                 }  
                 else
                 {
@@ -223,6 +228,10 @@ namespace POLARIS.Managers
             else
             {
                 rawImage = ((DownloadHandlerTexture)request.downloadHandler).texture;
+                //Dependency (Might be bad)
+                //null checking and if on events tab
+                if (MenUI_Panels.listController != null && MenUI_Panels.listController.sw == ListController.SwitchType.events)
+                    MenUI_Panels.listController.RefreshUI();
                 //Debug.Log(name + " successfully downloaded");
             }
                 

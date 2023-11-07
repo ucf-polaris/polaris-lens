@@ -119,6 +119,7 @@ public class BuildingListEntryController
             FavoriteElement.AddToClassList("isNotFavorited");
         }
 
+        image.style.backgroundImage = buildingData.rawImage;
         this.locationData = buildingData;
     }
     

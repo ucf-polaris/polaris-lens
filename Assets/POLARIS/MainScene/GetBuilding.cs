@@ -81,15 +81,16 @@ namespace POLARIS.MainScene
                         $"Events: {((closestBuilding.BuildingEvents != null) ? string.Join(", ", closestBuilding.BuildingEvents) : "")}\n");
 
                     UpdateBuildingColor(hit.transform.gameObject, BuildingSelect);
-
                     //raise all menus associated
                     StartCoroutine(RaiseAllMenus(closestBuilding));
+
                 }
                 else
                 {
                     _lastTapTime = Time.time;
                 }
             }
+                
         }
 
         private IEnumerator RaiseAllMenus(LocationData building) {

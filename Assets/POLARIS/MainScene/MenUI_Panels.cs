@@ -330,10 +330,11 @@ namespace POLARIS.MainScene {
         }
         public void ExtendMenu(EventData evtData, bool closeOther)
         {
+            if (evtData == null) return;
             _eventData = evtData;
-            OutputFunction(closeOther);
+            RefreshPage(closeOther);
         }
-        private void OutputFunction(bool closeOther)
+        public void RefreshPage(bool closeOther)
         {
             //error checking
             if(_eventData == null)
@@ -410,10 +411,14 @@ namespace POLARIS.MainScene {
         {
             if (locData == null) return;
             locationData = locData;
-            OutputFunction(closeOther);
+            RefreshPage(closeOther);
         }
-        private void OutputFunction(bool closeOther)
+        public void RefreshPage(bool closeOther)
         {
+            if(locationData == null)
+            {
+                return;
+            }
             //handle informational fields
             TitleText.text = locationData.BuildingName;
             AddressText.text = locationData.BuildingAddress;

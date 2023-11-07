@@ -143,7 +143,7 @@ namespace POLARIS.Managers
             foreach (var data in dataList)
             {
                 //download if image exists (the ones with images are set, add boolean in backend from if it's from knights connect or ucf evetns)
-                if (!string.IsNullOrEmpty(data.BuildingImage))
+                /*if (!string.IsNullOrEmpty(data.BuildingImage))
                 {
                     if (data.rawImage == null)
                         StartCoroutine(data.DownloadImage("https://knightconnect.campuslabs.com/engage/image/" + data.BuildingImage));
@@ -151,7 +151,8 @@ namespace POLARIS.Managers
                 else
                 {
                     data.rawImage = Resources.Load<Texture2D>("UCF_Logo_2");
-                }
+                }*/
+                data.rawImage = Resources.Load<Texture2D>("UCF_Logo_2");
             }
         }
         public List<LocationData> GetBuildingsFromSearch(string query, bool fuzzySearch)
