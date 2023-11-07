@@ -230,7 +230,7 @@ namespace POLARIS.Managers
                 rawImage = ((DownloadHandlerTexture)request.downloadHandler).texture;
                 //Dependency (Might be bad)
                 //null checking and if on events tab
-                if (MenUI_Panels.listController != null && MenUI_Panels.listController.sw == ListController.SwitchType.events)
+                if (MenUI_Panels.listController != null)
                     MenUI_Panels.listController.RefreshUI();
                 //Debug.Log(name + " successfully downloaded");
             }
