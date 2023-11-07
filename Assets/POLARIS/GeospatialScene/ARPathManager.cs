@@ -55,7 +55,8 @@ namespace POLARIS.GeospatialScene
             _routingBox = rootVisual.Q<VisualElement>("RoutingInfo");
             _slideButton = rootVisual.Q<Button>("SlideButton");
             _stopButton = rootVisual.Q<Button>("StopButton");
-            
+
+            _lastRouting = PersistData.Routing;
             _routingBox.ToggleDisplayStyle(false);
             _slideButton.clickable.clicked += ToggleSlide;
             _stopButton.clickable.clicked += StopClicked;
@@ -67,7 +68,7 @@ namespace POLARIS.GeospatialScene
             if (PersistData.Routing != _lastRouting)
             {
                 _lastRouting = PersistData.Routing;
-                StartCoroutine(ToggleRouting(PersistData.Routing));
+                StartCoroutine(ToggleRouting(false));
             }
             
             if (!PersistData.Routing || _pathAnchorObjects.Count < 2) return;
@@ -95,8 +96,8 @@ namespace POLARIS.GeospatialScene
 
             var percentage = UcfRouteManager.PointPercentage(
                 _pathAnchorObjects.Select(anchor => anchor.transform.position).ToArray(), closest);
-            
-            UpdateRouteInfo(percentage);
+
+            _routingInfoLabel.text = UcfRouteManager.GetUpdatedRouteText(percentage);
         }
 
         public void ClearPath(List<GameObject> anchorObjects)
@@ -108,7 +109,7 @@ namespace POLARIS.GeospatialScene
             _pathAnchorObjects.Clear();
             // _lineRenderer.positionCount = 0;
             // _lineRenderer.enabled = false;
-            _arrow.SetEnabled(false);
+            if (_arrow) _arrow.SetEnabled(false);
         }
 
         public void LoadPathAnchors(List<GameObject> anchorObjects, ARAnchorManager anchorManager)
@@ -123,17 +124,13 @@ namespace POLARIS.GeospatialScene
 
             // _lineRenderer.positionCount = PersistData.PathPoints.Count;
             // _lineRenderer.enabled = PersistData.Routing;
-            _arrow.SetEnabled(PersistData.Routing);
+            _arrow.SetEnabled(true);
             
             _routingSrcLabel.text = PersistData.SrcName;
             _routingDestLabel.text = PersistData.DestName;
             _routingInfoLabel.text = $"Routing - {PersistData.TravelMinutes:0} min. ({PersistData.TravelMiles:0.0} mi.)";
-
-            if (PersistData.Routing)
-            {
-                _lastRouting = PersistData.Routing;
-                StartCoroutine(ToggleRouting(PersistData.Routing));
-            }
+            
+            StartCoroutine(ToggleRouting(true));
         }
 
         private ARGeospatialAnchor PlacePathGeospatialAnchor(
@@ -141,6 +138,7 @@ namespace POLARIS.GeospatialScene
                                                 ICollection<GameObject> anchorObjects,
                                                 ARAnchorManager anchorManager)
         {
+
             var promise =
                 anchorManager.ResolveAnchorOnTerrainAsync(
                     point[0], point[1],
@@ -193,11 +191,6 @@ namespace POLARIS.GeospatialScene
             return smallestIndex;
         }
 
-        private void UpdateRouteInfo(float pointPercent)
-        {
-            _routingInfoLabel.text = $"Routing - {(PersistData.TravelMinutes*pointPercent):0} min. ({(PersistData.TravelMiles*pointPercent):0.0} mi.)";
-        }
-        
         private void ToggleSlide()
         {
             _closed = !_closed;
@@ -224,6 +217,7 @@ namespace POLARIS.GeospatialScene
                 _routingBox.style.left = Length.Percent(-80f);
                 yield return new WaitForSeconds(0.3f);
                 _routingBox.ToggleDisplayStyle(false);
+                PersistData.ClearStops();
             }
         }
     }

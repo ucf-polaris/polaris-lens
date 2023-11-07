@@ -62,18 +62,10 @@ namespace POLARIS
 
         private Camera _mainCamera;
 
-        private string _srcName;
-        private string _destName;
-        private readonly Stack<string> _stopNames = new();
-
         private bool _destSelected = false;
         private bool _lastDestSelected = true;
-        private bool _routing = false;
         private float _pressTime = 0;
         private bool _closed = false;
-
-        private float _travelMinutes = 0f;
-        private float _travelMiles = 0f;
 
         private UserManager userManager;
         private LocationManager _locationManager;
@@ -113,9 +105,21 @@ namespace POLARIS
             userManager = UserManager.getInstance();
             _locationManager = LocationManager.getInstance();
             suggestedLocations = new Queue<string>(numSuggestions);
+            
+            // PersistData.StopLocations.Push(new Vector3(16, -930, 239));
+            // PersistData.StopLocations.Push(new Vector3(115, -970, 59));
+            // PersistData.StopNames.Push("Classroom 2");
+            // PersistData.StopNames.Push("Another building");
+            
+            var stopLocations = PersistData.StopLocations.ToArray();
+            var stopNames = PersistData.StopNames.ToArray();
+            for (var i = 0; i < stopLocations.Length; i++)
+            {
+                PlaceMarker(stopLocations[i], stopNames[i], false, true);
+            }
         }
 
-        private async void Update()
+        private void Update()
         {
             if (MenUI_Panels.userOnListView) return;
             
@@ -138,7 +142,7 @@ namespace POLARIS
                     case TouchPhase.Canceled:
                         if (_pressTime > 0.5f)
                         {
-                            if (_routing)
+                            if (PersistData.Routing)
                             {
                                 Debug.Log("Please Wait for Results or Cancel");
                                 return;
@@ -150,7 +154,7 @@ namespace POLARIS
                             {
                                 var locationName = hit.transform.name;
 
-                                PlaceMarker(hit.point, GetBuilding.ToTitleCase(locationName[4..]), false);
+                                PlaceMarker(hit.point, GetBuilding.ToTitleCase(locationName[4..]), false, false);
                             }
                         }
                         _pressTime = 0;
@@ -164,20 +168,20 @@ namespace POLARIS
             if (_destSelected != _lastDestSelected)
             {
                 _lastDestSelected = _destSelected;
-                StartCoroutine(ToggleRouting(_destSelected));
+                StartCoroutine(ToggleRouting(_destSelected || PersistData.Routing));
             }
 
             RebaseRoute();
         }
 
-        private async void PlaceMarker(Vector3 position, string locationName, bool adjustHeight)
+        private async void PlaceMarker(Vector3 position, string locationName, bool adjustHeight, bool recreated)
         {
             var routeMarker = Instantiate(RouteMarker, position, Quaternion.identity, _arcGisMapComponent.transform);
             
             var locationComponent = routeMarker.GetComponent<ArcGISLocationComponent>();
             locationComponent.enabled = true;
             locationComponent.Rotation = new ArcGISRotation(0, 180, 0);
-
+            
             if (adjustHeight)
             {
                 SetElevation(routeMarker, 30f);
@@ -188,30 +192,45 @@ namespace POLARIS
             }
 
             _stops.Push(routeMarker);
-            _stopNames.Push(locationName.StartsWith("Isgameobject_") ? $"{locationComponent.Position.Y:00.00000}, {locationComponent.Position.X:00.00000}" : locationName);
+
+            if (!recreated)
+            {
+                PersistData.StopLocations.Push(routeMarker.transform.position);
+                PersistData.StopNames.Push(locationName.StartsWith("Isgameobject_") 
+                                               ? $"{locationComponent.Position.Y:00.00000}, {locationComponent.Position.X:00.00000}" 
+                                               : locationName);
+            }
 
             if (_stops.Count > StopCount)
             {
                 Destroy(_stops.Pop());
-                _stopNames.Pop();
+                PersistData.StopLocations.Pop();
+                PersistData.StopNames.Pop();
             }
 
             if (_stops.Count == 1)
             {
-                _destName = _stopNames.Peek();
+                var len = PersistData.StopLocations.Count;
+                PersistData.DestPoint = PersistData.StopLocations.ToArray()[len - 1];
+                PersistData.DestName = PersistData.StopNames.ToArray()[len - 1];
                 UpdateRouteInfoIncomplete();
                 _destSelected = true;
             }
 
             if (_stops.Count == StopCount)
             {
-                var stopNamesArray = _stopNames.ToArray();
-                _srcName = stopNamesArray[0];
-                _destName = stopNamesArray[1];
+                PersistData.SrcName = PersistData.StopNames.Peek();
                 // No filthy coordinates or weird locations in my suggestions
-                if (!_destName.Contains(',') && !_destName.Equals("Other") && !_destName.Equals("Virtual")) HandleSuggestedLocations(_destName);
+                if (!PersistData.DestName.Contains(',') 
+                    && !PersistData.DestName.Equals("Other") 
+                    && !PersistData.DestName.Equals("Virtual")) HandleSuggestedLocations(PersistData.DestName);
 
-                var results = await FetchRoute(_stops.ToArray());
+                var results = PersistData.RoutingString;
+                if (!recreated)
+                {
+                    results = await FetchRoute(_stops.ToArray());
+                    PersistData.RoutingString = results;
+                }
 
                 if (results.Contains("error"))
                 {
@@ -236,10 +255,7 @@ namespace POLARIS
 
             var geoPosition = _arcGisMapComponent.View.WorldToGeographic(worldPosition);
             var offsetPosition = new ArcGISPoint(geoPosition.X, geoPosition.Y, geoPosition.Z + yOffset, geoPosition.SpatialReference);
-
-            var spatialRef = GeoUtils.ProjectToSpatialReference(offsetPosition, new ArcGISSpatialReference(4326));
-            PersistData.DestinationPoint = spatialRef;
-                
+            
             return GeoUtils.ProjectToSpatialReference(offsetPosition, new ArcGISSpatialReference(4326));
         }
 
@@ -248,7 +264,7 @@ namespace POLARIS
             var error = JObject.Parse(errorText).SelectToken("error");
             var message = error.SelectToken("message");
 
-            print($"Error: {message}");
+            Debug.LogError($"Routing Error: {message}");
         }
 
         private async Task<string> FetchRoute(GameObject[] stops)
@@ -373,30 +389,25 @@ namespace POLARIS
             var features = info.SelectToken("routes")?.SelectToken("features");
             var attributes = features?[0]?.SelectToken("attributes");
 
-            _travelMiles = (float)attributes?.SelectToken("Total_Miles");
+            PersistData.TravelMiles = (float)attributes?.SelectToken("Total_Miles");
 
             var summary = info.SelectToken("directions")?[0]?.SelectToken("summary");
-            _travelMinutes = (float)summary?.SelectToken("totalTime");
+            PersistData.TravelMinutes = (float)summary?.SelectToken("totalTime");
 
-            print($"Time: {_travelMinutes:0.00} Minutes, Distance: {_travelMiles:0.00} Miles");
+            print($"Time: {PersistData.TravelMinutes:0.00} Minutes, Distance: {PersistData.TravelMiles:0.00} Miles");
 
-            _routingInfoLabel.text = $"Routing - {_travelMinutes:0} min. ({_travelMiles:0.0} mi.)";
-            _routingSrcLabel.text = _srcName;
-            _routingDestLabel.text = _destName;
+            _routingInfoLabel.text = $"Routing - {PersistData.TravelMinutes:0} min. ({PersistData.TravelMiles:0.0} mi.)";
+            _routingSrcLabel.text = PersistData.SrcName;
+            _routingDestLabel.text = PersistData.DestName;
             
             _routingSrcBox.ToggleDisplayStyle(includeSrc);
-
-            PersistData.SrcName = _srcName;
-            PersistData.DestName = _destName;
-            PersistData.TravelMiles = _travelMiles;
-            PersistData.TravelMinutes = _travelMinutes;
         }
 
         private void UpdateRouteInfoIncomplete()
         {
             _routingInfoLabel.text = "Hold to pick starting point";
             _routingSrcLabel.text = "Waiting";
-            _routingDestLabel.text = _destName;
+            _routingDestLabel.text = PersistData.DestName;
             
             _routingSrcBox.ToggleDisplayStyle(false);
         }
@@ -410,10 +421,9 @@ namespace POLARIS
                     Destroy(stop);
                 }
                 _stops.Clear();
-                _stopNames.Clear();
-                
-                _routing = _destSelected = false;
-                PersistData.Routing = false;
+                PersistData.ClearStops();
+
+                _destSelected = false;
             }
 
             foreach (var breadcrumb in _breadcrumbs)
@@ -443,7 +453,6 @@ namespace POLARIS
 
             _lineRenderer.positionCount = allPoints.Count;
             _lineRenderer.SetPositions(allPoints.ToArray());
-            _routing = true;
             PersistData.Routing = true;
         }
 
@@ -470,8 +479,8 @@ namespace POLARIS
                 _lineRenderer.SetPositions(points);
                 var closestPoint = GetClosestPathPoint(points);
                 var pointPercent = PointPercentage(points, closestPoint);
-                _routingInfoLabel.text = $"Routing - {(_travelMinutes*pointPercent):0} min. ({(_travelMiles*pointPercent):0.0} mi.)";
-
+                _routingInfoLabel.text = GetUpdatedRouteText(pointPercent);
+                
                 var gradient = new Gradient();
                 gradient.SetKeys(
                     new[] {new GradientColorKey(PathStart, 0.0f), new GradientColorKey(PathStart, pointPercent - 0.01f), new GradientColorKey(PathEnd, pointPercent + 0.01f), new GradientColorKey(PathEnd, 1f)},
@@ -482,12 +491,27 @@ namespace POLARIS
             _lastRootPosition = rootPosition;
         }
 
+        public static string GetUpdatedRouteText(float completionPercentage)
+        {
+            var minutes = PersistData.TravelMinutes * (1 - completionPercentage);
+            var miles = PersistData.TravelMiles * (1 - completionPercentage);
+                
+            if (miles < 0.1)
+            {
+                var feet = (int)(miles * 5280);
+                var feetRounded = (feet / 100) * 100;
+                return $"Routing - {minutes:0} min. ({feetRounded} ft.)";
+            }
+            
+            return $"Routing - {minutes:0} min. ({miles:0.0} mi.)";
+        }
+
         public void RouteToEvent(EventData eventData)
         {
             LocationData location = null;
             foreach (var building in _locationManager.dataList)
             {
-                // BUT WHAT IF EVENT DATA DOESNT HAVE A BUILDING LAT OR LONG?
+                // TODO: BUT WHAT IF EVENT DATA DOESNT HAVE A BUILDING LAT OR LONG?
                 if (Math.Abs(building.BuildingLat - eventData.Location.BuildingLat) < 0.00001 &&
                     Math.Abs(building.BuildingLong - eventData.Location.BuildingLong) < 0.00001)
                 {
@@ -506,18 +530,12 @@ namespace POLARIS
                                               new ArcGISSpatialReference(4326));
             var worldPosition =
                 _root.TransformPoint(_arcGisMapComponent.View.GeographicToWorld(geoPosition)).ToVector3();
-            PlaceMarker(worldPosition,  buildingName, true);
+            PlaceMarker(worldPosition,  buildingName, true, false);
             
             // TODO: MAKE IT SO CLICKING THE "CHOOSE STARTING POINT MENU" SELECTS USER CURRENT LOCATION
             if (GetUserCurrentLocation.displayLocation)
             {
-                var curPosition = new ArcGISPoint(GetUserCurrentLocation._longitude,
-                    GetUserCurrentLocation._latitude,
-                    0f,
-                    new ArcGISSpatialReference(4326));
-                var curWorldPosition =
-                    _root.TransformPoint(_arcGisMapComponent.View.GeographicToWorld(curPosition)).ToVector3();
-                PlaceMarker(curWorldPosition, "My Location", true);
+                PlaceMarkerAtUserLocation();
             }
         }
 
@@ -535,20 +553,26 @@ namespace POLARIS
                                               new ArcGISSpatialReference(4326));
             var worldPosition =
                 _root.TransformPoint(_arcGisMapComponent.View.GeographicToWorld(geoPosition)).ToVector3();
-            PlaceMarker(worldPosition, buildingName, true);
+            PlaceMarker(worldPosition, buildingName, true, false);
 
             // TODO: MAKE IT SO CLICKING THE "CHOOSE STARTING POINT MENU" SELECTS USER CURRENT LOCATION
             if (GetUserCurrentLocation.displayLocation)
             {
-                var curPosition = new ArcGISPoint(GetUserCurrentLocation._longitude,
-                    GetUserCurrentLocation._latitude,
-                    0f,
-                    new ArcGISSpatialReference(4326));
-                var curWorldPosition =
-                    _root.TransformPoint(_arcGisMapComponent.View.GeographicToWorld(curPosition)).ToVector3();
-                PlaceMarker(curWorldPosition, "My Location", true);
+                PlaceMarkerAtUserLocation();
             }
         }
+
+        private void PlaceMarkerAtUserLocation()
+        {
+            var curPosition = new ArcGISPoint(GetUserCurrentLocation._longitude,
+                                              GetUserCurrentLocation._latitude,
+                                              0f,
+                                              new ArcGISSpatialReference(4326));
+            var curWorldPosition =
+                _root.TransformPoint(_arcGisMapComponent.View.GeographicToWorld(curPosition)).ToVector3();
+            PlaceMarker(curWorldPosition, "My Location", true, false);
+        }
+        
 
         private void ToggleSlide()
         {

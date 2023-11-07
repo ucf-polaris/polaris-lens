@@ -1,5 +1,5 @@
 using System.Collections.Generic;
-using Esri.GameEngine.Geometry;
+using UnityEngine;
 
 namespace POLARIS.MainScene
 {
@@ -7,7 +7,9 @@ namespace POLARIS.MainScene
     {
         public static bool Routing = false;
         
-        public static ArcGISPoint DestinationPoint = null;
+        public static Vector3 DestPoint = Vector3.zero;
+        public static readonly Stack<Vector3> StopLocations = new();
+        public static readonly Stack<string> StopNames = new();
 
         public static List<double[]> PathPoints = new();
         // {
@@ -15,10 +17,18 @@ namespace POLARIS.MainScene
         //     new[]{28.614469, -81.195702},
         //     new[]{28.614369, -81.195760}
         // };
+        public static string RoutingString;
 
         public static string SrcName = "";
         public static string DestName = "";
         public static float TravelMinutes = 0f;
         public static float TravelMiles = 0f;
+
+        public static void ClearStops()
+        {
+            Routing = false;
+            StopLocations.Clear();
+            StopNames.Clear();
+        }
     }
 }

@@ -177,9 +177,6 @@ public class GetUserCurrentLocation : MonoBehaviour
         var geoPosition = _arcGisMapComponent.View.WorldToGeographic(worldPosition);
         var offsetPosition = new ArcGISPoint(geoPosition.X, geoPosition.Y, geoPosition.Z + yOffset, geoPosition.SpatialReference);
 
-        var spatialRef = GeoUtils.ProjectToSpatialReference(offsetPosition, new ArcGISSpatialReference(4326));
-        PersistData.DestinationPoint = spatialRef;
-                
         return GeoUtils.ProjectToSpatialReference(offsetPosition, new ArcGISSpatialReference(4326));
     }
 

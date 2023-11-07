@@ -365,7 +365,6 @@ namespace Google.XR.ARCoreExtensions.Samples.Geospatial
 
             _isReturning = false;
             _enablingGeospatial = false;
-            _lastRouting = !PersistData.Routing;
             ClearAllButton.gameObject.SetActive(false);
 
             _localizationPassedTime = 0f;
@@ -612,21 +611,15 @@ namespace Google.XR.ARCoreExtensions.Samples.Geospatial
                 {
                     _lastRouting = PersistData.Routing;
 
-                    if (PersistData.Routing)
+                    if (PersistData.Routing && PersistData.PathPoints != null)
                     {
-                        if (PersistData.PathPoints != null)
-                        {
-                            PathManager.LoadPathAnchors(_anchorObjects, AnchorManager);
-                        }
+                        PathManager.LoadPathAnchors(_anchorObjects, AnchorManager);
                     }
                     else
                     {
                         PathManager.ClearPath(_anchorObjects);
                     }
-                    
                 }
-                
-                
             }
             
             if (earthTrackingState == TrackingState.Tracking)
