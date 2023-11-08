@@ -354,3 +354,33 @@
     padding-left: 32px;
     left: -31px;
 }
+
+DropdownField > VisualElement {
+    background-color: rgba(0, 0, 0, 0);
+    background-image: url('project://database/Assets/POLARIS/UI%20Assets/RectangleWhite.png?fileID=2800000&guid=e48653822c6b5e944b380ac73cdb9f9f&type=3#RectangleWhite');
+    -unity-background-image-tint-color: rgb(216, 97, 127);
+    border-top-left-radius: 0;
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+    border-bottom-left-radius: 0;
+    border-top-width: 0;
+    border-right-width: 0;
+    border-bottom-width: 0;
+    border-left-width: 0;
+}
+
+DropdownField > VisualElement > VisualElement {
+    background-image: url('project://database/Assets/UI%20Toolkit/UnityThemes/UnityDefaultRuntimeTheme.tss?fileID=-1304905567622442630&guid=822ceb35a710d9b4bb5d07a9e09d4681&type=3#arrow-down@2x');
+    background-color: rgba(0, 0, 0, 0);
+    width: 26%;
+    height: 110%;
+    -unity-background-image-tint-color: rgb(255, 255, 255);
+    left: 8px;
+    top: 3px;
+}
+
+DropdownField > VisualElement > PopupTextElement {
+    margin-left: 20px;
+    margin-right: 0;
+    padding-right: 0;
+}

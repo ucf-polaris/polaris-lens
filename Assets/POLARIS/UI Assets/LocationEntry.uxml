@@ -6,12 +6,12 @@
             <ui:VisualElement class="panelImage" style="flex-grow: 1;" />
             <ui:VisualElement class="panelBlocker" style="flex-grow: 1;" />
             <ui:VisualElement class="panelTextArea" style="flex-grow: 1;">
-                <ui:Label tabindex="-1" text="Label" parse-escape-sequences="true" display-tooltip-when-elided="false" class="panelTextLocation" />
+                <ui:Label tabindex="-1" text="Label" parse-escape-sequences="true" display-tooltip-when-elided="false" class="panelTextLocation" style="-unity-font-definition: url(&apos;project://database/Assets/POLARIS/Fonts/Poppins-SemiBold%20SDF%20NEW.asset?fileID=11400000&amp;guid=b5ed3e77dd4fb4f43bf79f1640728c09&amp;type=2#Poppins-SemiBold SDF NEW&apos;); -unity-font-style: normal;" />
                 <ui:VisualElement class="panelLocationGroup" style="flex-grow: 1;">
-                    <ui:Label tabindex="-1" text="An Address - " parse-escape-sequences="true" display-tooltip-when-elided="true" class="panelTextAddress" style="color: rgb(36, 36, 41);" />
-                    <ui:Label tabindex="-1" text="Label" parse-escape-sequences="true" display-tooltip-when-elided="true" class="panelTextDistance" style="left: -10px; color: rgb(37, 37, 41);" />
+                    <ui:Label tabindex="-1" text="An Address - " parse-escape-sequences="true" display-tooltip-when-elided="true" class="panelTextAddress" style="color: rgb(87, 87, 91); -unity-font-definition: url(&apos;project://database/Assets/POLARIS/Fonts/Poppins-Medium%20SDF%20NEW.asset?fileID=11400000&amp;guid=cf1be7b544c49d84a9a5d3b9f0ea25fb&amp;type=2#Poppins-Medium SDF NEW&apos;);" />
+                    <ui:Label tabindex="-1" text="Label" parse-escape-sequences="true" display-tooltip-when-elided="true" class="panelTextDistance" style="left: -10px; color: rgb(37, 37, 41); -unity-font-definition: url(&apos;project://database/Assets/POLARIS/Fonts/Poppins-Regular%20SDF%20NEW.asset?fileID=11400000&amp;guid=da3f79198bc82a4488e2b178a316c20e&amp;type=2#Poppins-Regular SDF NEW&apos;);" />
                 </ui:VisualElement>
-                <ui:Label tabindex="-1" text="Label" parse-escape-sequences="true" display-tooltip-when-elided="true" class="panelTextEvents" />
+                <ui:Label tabindex="-1" text="Label" parse-escape-sequences="true" display-tooltip-when-elided="true" class="panelTextEvents" style="-unity-font-definition: url(&apos;project://database/Assets/POLARIS/Fonts/Poppins-Regular%20SDF%20NEW.asset?fileID=11400000&amp;guid=da3f79198bc82a4488e2b178a316c20e&amp;type=2#Poppins-Regular SDF NEW&apos;);" />
             </ui:VisualElement>
             <ui:Button parse-escape-sequences="true" display-tooltip-when-elided="true" name="navigationButton" picking-mode="Ignore" style="position: absolute; top: 86%; left: 87%; width: 7%; height: 9%; background-color: rgb(149, 149, 149);">
                 <ui:VisualElement style="flex-grow: 1; background-image: url(&apos;project://database/Assets/UI%20Toolkit/UnityThemes/UnityDefaultRuntimeTheme.tss?fileID=8300712400058098730&amp;guid=822ceb35a710d9b4bb5d07a9e09d4681&amp;type=3#dropdown-arrow@2x&apos;); rotate: 270deg; -unity-background-image-tint-color: rgb(255, 255, 255);" />

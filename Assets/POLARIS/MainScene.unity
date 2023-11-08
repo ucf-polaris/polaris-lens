@@ -529,37 +529,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   dataList: []
   Testing: 0
---- !u!1 &513079230
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 513079231}
-  m_Layer: 0
-  m_Name: LocationManager
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &513079231
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 513079230}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 398.13428, y: -264.98145, z: -0.27000707}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &607878207
 GameObject:
   m_ObjectHideFlags: 0
@@ -897,6 +866,7 @@ GameObject:
   - component: {fileID: 985640670}
   - component: {fileID: 985640671}
   - component: {fileID: 985640672}
+  - component: {fileID: 985640673}
   m_Layer: 5
   m_Name: MenuUI
   m_TagString: Untagged
@@ -965,6 +935,26 @@ MonoBehaviour:
     type: 3}
   EventListEntryTemplate: {fileID: 9197481963319205126, guid: 7aeb352b21f934d4e81a05dc8142be99,
     type: 3}
+  ExtendedEventView:
+    OtherView:
+      OtherView:
+        OtherView:
+          OtherView:
+            OtherView:
+              OtherView:
+                OtherView:
+                  OtherView:
+                    OtherView: {}
+  ExtendedLocationView:
+    OtherView:
+      OtherView:
+        OtherView:
+          OtherView:
+            OtherView:
+              OtherView:
+                OtherView:
+                  OtherView:
+                    OtherView: {}
 --- !u!114 &985640672
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -975,6 +965,18 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: f525fa99ecb77364e9e2fe4c1bb1575a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &985640673
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 985640667}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5bd31453237b6fb4ebbf226a133fcb50, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
 --- !u!1 &1006044603
@@ -2285,4 +2287,3 @@ SceneRoots:
   - {fileID: 355669367}
   - {fileID: 1079395656}
   - {fileID: 1080807621}
-  - {fileID: 513079231}
