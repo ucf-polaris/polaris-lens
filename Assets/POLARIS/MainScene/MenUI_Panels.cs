@@ -180,7 +180,7 @@ namespace POLARIS.MainScene {
             {
                 if (showSuggestions && newText == "")
                 {
-                    header.text = "Suggested Locations";
+                    header.text = "Locations";
                     List<LocationData> buildings = new List<LocationData>();
                     foreach (string buildingName in userManager.data.Suggested.Split("~"))
                     {

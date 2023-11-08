@@ -377,10 +377,18 @@ DropdownField > VisualElement > VisualElement {
     -unity-background-image-tint-color: rgb(255, 255, 255);
     left: 8px;
     top: 3px;
+    border-top-left-radius: 0;
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+    border-bottom-left-radius: 0;
 }
 
 DropdownField > VisualElement > PopupTextElement {
     margin-left: 20px;
     margin-right: 0;
     padding-right: 0;
+    border-top-left-radius: 0;
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 20px;
+    border-bottom-left-radius: 20px;
 }
