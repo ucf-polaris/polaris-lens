@@ -4,6 +4,9 @@ using Newtonsoft.Json.Linq;
 using UnityEngine;
 using UnityEngine.Networking;
 using System.Collections.Generic;
+using System.Linq;
+using POLARIS;
+using Unity.Mathematics;
 
 namespace POLARIS.Managers
 {
@@ -54,9 +57,6 @@ namespace POLARIS.Managers
                 running = Scan(null);
                 StartCoroutine(running);
             }
-            //since this isn't inherent to the building, needs to be set from userAccess
-            UpdateFavoritesInBuildings();
-            UpdateVisitedInBuildings();
         }
 
         override protected IEnumerator Scan(IDictionary<string, string> request)
@@ -96,6 +96,9 @@ namespace POLARIS.Managers
                 getAllRawImages();
             }
             running = null;
+            //since this isn't inherent to the building, needs to be set from userAccess
+            UpdateFavoritesInBuildings();
+            UpdateVisitedInBuildings();
         }
 
         override protected IEnumerator Get(IDictionary<string, string> request)
@@ -155,7 +158,30 @@ namespace POLARIS.Managers
                 data.rawImage = Resources.Load<Texture2D>("UCF_Logo_2");
             }
         }
-        public List<LocationData> GetBuildingsFromSearch(string query, bool fuzzySearch)
+        public enum LocationFilter
+        {
+            None,
+            Favorites,
+            NotVisited,
+            Visited,
+            Closest
+        }
+        private bool filterLocation(LocationData location, LocationFilter filter)
+        {
+            if (filter == LocationFilter.Favorites) return location.IsFavorited;
+            else if (filter == LocationFilter.NotVisited) return !location.IsVisited;
+            else if (filter == LocationFilter.Visited) return location.IsVisited;
+            return true;
+        }
+
+        private List<LocationData> sortLocations(List<LocationData> list, LocationFilter filter)
+        {
+            if (filter == LocationFilter.Closest)
+                list = list.OrderBy(loc => DistanceInMiBetweenEarthCoordinates(new double2(GetUserCurrentLocation._latitude, GetUserCurrentLocation._longitude), new double2(loc.BuildingLat, loc.BuildingLong))).ToList();
+            return list;
+        }
+
+        public List<LocationData> GetBuildingsFromSearch(string query, bool fuzzySearch, LocationFilter locFilter=LocationFilter.None)
         {
             const int TOLERANCE = 1;
 
@@ -166,7 +192,9 @@ namespace POLARIS.Managers
                     (fuzzySearch && FuzzyMatch(building.BuildingName, query, TOLERANCE)))
                 {
                     Debug.Log("Result: " + building.BuildingName);
-                    buildings.Add(building);
+                    //filter out based on the location filter
+                    if(filterLocation(building, locFilter))
+                        buildings.Add(building);
                     continue;
                 }
 
@@ -176,12 +204,14 @@ namespace POLARIS.Managers
                     if (alias.IndexOf(query, StringComparison.OrdinalIgnoreCase) >= 0 ||
                         (fuzzySearch && FuzzyMatch(alias, query, TOLERANCE)))
                     {
-                        buildings.Add(building);
+                        //filter out based on the location filter
+                        if (filterLocation(building, locFilter))
+                            buildings.Add(building);
                         break;
                     }
                 }
             }
-
+            buildings = sortLocations(buildings, locFilter);
             return buildings;
         }
 
@@ -197,16 +227,17 @@ namespace POLARIS.Managers
 
         private void UpdateFavoritesInBuildings()
         {
-            foreach(var building in dataList)
+            for(var i = 0; i < dataList.Count; i++)
             {
-                if (userAccess.isFavorite(building))
-                    building.IsFavorited = true;
+                if (userAccess.isFavorite(dataList[i]))
+                {
+                    dataList[i].IsFavorited = true;
+                }    
             }
         }
 
         private void UpdateVisitedInBuildings()
         {
-            //unimplemented for now
             foreach(var building in dataList)
             {
                 if (userAccess.isVisited(building))
@@ -222,6 +253,28 @@ namespace POLARIS.Managers
                     return dataList[i];
             }
             return null;
+        }
+
+        public double DistanceInMiBetweenEarthCoordinates(double2 pointA, double2 pointB)
+        {
+            const int earthRadiusKm = 6371;
+            const double KmToMi = 0.621371;
+
+            var distLat = DegreesToRadians(pointB.x - pointA.x);
+            var distLon = DegreesToRadians(pointB.y - pointA.y);
+
+            var latA = DegreesToRadians(pointA.x);
+            var latB = DegreesToRadians(pointB.x);
+
+            var a = Math.Sin(distLat / 2) * Math.Sin(distLat / 2) +
+                    Math.Sin(distLon / 2) * Math.Sin(distLon / 2) * Math.Cos(latA) * Math.Cos(latB);
+            var c = 2 * Math.Atan2(Math.Sqrt(a), Math.Sqrt(1 - a));
+            return earthRadiusKm * c * KmToMi;
+        }
+
+        private static double DegreesToRadians(double degrees)
+        {
+            return degrees * Math.PI / 180;
         }
     }
 

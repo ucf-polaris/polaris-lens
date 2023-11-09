@@ -37,6 +37,7 @@ namespace POLARIS.MainScene {
         public locationExtendedView ExtendedLocationView;
 
         public static bool userOnListView;
+        private bool shouldTriggerOnChangeEvent = true;
         // Start is called before the first frame update
         private void Start()
         {
@@ -83,23 +84,7 @@ namespace POLARIS.MainScene {
             if (currentTab == "location")
             {
                 while (locationManager.dataList.Count == 0) yield return null;
-                List<LocationData> buildings = new List<LocationData>();
-                if (showSuggestions)
-                {
-                    header.text = "Locations";
-                    buildings = new List<LocationData>();
-                    foreach (string buildingName in userManager.data.Suggested.Split("~"))
-                    {
-                        LocationData building = GetBuildingFromName(buildingName);
-                        if (building != null) buildings.Add(building);
-                    }
-                }
-                else
-                {
-                    header.text = "Locations";
-                    buildings = locationManager.dataList;
-                }
-                UpdateBuildingSearchUI(buildings);
+                OnChangeDropdown(MenUI_Dropdown.currentChoice);
             }
             else
             {
@@ -161,8 +146,55 @@ namespace POLARIS.MainScene {
             SetPlaceholderText(_searchField, ChangeTabImage._lastPressed == "location" ? "Search for locations" : "Search for events");
         }
         
+        public void OnChangeDropdown(string choice)
+        {
+            shouldTriggerOnChangeEvent = false;
+            //clear search view
+            if(_searchField.value != "Search for locations" && _searchField.value != "Search for events") _searchField.value = "Search for locations";
+            List<LocationData> buildings = new List<LocationData>();
+            switch (choice)
+            {
+                case "SUGGESTED":
+                    header.text = "Suggested Locations";
+                    Debug.Log("yes");
+                    foreach (string buildingName in userManager.data.Suggested.Split("~"))
+                    {
+                        LocationData building = GetBuildingFromName(buildingName);
+                        if (building != null) buildings.Add(building);
+                    }
+                    break;
+                case "VISITED":
+                    header.text = "Visited Locations";
+                    buildings = locationManager.GetBuildingsFromSearch("", false, LocationManager.LocationFilter.Visited);
+                    break;
+                case "NOT VISITED":
+                    header.text = "Not Visited Locations";
+                    buildings = locationManager.GetBuildingsFromSearch("", false, LocationManager.LocationFilter.NotVisited);
+                    break;
+                case "FAVORITES":
+                    header.text = "Favorited Locations";
+                    buildings = locationManager.GetBuildingsFromSearch("", false, LocationManager.LocationFilter.Favorites);
+                    break;
+                case "CLOSEST":
+                    header.text = "Closest Locations";
+                    buildings = locationManager.GetBuildingsFromSearch("", false, LocationManager.LocationFilter.Closest);
+                    break;
+                default:
+                    header.text = "Locations";
+                    buildings = locationManager.dataList;
+                    break;
+            }
+            UpdateBuildingSearchUI(buildings);
+        }
+
         private void OnSearchValueChanged(ChangeEvent<string> evt)
         {
+            if (shouldTriggerOnChangeEvent == false)
+            {
+                shouldTriggerOnChangeEvent = true;
+                return;
+            }
+            
             if (ChangeTabImage.justRaised) ChangeTabImage.justRaised = false;
             string newText = evt.newValue;
 
@@ -178,9 +210,9 @@ namespace POLARIS.MainScene {
             bool flag = (evt.previousValue == "Search for locations" || evt.previousValue == "Search for events") && evt.newValue == "";
             if (currentTab == "location")
             {
-                if (showSuggestions && newText == "")
+                if (showSuggestions && newText == "" && MenUI_Dropdown.currentChoice == "SUGGESTED")
                 {
-                    header.text = "Locations";
+                    header.text = "Suggested Locations";
                     List<LocationData> buildings = new List<LocationData>();
                     foreach (string buildingName in userManager.data.Suggested.Split("~"))
                     {
@@ -191,8 +223,30 @@ namespace POLARIS.MainScene {
                 }
                 else
                 {
-                    header.text = "Locations";
-                    List<LocationData> buildings = locationManager.GetBuildingsFromSearch(newText, newText.Length > 0 && newText[0] == '~');
+                    LocationManager.LocationFilter filter = LocationManager.LocationFilter.None;
+                    //put in logic to shift between drop down options here
+                    switch (MenUI_Dropdown.currentChoice)
+                    {
+                        case "VISITED":
+                            filter = LocationManager.LocationFilter.Visited;
+                            break;
+                        case "NOT VISITED":
+                            filter = LocationManager.LocationFilter.NotVisited;
+                            break;
+                        case "FAVORITES":
+                            filter = LocationManager.LocationFilter.Favorites;
+                            break;
+                        case "CLOSEST":
+                            filter = LocationManager.LocationFilter.Closest;
+                            break;
+                        case "FARTHEST":
+                            filter = LocationManager.LocationFilter.Closest;
+                            break;
+                        default:
+                            header.text = "Locations";
+                            break;
+                    }
+                    List<LocationData> buildings = locationManager.GetBuildingsFromSearch(newText, newText.Length > 0 && newText[0] == '~', filter);
                     UpdateBuildingSearchUI(buildings, !flag);
                 }
             }

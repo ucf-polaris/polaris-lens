@@ -95,7 +95,7 @@ public class BuildingListEntryController
         NameLabel.text = buildingData.BuildingName;
         if (GetUserCurrentLocation.displayLocation)
         {
-            var distanceToBuilding = DistanceInMiBetweenEarthCoordinates(new double2(GetUserCurrentLocation._latitude, GetUserCurrentLocation._longitude), new double2(buildingData.BuildingLat, buildingData.BuildingLong));
+            var distanceToBuilding = locationManager.DistanceInMiBetweenEarthCoordinates(new double2(GetUserCurrentLocation._latitude, GetUserCurrentLocation._longitude), new double2(buildingData.BuildingLat, buildingData.BuildingLong));
             DistanceLabel.text = $"{distanceToBuilding:0.00} miles";
         }
         else
@@ -122,28 +122,7 @@ public class BuildingListEntryController
         image.style.backgroundImage = buildingData.rawImage;
         this.locationData = buildingData;
     }
-    
-    private double DistanceInMiBetweenEarthCoordinates(double2 pointA, double2 pointB) 
-    {
-        const int earthRadiusKm = 6371;
-        const double KmToMi = 0.621371;
-
-        var distLat = DegreesToRadians(pointB.x - pointA.x);
-        var distLon = DegreesToRadians(pointB.y - pointA.y);
-
-        var latA = DegreesToRadians(pointA.x);
-        var latB = DegreesToRadians(pointB.x);
-
-        var a = Math.Sin(distLat / 2) * Math.Sin(distLat / 2) +
-                Math.Sin(distLon / 2) * Math.Sin(distLon / 2) * Math.Cos(latA) * Math.Cos(latB); 
-        var c = 2 * Math.Atan2(Math.Sqrt(a), Math.Sqrt(1 - a)); 
-        return earthRadiusKm * c * KmToMi;
-    }
-        
-    private static double DegreesToRadians(double degrees) 
-    {
-        return degrees * Math.PI / 180;
-    }
+       
 
     private void OnNavClick(ClickEvent evt)
     {

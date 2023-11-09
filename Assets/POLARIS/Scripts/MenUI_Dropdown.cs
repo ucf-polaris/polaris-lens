@@ -3,10 +3,12 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UIElements;
 using POLARIS.Managers;
+using POLARIS.MainScene;
 
 public class MenUI_Dropdown : MonoBehaviour
 {
     DropdownField dropDown;
+    MenUI_Panels panels;
     public string CurrentTab { get => _currentTab; 
         set {
             _currentTab = value;
@@ -17,9 +19,13 @@ public class MenUI_Dropdown : MonoBehaviour
                 dropDown.style.display = DisplayStyle.None;
         } }
     private string _currentTab = "";
+    public static string currentChoice;
+
     // Start is called before the first frame update
     void Start()
     {
+        panels = GetComponent<MenUI_Panels>();
+
         var UIDoc = GetComponent<UIDocument>();
         dropDown = UIDoc.rootVisualElement.Q<DropdownField>("SearchFilter");
 
@@ -29,15 +35,25 @@ public class MenUI_Dropdown : MonoBehaviour
             "ALL",
             "VISITED",
             "NOT VISITED",
-            "FAVORITES"
+            "FAVORITES",
+            "CLOSEST"
         };
 
         dropDown.value = dropDown.choices[0];
+        currentChoice = dropDown.value;
+
+        //assign value to currentChoice;
+        dropDown.RegisterCallback<ChangeEvent<string>>((evt) =>
+        {
+            currentChoice = evt.newValue;
+            panels.OnChangeDropdown(currentChoice);
+        });
     }
 
     // Update is called once per frame
     void Update()
     {
+        //keep track if tab changes (get rid of drop down)
         CurrentTab = ChangeTabImage._lastPressed;
     }
 }
