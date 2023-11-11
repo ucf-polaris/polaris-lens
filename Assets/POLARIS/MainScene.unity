@@ -1255,6 +1255,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   LocationMarker: {fileID: 70745446}
   DesiredAccuracy: 5
+  testing: 0
+  testingLong: -81.20062
+  testingLat: 28.6019
 --- !u!4 &1322891753
 Transform:
   m_ObjectHideFlags: 0

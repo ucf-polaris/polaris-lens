@@ -21,6 +21,10 @@ public class GetUserCurrentLocation : MonoBehaviour
     private float lonMax = -81.181589f;
     private float latMin = 28.580255f;
     private float latMax = 28.613986f;
+
+    public bool testing = false;
+    public float testingLong;
+    public float testingLat;
     
     private ArcGISMapComponent _arcGisMapComponent;
     private HPRoot _hpRoot;
@@ -33,19 +37,30 @@ public class GetUserCurrentLocation : MonoBehaviour
 
     private void Update()
     {
-        // Location service running and in bounds of map
-        if (Input.location.status == LocationServiceStatus.Running &&
-            PointInBounds(Input.location.lastData.longitude, Input.location.lastData.latitude))
+        if (!testing)
         {
-            displayLocation = true;
-            _longitude = Input.location.lastData.longitude;
-            _latitude = Input.location.lastData.latitude;
-            if (!created) CreateLocationMarker();
-            else UpdateLocationMarker();
+            // Location service running and in bounds of map
+            if (Input.location.status == LocationServiceStatus.Running &&
+                PointInBounds(Input.location.lastData.longitude, Input.location.lastData.latitude))
+            {
+                displayLocation = true;
+                _longitude = Input.location.lastData.longitude;
+                _latitude = Input.location.lastData.latitude;
+                if (!created) CreateLocationMarker();
+                else UpdateLocationMarker();
+            }
+            else
+            {
+                displayLocation = false;
+            }
         }
         else
         {
-            displayLocation = false;
+            displayLocation = true;
+            _longitude = testingLong;
+            _latitude = testingLat;
+            if (!created) CreateLocationMarker();
+            else UpdateLocationMarker();
         }
     }
     

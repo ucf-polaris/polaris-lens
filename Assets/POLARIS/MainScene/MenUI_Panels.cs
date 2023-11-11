@@ -156,7 +156,6 @@ namespace POLARIS.MainScene {
             {
                 case "SUGGESTED":
                     header.text = "Suggested Locations";
-                    Debug.Log("yes");
                     foreach (string buildingName in userManager.data.Suggested.Split("~"))
                     {
                         LocationData building = GetBuildingFromName(buildingName);
@@ -178,6 +177,10 @@ namespace POLARIS.MainScene {
                 case "CLOSEST":
                     header.text = "Closest Locations";
                     buildings = locationManager.GetBuildingsFromSearch("", false, LocationManager.LocationFilter.Closest);
+                    break;
+                case "EVENTS":
+                    header.text = "Most Events per Locations";
+                    buildings = locationManager.GetBuildingsFromSearch("", false, LocationManager.LocationFilter.Events);
                     break;
                 default:
                     header.text = "Locations";
@@ -239,8 +242,8 @@ namespace POLARIS.MainScene {
                         case "CLOSEST":
                             filter = LocationManager.LocationFilter.Closest;
                             break;
-                        case "FARTHEST":
-                            filter = LocationManager.LocationFilter.Closest;
+                        case "EVENTS":
+                            filter = LocationManager.LocationFilter.Events;
                             break;
                         default:
                             header.text = "Locations";

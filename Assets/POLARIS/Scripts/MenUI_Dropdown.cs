@@ -36,7 +36,8 @@ public class MenUI_Dropdown : MonoBehaviour
             "VISITED",
             "NOT VISITED",
             "FAVORITES",
-            "CLOSEST"
+            "CLOSEST",
+            "EVENTS"
         };
 
         dropDown.value = dropDown.choices[0];

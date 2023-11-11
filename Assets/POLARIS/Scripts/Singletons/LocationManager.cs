@@ -164,7 +164,8 @@ namespace POLARIS.Managers
             Favorites,
             NotVisited,
             Visited,
-            Closest
+            Closest,
+            Events
         }
         private bool filterLocation(LocationData location, LocationFilter filter)
         {
@@ -178,6 +179,8 @@ namespace POLARIS.Managers
         {
             if (filter == LocationFilter.Closest)
                 list = list.OrderBy(loc => DistanceInMiBetweenEarthCoordinates(new double2(GetUserCurrentLocation._latitude, GetUserCurrentLocation._longitude), new double2(loc.BuildingLat, loc.BuildingLong))).ToList();
+            else if (filter == LocationFilter.Events)
+                list = list.OrderByDescending(loc => loc.BuildingEvents.Length).ToList();
             return list;
         }
 
@@ -288,7 +291,7 @@ namespace POLARIS.Managers
         [SerializeField]
         private string buildingDesc;
         [SerializeField]
-        private string[] buildingEvents;
+        private string[] buildingEvents = new string[0];
         [SerializeField]
         private string buildingName;
         [SerializeField]
