@@ -10,20 +10,9 @@ using POLARIS.Managers;
 namespace POLARIS.MainScene {
     public class MenUI_Panels : MonoBehaviour
     {
-
-        //misc. variables
-        private string currentTab;
-        private bool _waitingForResponse = false;
-        private Label header;
-        [SerializeField] private bool showSuggestions = true;
-
         //Managers
-        private UserManager userManager;
         private EventManager eventManager;
         private LocationManager locationManager;
-
-        //UI Toolkit elements
-        private TextField _searchField;
 
         //UI Toolkit Objects
         [SerializeField]
@@ -37,20 +26,16 @@ namespace POLARIS.MainScene {
         public locationExtendedView ExtendedLocationView;
 
         public static bool userOnListView;
-        private bool shouldTriggerOnChangeEvent = true;
         // Start is called before the first frame update
         private void Start()
         {
             //Initialize variables
-            userManager = UserManager.getInstance();
             eventManager = EventManager.getInstance();
             locationManager = LocationManager.getInstance();
-            currentTab = ChangeTabImage._lastPressed;
             listController = new ListController();
 
             var uiDoc = GetComponent<UIDocument>();
             var rootVisual = uiDoc.rootVisualElement;
-            header = rootVisual.Q<Label>("Identifier");
 
             //define extended views
             ExtendedEventView = new eventExtendedView(rootVisual.Q<VisualElement>("ExtendedEventView"));
@@ -65,210 +50,14 @@ namespace POLARIS.MainScene {
             BuildingListEntryController.extendedView = ExtendedLocationView;
 
             BuildingListEntryController.otherView = ExtendedEventView;
-
-            //set up the search bar
-            _searchField = rootVisual.Q<TextField>("SearchBar");
-            _searchField.RegisterValueChangedCallback(OnSearchValueChanged);
-            
-            var tab = GetComponent<ChangeTabImage>();
-            _searchField.RegisterCallback<FocusEvent>(tab.RaiseMenu);
-            
-            _searchField.selectAllOnFocus = true;
-            SetPlaceholderText(_searchField, currentTab == "location" ? "Search for locations" : "Search for events");
-
-            StartCoroutine(FillSearch());
-        }
-
-        private IEnumerator FillSearch()
-        {
-            if (currentTab == "location")
-            {
-                while (locationManager.dataList.Count == 0) yield return null;
-                OnChangeDropdown(MenUI_Dropdown.currentChoice);
-            }
-            else
-            {
-                while (eventManager.dataList.Count == 0) yield return null;
-                if (showSuggestions)
-                {
-                    header.text = "Suggested Events";
-                }
-                else
-                {
-                    header.text = "Events";
-                }
-                List<EventData> events = eventManager.dataList;
-                UpdateEventSearchUI(events);
-            }
-        }
-        
-        private LocationData GetBuildingFromName(string buildingName)
-        {
-            foreach (LocationData building in locationManager.dataList)
-            {
-                if (string.Equals(buildingName, building.BuildingName,
-                        StringComparison.OrdinalIgnoreCase))
-                {
-                    return building;
-                }
-
-                if (building.BuildingAllias == null) continue;
-                foreach (string alias in building.BuildingAllias)
-                {
-                    if (String.Equals(buildingName, alias,
-                            StringComparison.OrdinalIgnoreCase))
-                    {
-                        return building;
-                    }
-                }
-            }
-
-            return null;
         }
 
         // Update is called once per frame
         private void Update()
         {
             userOnListView = ChangeTabImage._menuOpen || ExtendedEventView.Extended || ExtendedLocationView.Extended;
-            
-            if (ChangeTabImage.justRaised)
-            {
-                StartCoroutine(FillSearch());
-                ChangeTabImage.justRaised = false;
-            }
-            
-            if (ChangeTabImage._lastPressed == currentTab) return;
-
-            // Just swapped tabs
-            currentTab = ChangeTabImage._lastPressed;
-            ClearSearchResults(true);
-            _searchField.value = "";
-            SetPlaceholderText(_searchField, ChangeTabImage._lastPressed == "location" ? "Search for locations" : "Search for events");
         }
-        
-        public void OnChangeDropdown(string choice)
-        {
-            shouldTriggerOnChangeEvent = false;
-            //clear search view
-            if(_searchField.value != "Search for locations" && _searchField.value != "Search for events") _searchField.value = "Search for locations";
-            List<LocationData> buildings = new List<LocationData>();
-            switch (choice)
-            {
-                case "SUGGESTED":
-                    header.text = "Suggested Locations";
-                    foreach (string buildingName in userManager.data.Suggested.Split("~"))
-                    {
-                        LocationData building = GetBuildingFromName(buildingName);
-                        if (building != null) buildings.Add(building);
-                    }
-                    break;
-                case "VISITED":
-                    header.text = "Visited Locations";
-                    buildings = locationManager.GetBuildingsFromSearch("", false, LocationManager.LocationFilter.Visited);
-                    break;
-                case "NOT VISITED":
-                    header.text = "Not Visited Locations";
-                    buildings = locationManager.GetBuildingsFromSearch("", false, LocationManager.LocationFilter.NotVisited);
-                    break;
-                case "FAVORITES":
-                    header.text = "Favorited Locations";
-                    buildings = locationManager.GetBuildingsFromSearch("", false, LocationManager.LocationFilter.Favorites);
-                    break;
-                case "CLOSEST":
-                    header.text = "Closest Locations";
-                    buildings = locationManager.GetBuildingsFromSearch("", false, LocationManager.LocationFilter.Closest);
-                    break;
-                case "EVENTS":
-                    header.text = "Most Events per Locations";
-                    buildings = locationManager.GetBuildingsFromSearch("", false, LocationManager.LocationFilter.Events);
-                    break;
-                default:
-                    header.text = "Locations";
-                    buildings = locationManager.dataList;
-                    break;
-            }
-            UpdateBuildingSearchUI(buildings);
-        }
-
-        private void OnSearchValueChanged(ChangeEvent<string> evt)
-        {
-            if (shouldTriggerOnChangeEvent == false)
-            {
-                shouldTriggerOnChangeEvent = true;
-                return;
-            }
-            
-            if (ChangeTabImage.justRaised) ChangeTabImage.justRaised = false;
-            string newText = evt.newValue;
-
-            //from something to empty string
-            if (newText.EndsWith("\n"))
-            {
-                Deselect();
-                _searchField.value = newText.TrimEnd('\n');
-                return;
-            }
-
-            //when you replace placeholder by focusing on text box
-            bool flag = (evt.previousValue == "Search for locations" || evt.previousValue == "Search for events") && evt.newValue == "";
-            if (currentTab == "location")
-            {
-                if (showSuggestions && newText == "" && MenUI_Dropdown.currentChoice == "SUGGESTED")
-                {
-                    header.text = "Suggested Locations";
-                    List<LocationData> buildings = new List<LocationData>();
-                    foreach (string buildingName in userManager.data.Suggested.Split("~"))
-                    {
-                        LocationData building = GetBuildingFromName(buildingName);
-                        if (building != null) buildings.Add(building);
-                    }
-                    UpdateBuildingSearchUI(buildings);
-                }
-                else
-                {
-                    LocationManager.LocationFilter filter = LocationManager.LocationFilter.None;
-                    //put in logic to shift between drop down options here
-                    switch (MenUI_Dropdown.currentChoice)
-                    {
-                        case "VISITED":
-                            filter = LocationManager.LocationFilter.Visited;
-                            break;
-                        case "NOT VISITED":
-                            filter = LocationManager.LocationFilter.NotVisited;
-                            break;
-                        case "FAVORITES":
-                            filter = LocationManager.LocationFilter.Favorites;
-                            break;
-                        case "CLOSEST":
-                            filter = LocationManager.LocationFilter.Closest;
-                            break;
-                        case "EVENTS":
-                            filter = LocationManager.LocationFilter.Events;
-                            break;
-                        default:
-                            header.text = "Locations";
-                            break;
-                    }
-                    List<LocationData> buildings = locationManager.GetBuildingsFromSearch(newText, newText.Length > 0 && newText[0] == '~', filter);
-                    UpdateBuildingSearchUI(buildings, !flag);
-                }
-            }
-            else
-            {
-                if (showSuggestions && newText == "")
-                {
-                    header.text = "Suggested Events";
-                }
-                else
-                {
-                    header.text = "Events";
-                }
-                List<EventData> events = eventManager.GetEventsFromSearch(newText, newText.Length > 0 && newText[0] == '~');
-                UpdateEventSearchUI(events, !flag);
-            }
-        }
-
-        private void UpdateBuildingSearchUI(List<LocationData> buildings, bool shouldReset = true)
+        public void UpdateBuildingSearchUI(List<LocationData> buildings, bool shouldReset = true)
         {
             listController.Update(buildings);
             if (shouldReset)
@@ -278,7 +67,7 @@ namespace POLARIS.MainScene {
             }
         }
 
-        private void UpdateEventSearchUI(List<EventData> events, bool shouldReset = true)
+        public void UpdateEventSearchUI(List<EventData> events, bool shouldReset = true)
         {
             listController.Update(events);
             if (shouldReset)
@@ -287,25 +76,8 @@ namespace POLARIS.MainScene {
                 CollapseBothExtendedViews();
             }
         }
-        
 
-        private void Deselect()
-        {
-            // Deselect the text input field that was used to call this function. 
-            // It is required so that the camera controller can be enabled/disabled when the input field is deselected/selected 
-            var eventSystem = EventSystem.current;
-            if (!eventSystem.alreadySelecting)
-            {
-                eventSystem.SetSelectedGameObject(null);
-            }
-        }
-
-        private void FillInputField(string searchText)
-        {
-            _searchField.value = searchText;
-        }
-
-        private void ClearSearchResults(bool swap)
+        public void ClearSearchResults(bool swap)
         {
             ListController.SwitchType type1 = ListController.SwitchType.locations;
             ListController.SwitchType type2 = ListController.SwitchType.events;

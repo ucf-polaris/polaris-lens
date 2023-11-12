@@ -131,24 +131,6 @@ public class ListController
         // Set the actual item's source list/array
         EntryList.itemsSource = _eventSearchList;
     }
-
-    //will be used after pictures are downloaded
-    public void RefreshUI()
-    {
-        if (EntryList == null) return;
-
-        EntryList.Rebuild();
-        //refresh the extended view if it's up
-        if (EventListEntryController.extendedView.Extended)
-        {
-            EventListEntryController.extendedView.RefreshPage(false);
-        }
-        if (BuildingListEntryController.extendedView.Extended)
-        {
-            BuildingListEntryController.extendedView.RefreshPage(false);
-        }
-    }
-
     public void Update(List<LocationData> newList)
     {
         _buildingSearchList = newList;

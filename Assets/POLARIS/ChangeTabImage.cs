@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.UIElements;
 using POLARIS.MainScene;
+using System;
 
 public class ChangeTabImage : MonoBehaviour
 {
@@ -15,11 +16,14 @@ public class ChangeTabImage : MonoBehaviour
 	private VisualElement _spacer;
 	private VisualElement _arrow;
 	private Label _header;
-	public static string _lastPressed = "location";
+	private string _myLastPressed = "location";
+	public string MyLastPressed { get => _myLastPressed; set { _myLastPressed = value; OnEvent(); } }
+
 	public static bool _menuOpen = false;
 	public static bool justRaised = false;
 
 	private MenUI_Panels panelFuncts;
+	public event EventHandler ChangeTab;
 
 	// Start is called before the first frame update
     private void Start()
@@ -43,8 +47,16 @@ public class ChangeTabImage : MonoBehaviour
 		_header = uiDoc.rootVisualElement.Q<Label>("Identifier");
 		_arrow.RegisterCallback<ClickEvent>(OnClickArrow);
     }
+	private void OnEvent()
+	{
+		Debug.Log("yes");
+		if (ChangeTab != null)
+		{
+			ChangeTab(this, EventArgs.Empty);
+		}
+	}
 
-    private void OnClickCalendar()
+	private void OnClickCalendar()
 	{
 		_header.text = "Events";
 		_locationButton.style.backgroundImage = _locationDark;
@@ -74,9 +86,9 @@ public class ChangeTabImage : MonoBehaviour
 
     private void MoveUI(string pressed)
     {
-	    justRaised = (!_menuOpen && !(_menuOpen && _lastPressed == pressed)); 
-	    _menuOpen = !(_menuOpen && _lastPressed == pressed);
-	    _lastPressed = pressed;
+	    justRaised = (!_menuOpen && !(_menuOpen && MyLastPressed == pressed)); 
+	    _menuOpen = !(_menuOpen && MyLastPressed == pressed);
+		MyLastPressed = pressed;
 
 	    _spacer.style.height = Length.Percent(_menuOpen ?  15 : 82.5f);
 	    _arrow.style.rotate = new Rotate(_menuOpen ? 180 : 0);

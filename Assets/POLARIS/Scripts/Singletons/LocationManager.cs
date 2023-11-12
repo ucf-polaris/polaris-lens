@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Linq;
 using POLARIS;
 using Unity.Mathematics;
+using System.Globalization;
 
 namespace POLARIS.Managers
 {
@@ -20,7 +21,26 @@ namespace POLARIS.Managers
         private const string BaseApiUrl = "https://api.ucfpolaris.com";
 
         public List<LocationData> dataList;
+        //public IDictionary<string, GarageData> garageList = new Dictionary<string, GarageData>();
+        public List<GarageData> garageList = new List<GarageData>();
+        public DateTime lastGaragePull = DateTime.UtcNow;
+        private TimeSpan nextPullDuration = TimeSpan.FromMinutes(60);
         public bool Testing;
+
+        public CallStatus ScanStatus = CallStatus.NotStarted;
+        public CallStatus GarageScanStatus = CallStatus.NotStarted;
+
+        public event EventHandler UpdateNeeded;
+        public enum LocationFilter
+        {
+            None,
+            Favorites,
+            NotVisited,
+            Visited,
+            Closest,
+            Events
+        }
+
         void Awake()
         {
             //create singleton
@@ -41,11 +61,21 @@ namespace POLARIS.Managers
             //populates dataList
             userAccess = UserManager.getInstance();
             CallScan();
+            CallGarage();
         }
 
         static public LocationManager getInstance()
         {
             return Instance;
+        }
+
+        //calls all functions subscribed to event
+        private void OnEvent()
+        {
+            if(UpdateNeeded != null)
+            {
+                UpdateNeeded(this, EventArgs.Empty);
+            }
         }
 
         //scans all elements right away
@@ -59,9 +89,15 @@ namespace POLARIS.Managers
             }
         }
 
+        public void CallGarage()
+        {
+            StartCoroutine(DownloadGarageData());
+        }
+
         override protected IEnumerator Scan(IDictionary<string, string> request)
         {
             Debug.Log("SCANNING....");
+            ScanStatus = CallStatus.InProgress;
             string Token = TestingToken;
             string RefreshToken = TestingRefreshToken;
             if (UserManager.isNotNull() && !userAccess.Testing)
@@ -76,6 +112,7 @@ namespace POLARIS.Managers
             if (www.result != UnityWebRequest.Result.Success)
             {
                 Debug.Log(www.error);
+                ScanStatus = CallStatus.Failed;
             }
             else
             {
@@ -94,6 +131,7 @@ namespace POLARIS.Managers
                 // Debug.Log($"Event {UCFEvent.Name} has description {UCFEvent.Description}");
                 // }
                 getAllRawImages();
+                ScanStatus = CallStatus.Succeeded;
             }
             running = null;
             //since this isn't inherent to the building, needs to be set from userAccess
@@ -131,13 +169,45 @@ namespace POLARIS.Managers
                 JObject jsonResponse = JObject.Parse(www.downloadHandler.text);
                 Debug.Log("Response: " + jsonResponse);
             }
-            Debug.LogWarning("Implement this");
         }
 
         override public IEnumerator UpdateFields(IDictionary<string, string> request)
         {
             yield return null;
-            Debug.LogWarning("Should not be implement");
+            Debug.LogWarning("Should not be implemented");
+        }
+
+        protected IEnumerator DownloadGarageData()
+        {
+            Debug.Log("SCANNING....");
+            GarageScanStatus = CallStatus.InProgress;
+            var www = UnityWebRequest.Get("https://secure.parking.ucf.edu/GarageCounter/GetOccupancy");
+            yield return www.SendWebRequest();
+            lastGaragePull = DateTime.UtcNow;
+
+            if (www.result != UnityWebRequest.Result.Success)
+            {
+                Debug.Log(www.error);
+                GarageScanStatus = CallStatus.Failed;
+            }
+            else
+            {
+                Debug.Log("Form upload complete!");
+                Debug.Log("Status Code: " + www.responseCode);
+                Debug.Log(www.result);
+                Debug.Log("Garage Response: " + www.downloadHandler.text);
+
+                var gb = JArray.Parse(www.downloadHandler.text);
+                garageList.Clear();
+                foreach(var token in gb)
+                {
+                    var counts = token["location"]["counts"];
+                    garageList.Add(new GarageData(counts["available"].ToObject<int>(), counts["occupied"].ToObject<int>(), counts["total"].ToObject<int>(),
+                        counts["timestamp"].ToObject<string>(), token["location"]["name"].ToObject<string>()));
+                }
+                GarageScanStatus = CallStatus.Succeeded;
+                OnEvent();
+            }
         }
 
         public void getAllRawImages()
@@ -158,15 +228,7 @@ namespace POLARIS.Managers
                 data.rawImage = Resources.Load<Texture2D>("UCF_Logo_2");
             }
         }
-        public enum LocationFilter
-        {
-            None,
-            Favorites,
-            NotVisited,
-            Visited,
-            Closest,
-            Events
-        }
+        
         private bool filterLocation(LocationData location, LocationFilter filter)
         {
             if (filter == LocationFilter.Favorites) return location.IsFavorited;
@@ -194,7 +256,6 @@ namespace POLARIS.Managers
                 if (building.BuildingName.IndexOf(query, StringComparison.OrdinalIgnoreCase) >= 0 ||
                     (fuzzySearch && FuzzyMatch(building.BuildingName, query, TOLERANCE)))
                 {
-                    Debug.Log("Result: " + building.BuildingName);
                     //filter out based on the location filter
                     if(filterLocation(building, locFilter))
                         buildings.Add(building);
@@ -279,40 +340,49 @@ namespace POLARIS.Managers
         {
             return degrees * Math.PI / 180;
         }
+
+        private void Update()
+        {
+            //refresh every hour
+            if(DateTime.UtcNow - lastGaragePull > nextPullDuration)
+            {
+                CallGarage();
+            }
+        }
     }
 
     [Serializable]
     public class LocationData
     {
         [SerializeField]
-        private float buildingLong;
+        protected float buildingLong;
         [SerializeField]
-        private float buildingLat;
+        protected float buildingLat;
         [SerializeField]
-        private string buildingDesc;
+        protected string buildingDesc;
         [SerializeField]
-        private string[] buildingEvents = new string[0];
+        protected string[] buildingEvents = new string[0];
         [SerializeField]
-        private string buildingName;
+        protected string buildingName;
         [SerializeField]
-        private float buildingAltitude;
+        protected float buildingAltitude;
         [SerializeField]
-        private string buildingLocationType;
+        protected string buildingLocationType;
         [SerializeField]
-        private string[] buildingAbbreviation;
+        protected string[] buildingAbbreviation;
         [SerializeField]
-        private string[] buildingAllias;
+        protected string[] buildingAllias;
         [SerializeField]
-        private string buildingAddress;
+        protected string buildingAddress;
         [SerializeField]
-        private string buildingImage;
+        protected string buildingImage;
         [SerializeField]
-        private Location[] buildingEntrances;
+        protected Location[] buildingEntrances;
         public Texture2D rawImage = null;
         [SerializeField]
-        private bool isFavorited;
+        protected bool isFavorited;
         [SerializeField]
-        private bool isVisited;
+        protected bool isVisited;
 
         public float BuildingLong { get => buildingLong; set => buildingLong = value; }
         public float BuildingLat { get => buildingLat; set => buildingLat = value; }

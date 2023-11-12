@@ -13,6 +13,13 @@ public abstract class BaseManager : MonoBehaviour
     protected abstract IEnumerator Get(IDictionary<string, string> request);
     public abstract IEnumerator UpdateFields(IDictionary<string, string> request);
 
+    public enum CallStatus
+    {
+        NotStarted,
+        InProgress,
+        Failed,
+        Succeeded
+    }
     protected string LongestCommonSubsequence(string source, string target)
     {
         int[,] C = LongestCommonSubsequenceLengthTable(source, target);

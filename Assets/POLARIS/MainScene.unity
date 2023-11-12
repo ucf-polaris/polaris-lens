@@ -528,7 +528,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   dataList: []
+  garageList: []
   Testing: 0
+  ScanStatus: 0
+  GarageScanStatus: 0
 --- !u!1 &607878207
 GameObject:
   m_ObjectHideFlags: 0
@@ -867,6 +870,7 @@ GameObject:
   - component: {fileID: 985640671}
   - component: {fileID: 985640672}
   - component: {fileID: 985640673}
+  - component: {fileID: 985640674}
   m_Layer: 5
   m_Name: MenuUI
   m_TagString: Untagged
@@ -930,7 +934,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6b021cc1d5d6d5146bbcbfc080d4d506, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  showSuggestions: 1
   LocationListEntryTemplate: {fileID: 9197481963319205126, guid: a6efed181fb96594d9670d265b13e76e,
     type: 3}
   EventListEntryTemplate: {fileID: 9197481963319205126, guid: 7aeb352b21f934d4e81a05dc8142be99,
@@ -979,6 +982,19 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5bd31453237b6fb4ebbf226a133fcb50, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!114 &985640674
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 985640667}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d02e3c8cf36159a4185251aba67b41d1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  showSuggestions: 1
 --- !u!1 &1006044603
 GameObject:
   m_ObjectHideFlags: 0

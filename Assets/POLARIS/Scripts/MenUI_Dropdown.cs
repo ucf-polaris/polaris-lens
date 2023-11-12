@@ -4,27 +4,20 @@ using UnityEngine;
 using UnityEngine.UIElements;
 using POLARIS.Managers;
 using POLARIS.MainScene;
+using System;
 
 public class MenUI_Dropdown : MonoBehaviour
 {
     DropdownField dropDown;
-    MenUI_Panels panels;
-    public string CurrentTab { get => _currentTab; 
-        set {
-            _currentTab = value;
-            if (dropDown == null) return;
-            if (value == "location")
-                dropDown.style.display = DisplayStyle.Flex;
-            else
-                dropDown.style.display = DisplayStyle.None;
-        } }
-    private string _currentTab = "";
+    MenUI_Search search;
+    ChangeTabImage tab;
     public static string currentChoice;
 
     // Start is called before the first frame update
     void Start()
     {
-        panels = GetComponent<MenUI_Panels>();
+        search = GetComponent<MenUI_Search>();
+        tab = GetComponent<ChangeTabImage>();
 
         var UIDoc = GetComponent<UIDocument>();
         dropDown = UIDoc.rootVisualElement.Q<DropdownField>("SearchFilter");
@@ -47,14 +40,18 @@ public class MenUI_Dropdown : MonoBehaviour
         dropDown.RegisterCallback<ChangeEvent<string>>((evt) =>
         {
             currentChoice = evt.newValue;
-            panels.OnChangeDropdown(currentChoice);
+            search.OnChangeDropdown(currentChoice);
         });
+
+        tab.ChangeTab += OnChangeTab;
     }
 
-    // Update is called once per frame
-    void Update()
+    public void OnChangeTab(object sender, EventArgs e)
     {
-        //keep track if tab changes (get rid of drop down)
-        CurrentTab = ChangeTabImage._lastPressed;
+        if (dropDown == null) return;
+        if (tab.MyLastPressed == "location")
+            dropDown.style.display = DisplayStyle.Flex;
+        else
+            dropDown.style.display = DisplayStyle.None;
     }
 }
