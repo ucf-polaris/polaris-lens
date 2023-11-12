@@ -6,6 +6,7 @@ namespace POLARIS.MainScene
     public static class PersistData
     {
         public static bool Routing = false;
+        public static bool UsingCurrent = false;
         
         public static Vector3 DestPoint = Vector3.zero;
         public static readonly Stack<Vector3> StopLocations = new();
