@@ -300,7 +300,7 @@ namespace POLARIS.MainScene {
                 noneLabel.AddToClassList("EventText");
                 EventList.Add(noneLabel);
             }
-            Debug.Log("made it");
+
             //extend location view, put down event view
             Extended = true;
             if(closeOther) OtherView.Extended = false;
@@ -373,11 +373,15 @@ namespace POLARIS.MainScene {
         public Button NavButton;
         protected UcfRouteManager _routeManager;
         protected GameObject MenuUI;
+        private float ScrollDecel;
 
         public extendedScrollView(VisualElement container)
         {
             ExtendedContainerView = container;
             ExtendedView = container.Q<ScrollView>("ExtendedScrollView");
+            ScrollDecel = ExtendedView.scrollDecelerationRate;
+            ExtendedView.RegisterCallback<PointerDownEvent>(OnTouchScreen);
+
             image = container.Q<VisualElement>("ImagePop");
             DescriptionText = container.Q<Label>("DescriptionText");
             TitleText = container.Q<Label>("TitleText");
@@ -410,6 +414,17 @@ namespace POLARIS.MainScene {
         protected void OnBackClick(ClickEvent evt)
         {
             Extended = false;
+        }
+
+        public void BackToTop()
+        {
+            ExtendedView.verticalScroller.value = ExtendedView.verticalScroller.lowValue;
+            ExtendedView.scrollDecelerationRate = 0.0f;
+        }
+
+        private void OnTouchScreen(PointerDownEvent evt)
+        {
+            ExtendedView.scrollDecelerationRate = ScrollDecel;
         }
 
         public bool Extended { get => extended; set { extended = value; ExtendedContainerView.style.top = Length.Percent(value ? 10f : 110f); } }

@@ -95,8 +95,10 @@ namespace POLARIS.MainScene
 
         private IEnumerator RaiseAllMenus(LocationData building) {
             var tabImage = menUI.GetComponent<ChangeTabImage>();
+
             tabImage.RaiseMenu(null);
             yield return new WaitForSeconds(0.1f);
+            menUI.ExtendedLocationView.BackToTop();
             menUI.ExtendedLocationView.ExtendMenu(building, true);
         }
 
