@@ -71,6 +71,7 @@ namespace POLARIS
         private bool _shouldClose = false;
         private bool _lastShouldClose = true;
         private float _pressTime = 0;
+        private float _lastRerouteTime = 0;
         private float _closeTime;
         private bool _closed = false;
 
@@ -213,9 +214,7 @@ namespace POLARIS
 
             if (_stops.Count > StopCount)
             {
-                Destroy(_stops.Pop());
-                PersistData.StopLocations.Pop();
-                PersistData.StopNames.Pop();
+                RemoveLastMarker();
             }
 
             if (_stops.Count == 1)
@@ -256,6 +255,13 @@ namespace POLARIS
                     StartCoroutine(DrawRoute(results, !PersistData.UsingCurrent));
                 }
             }
+        }
+
+        private void RemoveLastMarker()
+        {
+            Destroy(_stops.Pop());
+            PersistData.StopLocations.Pop();
+            PersistData.StopNames.Pop();
         }
 
         /// <summary>
@@ -585,13 +591,21 @@ namespace POLARIS
         private void PlaceMarkerAtUserLocation()
         {
             PersistData.UsingCurrent = true;
-            var curPosition = new ArcGISPoint(GetUserCurrentLocation._longitude,
-                                              GetUserCurrentLocation._latitude,
-                                              0f,
-                                              new ArcGISSpatialReference(4326));
-            var curWorldPosition =
-                _root.TransformPoint(_arcGisMapComponent.View.GeographicToWorld(curPosition)).ToVector3();
-            PlaceMarker(curWorldPosition, "My Location", true, false);
+            
+            if (LocationMarker)
+            {
+                PlaceMarker(LocationMarker.transform.position, "Current Location", true, false);
+            }
+            else
+            {
+                var curPosition = new ArcGISPoint(GetUserCurrentLocation._longitude,
+                                                  GetUserCurrentLocation._latitude,
+                                                  0f,
+                                                  new ArcGISSpatialReference(4326));
+                var curWorldPosition =
+                    _root.TransformPoint(_arcGisMapComponent.View.GeographicToWorld(curPosition)).ToVector3();
+                PlaceMarker(curWorldPosition, "Current Location", true, false);
+            }
         }
         
 
@@ -653,10 +667,14 @@ namespace POLARIS
                 }
             }
 
-            if (smallestDist > RerouteDist) // Dont know what dist this is
+            // Auto reroute
+            if (PersistData.UsingCurrent && smallestDist > RerouteDist && Time.time - _lastRerouteTime > 5)
             {
-                // TODO: Auto reroute
-                // Debug.Log("Should recalculate route! - Smallest dist is " + smallestDist);
+                Debug.Log("Should recalculate route! - Smallest dist is " + smallestDist);
+                _lastRerouteTime = Time.time;
+                
+                RemoveLastMarker();
+                PlaceMarkerAtUserLocation();
             }
 
             return smallestIndex;
