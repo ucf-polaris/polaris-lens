@@ -61,6 +61,8 @@ namespace POLARIS
         
         [SerializeField] private Color32 BaseBuildingColor = new (23, 103, 194, 255);
         [SerializeField] private Color32 TopBuildingColor = new (123, 13, 194, 255);
+        [SerializeField] private Color32 NoInformationBuildingColor = new(128, 128, 128, 255);
+        
         // The feature layer we are going to query
         public string FeatureLayerURL = "https://services.arcgis.com/dVL5xxth19juhrDY/ArcGIS/rest/services/MainCampus_RPbldgs/FeatureServer/0";
 
@@ -229,9 +231,11 @@ namespace POLARIS
                 _polyExtruder.isOutlineRendered = false;
 
                 var numEventsOfBuilding = GetNumEventsBuilding(feature.attributes.BuildingNa);
-                var colorOfBuilding = Color.Lerp(
-                    BaseBuildingColor, TopBuildingColor, 1 - (1.0f / (numEventsOfBuilding + 1))
-                    );
+                var colorOfBuilding = numEventsOfBuilding.HasValue
+                    ? Color32.Lerp(
+                        BaseBuildingColor, TopBuildingColor, 1 - (1.0f / (numEventsOfBuilding.Value + 1))
+                    )
+                    : NoInformationBuildingColor;
 
                 var height = _customHeights.GetValueOrDefault(feature.attributes.BuildingNa, DefaultHeight);
                 _polyExtruder.createPrism(feature.attributes.BuildingNa, height, vertices2D, 
@@ -239,7 +243,7 @@ namespace POLARIS
             }
         }
         
-        private int GetNumEventsBuilding(string buildingName)
+        private int? GetNumEventsBuilding(string buildingName)
         {
             LocationData foundBuilding = null;
             foreach (var building in _locationManager.dataList)
@@ -259,7 +263,9 @@ namespace POLARIS
                 }
             }
 
-            return foundBuilding?.BuildingEvents?.Length ?? 0;
+            if (foundBuilding == null) return null;
+            if (foundBuilding.BuildingEvents == null) return 0;
+            return foundBuilding.BuildingEvents.Length;
         }
         
         private static GameObject FindChildWithTag(GameObject parent, string tag)
