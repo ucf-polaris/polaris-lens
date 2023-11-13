@@ -528,7 +528,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   dataList: []
-  garageList: []
   Testing: 0
   ScanStatus: 0
   GarageScanStatus: 0
@@ -938,25 +937,37 @@ MonoBehaviour:
     type: 3}
   EventListEntryTemplate: {fileID: 9197481963319205126, guid: 7aeb352b21f934d4e81a05dc8142be99,
     type: 3}
+  ParkingList: {fileID: 9197481963319205126, guid: fd85d2c40ab16e24cb5670c7dcd8d6bf,
+    type: 3}
   ExtendedEventView:
     OtherView:
+      GarageInstance: {fileID: 0}
       OtherView:
         OtherView:
+          GarageInstance: {fileID: 0}
           OtherView:
             OtherView:
+              GarageInstance: {fileID: 0}
               OtherView:
                 OtherView:
+                  GarageInstance: {fileID: 0}
                   OtherView:
-                    OtherView: {}
+                    OtherView:
+                      GarageInstance: {fileID: 0}
   ExtendedLocationView:
+    GarageInstance: {fileID: 0}
     OtherView:
       OtherView:
+        GarageInstance: {fileID: 0}
         OtherView:
           OtherView:
+            GarageInstance: {fileID: 0}
             OtherView:
               OtherView:
+                GarageInstance: {fileID: 0}
                 OtherView:
                   OtherView:
+                    GarageInstance: {fileID: 0}
                     OtherView: {}
 --- !u!114 &985640672
 MonoBehaviour:

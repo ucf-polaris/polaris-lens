@@ -50,6 +50,9 @@ namespace POLARIS.MainScene {
             BuildingListEntryController.extendedView = ExtendedLocationView;
 
             BuildingListEntryController.otherView = ExtendedEventView;
+
+            locationManager.UpdateNeeded += RefreshListView;
+            locationManager.UpdateNeeded += RefreshLocationExtendedView;
         }
 
         // Update is called once per frame
@@ -57,6 +60,20 @@ namespace POLARIS.MainScene {
         {
             userOnListView = ChangeTabImage._menuOpen || ExtendedEventView.Extended || ExtendedLocationView.Extended;
         }
+
+        private void RefreshListView(object sender, EventArgs e)
+        {
+            listController.EntryList.Rebuild();
+        }
+
+        //this will be called when parking information is finished (will load stuff)
+        private void RefreshLocationExtendedView(object sender, EventArgs e)
+        {
+            //if extended location view isn't up, then don't do anything
+            if (!ExtendedLocationView.Extended) return;
+            ExtendedLocationView.RefreshPage(false);
+        }
+
         public void UpdateBuildingSearchUI(List<LocationData> buildings, bool shouldReset = true)
         {
             listController.Update(buildings);
@@ -206,21 +223,33 @@ namespace POLARIS.MainScene {
     [Serializable]
     public class locationExtendedView : extendedScrollView
     {
-        public Label AddressText;
-        public VisualElement EventList;
-        public Label EventHeaderText;
+        private VisualElement container;
         public VisualElement FavoritesIcon;
         public VisualElement VisitedIcon;
+        public VisualElement EventList;
+        public VisualElement ParkingContainer;
+        public VisualElement ParkingList;
+        public VisualElement ParkingIcon;
+
+        public Label AddressText;
+        public Label EventHeaderText;
+        
         private LocationData locationData;
         private UserManager userManager;
         private EventManager eventManager;
         private LocationManager locationManager;
+
         private Geocoder geo;
         public eventExtendedView OtherView;
 
         public locationExtendedView(VisualElement container) : base(container)
         {
+            this.container = container;
             EventList = container.Q<VisualElement>("EventList");
+            ParkingList = container.Q<VisualElement>("ParkingList");
+            ParkingContainer = container.Q<VisualElement>("ParkingContainer");
+            ParkingIcon = container.Q<VisualElement>("ParkIcon");
+
             EventHeaderText = container.Q<Label>("EventsLabel");
             AddressText = container.Q<Label>("AddressText");
             
@@ -301,9 +330,43 @@ namespace POLARIS.MainScene {
                 EventList.Add(noneLabel);
             }
 
+            //parking information (for garages)
+            if (LocationManager.getInstance().garageList.ContainsKey(locationData.BuildingName))
+            {
+                ParkingContainer.style.display = DisplayStyle.Flex;
+                ParkingIcon.style.display = DisplayStyle.Flex;
+                PopulateParkingData();
+            }
+            else
+            {
+                //make disappear if location is not a parking garage
+                ParkingContainer.style.display = DisplayStyle.None;
+                ParkingIcon.style.display = DisplayStyle.None;
+            }
+
             //extend location view, put down event view
             Extended = true;
             if(closeOther) OtherView.Extended = false;
+        }
+
+        private void PopulateParkingData()
+        {
+            //get variables
+            GarageData data = LocationManager.getInstance().garageList[locationData.BuildingName];
+
+            Label name = container.Q<Label>("GarageName");
+            Label available = container.Q<Label>("Available");
+            Label fulllabel = container.Q<Label>("FullLabel");
+            VisualElement progress = container.Q<VisualElement>("InternalProgressBar");
+
+            //set values
+            name.text = data.name;
+            available.text = "Available: " + data.available.ToString();
+
+            int percentFull = (int)(Math.Ceiling(((float)data.occupied / (float)data.total) * 100));
+            fulllabel.text = percentFull.ToString() + "%";
+
+            progress.style.width = Length.Percent(percentFull);
         }
 
         private void OnFavoritesClick(ClickEvent evt)

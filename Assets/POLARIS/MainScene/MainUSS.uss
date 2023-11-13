@@ -297,12 +297,12 @@
 
 .notVisited {
     background-image: url('project://database/Assets/POLARIS/UI%20Assets/NotVisitedIcon.png?fileID=2800000&guid=0adcce37803887347944ef2c959c9a7e&type=3#NotVisitedIcon');
-    -unity-background-image-tint-color: rgb(159, 4, 30);
+    -unity-background-image-tint-color: rgb(221, 3, 39);
 }
 
 .Visited {
     background-image: url('project://database/Assets/POLARIS/UI%20Assets/VisitedIcon.png?fileID=2800000&guid=ec835c1d4e5da6f48991136f77787581&type=3#VisitedIcon');
-    -unity-background-image-tint-color: rgb(5, 152, 0);
+    -unity-background-image-tint-color: rgb(9, 217, 3);
 }
 
 .EventText {
@@ -329,7 +329,8 @@
 }
 
 .isNotFavorited {
-    background-image: resource('Polaris/star-outline');
+    background-image: url('project://database/Assets/POLARIS/UI%20Assets/star-outline-white.png?fileID=2800000&guid=8a4443ab3830b7b4c9a59e2b9afbdd21&type=3#star-outline-white');
+    -unity-background-image-tint-color: rgb(250, 243, 0);
 }
 
 .navigationButton {

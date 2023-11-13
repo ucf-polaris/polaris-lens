@@ -22,7 +22,7 @@ namespace POLARIS.Managers
 
         public List<LocationData> dataList;
         //public IDictionary<string, GarageData> garageList = new Dictionary<string, GarageData>();
-        public List<GarageData> garageList = new List<GarageData>();
+        public IDictionary<string, GarageData> garageList = new Dictionary<string, GarageData>();
         public DateTime lastGaragePull = DateTime.UtcNow;
         private TimeSpan nextPullDuration = TimeSpan.FromMinutes(60);
         public bool Testing;
@@ -31,6 +31,7 @@ namespace POLARIS.Managers
         public CallStatus GarageScanStatus = CallStatus.NotStarted;
 
         public event EventHandler UpdateNeeded;
+        public event EventHandler GarageUpdateNeeded;
         public enum LocationFilter
         {
             None,
@@ -199,13 +200,31 @@ namespace POLARIS.Managers
 
                 var gb = JArray.Parse(www.downloadHandler.text);
                 garageList.Clear();
-                foreach(var token in gb)
-                {
-                    var counts = token["location"]["counts"];
-                    garageList.Add(new GarageData(counts["available"].ToObject<int>(), counts["occupied"].ToObject<int>(), counts["total"].ToObject<int>(),
-                        counts["timestamp"].ToObject<string>(), token["location"]["name"].ToObject<string>()));
-                }
                 GarageScanStatus = CallStatus.Succeeded;
+
+                //if scan for locations is not done, wait
+                while (ScanStatus == CallStatus.NotStarted || ScanStatus == CallStatus.InProgress)
+                {
+                    yield return null;
+                }
+
+                if (ScanStatus == CallStatus.Failed) yield break;
+
+                //populate dictionary
+                foreach (var token in gb)
+                {
+                    //search through all locations and match garages
+                    foreach(var loc in dataList)
+                    {
+                        if (loc.BuildingName.Contains(token["location"]["name"].ToObject<string>()))
+                        {
+                            var counts = token["location"]["counts"];
+                            garageList.Add(loc.BuildingName, new GarageData(counts["available"].ToObject<int>(), counts["occupied"].ToObject<int>(), counts["total"].ToObject<int>(),
+                        counts["timestamp"].ToObject<string>(), token["location"]["name"].ToObject<string>()));
+                        }
+                    }   
+                }
+
                 OnEvent();
             }
         }

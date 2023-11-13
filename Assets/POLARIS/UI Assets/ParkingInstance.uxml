@@ -1,0 +1,11 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" xsi="http://www.w3.org/2001/XMLSchema-instance" engine="UnityEngine.UIElements" editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+    <ui:VisualElement name="ParkingInstance" style="flex-grow: 1;">
+        <ui:Label tabindex="-1" text="Garage ?" parse-escape-sequences="true" display-tooltip-when-elided="true" name="GarageName" style="background-color: rgba(56, 56, 56, 0); color: rgb(255, 255, 255); font-size: 30px; margin-bottom: 4px;" />
+        <ui:Label tabindex="-1" text="Available: N" parse-escape-sequences="true" display-tooltip-when-elided="true" name="Available" style="font-size: 25px; color: rgb(188, 188, 188); margin-bottom: 8px;" />
+        <ui:Label tabindex="-1" text="Capacity:" parse-escape-sequences="true" display-tooltip-when-elided="true" name="PercentFull" style="font-size: 25px; color: rgb(188, 188, 188); margin-bottom: 8px;" />
+        <ui:VisualElement name="ProgressBar" style="flex-grow: 0; height: 41px; border-top-left-radius: 10px; border-top-right-radius: 10px; border-bottom-right-radius: 10px; border-bottom-left-radius: 10px; background-color: rgb(20, 21, 41); min-height: auto; min-width: auto; border-top-width: 2px; border-right-width: 2px; border-bottom-width: 2px; border-left-width: 2px; width: 83%; margin-bottom: 10px;">
+            <ui:VisualElement name="InternalProgressBar" style="flex-grow: 1; background-color: rgb(132, 15, 2); border-top-left-radius: 10px; border-top-right-radius: 10px; border-bottom-right-radius: 10px; border-bottom-left-radius: 10px; width: 15%;" />
+            <ui:Label tabindex="-1" text="N%" parse-escape-sequences="true" display-tooltip-when-elided="true" name="FullLabel" style="position: absolute; top: -1px; left: 18px; background-color: rgba(255, 255, 255, 0); color: rgb(255, 255, 255); font-size: 18px;" />
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

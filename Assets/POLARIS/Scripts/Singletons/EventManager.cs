@@ -218,7 +218,7 @@ namespace POLARIS.Managers
         public IEnumerator DownloadImage(string MediaUrl)
         {
             UnityWebRequest request = UnityWebRequestTexture.GetTexture(MediaUrl);
-            Debug.Log("Downloading image from " + MediaUrl);
+            //Debug.Log("Downloading image from " + MediaUrl);
             yield return request.SendWebRequest();
             if (request.result == UnityWebRequest.Result.ConnectionError || request.result == UnityWebRequest.Result.ProtocolError)
             {

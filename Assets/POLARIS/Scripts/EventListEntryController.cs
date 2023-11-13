@@ -42,7 +42,7 @@ public class EventListEntryController : ListEntryController
         
         NameLabel.text = cullText(eventData.Name, 35);
 
-        DescriptionLabel.text = cullText(HtmlParser.RichParse(_eventData.Description), 180);
+        DescriptionLabel.text = cullText(HtmlParser.RichParse(_eventData.Description), 120);
 
         var splitDate = _eventData.DateTime.ToString("f").Split(",");
         string useDate = splitDate[1] + splitDate[2];

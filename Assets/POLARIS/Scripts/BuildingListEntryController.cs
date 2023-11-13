@@ -19,6 +19,7 @@ public class BuildingListEntryController
     VisualElement FavoriteElement;
     Button NavigationButton;
     VisualElement PanelEntity;
+    VisualElement GarageIcon;
     LocationData locationData;
 
     UserManager userManager;
@@ -77,6 +78,8 @@ public class BuildingListEntryController
         NavigationButton.UnregisterCallback<ClickEvent>(OnNavClick);
         NavigationButton.RegisterCallback<ClickEvent>(OnNavClick);
 
+        GarageIcon = visualElement.Q<VisualElement>("ParkingIcon");
+
         image = visualElement.Q<VisualElement>(className: "panelImage");
 
         if (Camera.main != null)
@@ -121,6 +124,8 @@ public class BuildingListEntryController
 
         image.style.backgroundImage = buildingData.rawImage;
         this.locationData = buildingData;
+        if (locationManager.garageList.ContainsKey(buildingData.BuildingName)) GarageIcon.style.display = DisplayStyle.Flex;
+        else GarageIcon.style.display = DisplayStyle.None;
     }
        
 

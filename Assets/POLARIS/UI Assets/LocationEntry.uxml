@@ -4,6 +4,11 @@
         <Shadow class="panelShadow" style="width: 950px;" />
         <ui:VisualElement class="panel" style="flex-grow: 1; width: 1000px;">
             <ui:VisualElement class="panelImage" style="flex-grow: 1;" />
+            <ui:VisualElement name="ParkingIcon" style="flex-grow: 0; position: absolute; top: -5%; left: 908px; visibility: visible; display: none;">
+                <ui:VisualElement name="Background" style="flex-grow: 1; background-color: rgba(173, 173, 173, 0.75); border-top-left-radius: 0; border-bottom-left-radius: 20px; border-bottom-right-radius: 0; border-top-right-radius: 20px;">
+                    <ui:VisualElement name="Icon" style="flex-grow: 1; background-image: url(&apos;project://database/Assets/POLARIS/UI%20Assets/ParkingIcon.png?fileID=2800000&amp;guid=c57abd2aa5aa06c45955d25d777dbac4&amp;type=3#ParkingIcon&apos;); height: 92px; width: 92px; -unity-background-image-tint-color: rgb(255, 255, 255);" />
+                </ui:VisualElement>
+            </ui:VisualElement>
             <ui:VisualElement class="panelBlocker" style="flex-grow: 1;" />
             <ui:VisualElement class="panelTextArea" style="flex-grow: 1;">
                 <ui:Label tabindex="-1" text="Label" parse-escape-sequences="true" display-tooltip-when-elided="false" class="panelTextLocation" style="-unity-font-definition: url(&apos;project://database/Assets/POLARIS/Fonts/Poppins-SemiBold%20SDF%20NEW.asset?fileID=11400000&amp;guid=b5ed3e77dd4fb4f43bf79f1640728c09&amp;type=2#Poppins-SemiBold SDF NEW&apos;); -unity-font-style: normal;" />
