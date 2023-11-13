@@ -36,6 +36,8 @@ namespace POLARIS
         public Color PathStart;
         public Color PathEnd;
 
+        public float RerouteDist;
+
         private Label _routingSrcLabel;
         private Label _routingDestLabel;
         private Label _routingInfoLabel;
@@ -43,6 +45,10 @@ namespace POLARIS
         private VisualElement _routingBox;
         private Button _slideButton;
         private Button _stopButton;
+
+        private Texture2D _checkMark;
+        private Texture2D _leftArrow;
+        private bool _slideIsCheck;
         
         private ArcGISMapComponent _arcGisMapComponent;
 
@@ -62,9 +68,11 @@ namespace POLARIS
 
         private Camera _mainCamera;
 
-        private bool _destSelected = false;
-        private bool _lastDestSelected = true;
+        private bool _shouldClose = false;
+        private bool _lastShouldClose = true;
         private float _pressTime = 0;
+        private float _lastRerouteTime = 0;
+        private float _closeTime;
         private bool _closed = false;
 
         private UserManager userManager;
@@ -98,6 +106,9 @@ namespace POLARIS
             _routingBox = rootVisual.Q<VisualElement>("RoutingInfo");
             _slideButton = rootVisual.Q<Button>("SlideButton");
             _stopButton = rootVisual.Q<Button>("StopButton");
+            
+            _checkMark = Resources.Load<Texture2D>("Polaris/icon _Check_");
+            _leftArrow = Resources.Load<Texture2D>("Polaris/leftarrow");
             
             _slideButton.clickable.clicked += ToggleSlide;
             _stopButton.clickable.clicked += StopClicked;
@@ -165,10 +176,10 @@ namespace POLARIS
                 }
             }
 
-            if (_destSelected != _lastDestSelected)
+            if (_shouldClose != _lastShouldClose)
             {
-                _lastDestSelected = _destSelected;
-                StartCoroutine(ToggleRouting(_destSelected || PersistData.Routing));
+                _shouldClose = _lastShouldClose = false;
+                StartCoroutine(ToggleRoutingBox(false));
             }
 
             RebaseRoute();
@@ -203,9 +214,7 @@ namespace POLARIS
 
             if (_stops.Count > StopCount)
             {
-                Destroy(_stops.Pop());
-                PersistData.StopLocations.Pop();
-                PersistData.StopNames.Pop();
+                RemoveLastMarker();
             }
 
             if (_stops.Count == 1)
@@ -213,12 +222,17 @@ namespace POLARIS
                 var len = PersistData.StopLocations.Count;
                 PersistData.DestPoint = PersistData.StopLocations.ToArray()[len - 1];
                 PersistData.DestName = PersistData.StopNames.ToArray()[len - 1];
+                PersistData.UsingCurrent = false;
+
                 UpdateRouteInfoIncomplete();
-                _destSelected = true;
+                StartCoroutine(ToggleRoutingBox(true));
             }
 
             if (_stops.Count == StopCount)
             {
+                StartCoroutine(ToggleRoutingBox(false));
+                _closeTime = Time.time;
+                
                 PersistData.SrcName = PersistData.StopNames.Peek();
                 // No filthy coordinates or weird locations in my suggestions
                 if (!PersistData.DestName.Contains(',') 
@@ -238,9 +252,16 @@ namespace POLARIS
                 }
                 else
                 {
-                    StartCoroutine(DrawRoute(results, !adjustHeight));
+                    StartCoroutine(DrawRoute(results, !PersistData.UsingCurrent));
                 }
             }
+        }
+
+        private void RemoveLastMarker()
+        {
+            Destroy(_stops.Pop());
+            PersistData.StopLocations.Pop();
+            PersistData.StopNames.Pop();
         }
 
         /// <summary>
@@ -396,20 +417,23 @@ namespace POLARIS
 
             print($"Time: {PersistData.TravelMinutes:0.00} Minutes, Distance: {PersistData.TravelMiles:0.00} Miles");
 
-            _routingInfoLabel.text = $"Routing - {PersistData.TravelMinutes:0} min. ({PersistData.TravelMiles:0.0} mi.)";
+            _routingInfoLabel.text = GetUpdatedRouteText(0);
             _routingSrcLabel.text = PersistData.SrcName;
             _routingDestLabel.text = PersistData.DestName;
             
             _routingSrcBox.ToggleDisplayStyle(includeSrc);
+            StartCoroutine(ToggleRoutingBox(true));
         }
 
         private void UpdateRouteInfoIncomplete()
         {
-            _routingInfoLabel.text = "Hold to pick starting point";
-            _routingSrcLabel.text = "Waiting";
+            _routingInfoLabel.text = "Hold to choose start";
+            _routingSrcLabel.text = "Current Location";
             _routingDestLabel.text = PersistData.DestName;
             
-            _routingSrcBox.ToggleDisplayStyle(false);
+            _slideButton.style.backgroundImage = _checkMark;
+            _slideIsCheck = true;
+            _routingSrcBox.ToggleDisplayStyle(true);
         }
 
         private void ClearRoute(bool markers)
@@ -422,8 +446,7 @@ namespace POLARIS
                 }
                 _stops.Clear();
                 PersistData.ClearStops();
-
-                _destSelected = false;
+                _shouldClose = true;
             }
 
             foreach (var breadcrumb in _breadcrumbs)
@@ -432,6 +455,9 @@ namespace POLARIS
 
             if (_lineRenderer)
                 _lineRenderer.positionCount = 0;
+
+            _slideIsCheck = false;
+            _slideButton.style.backgroundImage = _leftArrow;
         }
 
         private void RenderLine() 
@@ -564,18 +590,34 @@ namespace POLARIS
 
         private void PlaceMarkerAtUserLocation()
         {
-            var curPosition = new ArcGISPoint(GetUserCurrentLocation._longitude,
-                                              GetUserCurrentLocation._latitude,
-                                              0f,
-                                              new ArcGISSpatialReference(4326));
-            var curWorldPosition =
-                _root.TransformPoint(_arcGisMapComponent.View.GeographicToWorld(curPosition)).ToVector3();
-            PlaceMarker(curWorldPosition, "My Location", true, false);
+            PersistData.UsingCurrent = true;
+            
+            if (LocationMarker)
+            {
+                PlaceMarker(LocationMarker.transform.position, "Current Location", true, false);
+            }
+            else
+            {
+                var curPosition = new ArcGISPoint(GetUserCurrentLocation._longitude,
+                                                  GetUserCurrentLocation._latitude,
+                                                  0f,
+                                                  new ArcGISSpatialReference(4326));
+                var curWorldPosition =
+                    _root.TransformPoint(_arcGisMapComponent.View.GeographicToWorld(curPosition)).ToVector3();
+                PlaceMarker(curWorldPosition, "Current Location", true, false);
+            }
         }
         
 
         private void ToggleSlide()
         {
+            if (_slideIsCheck)
+            {
+                PlaceMarkerAtUserLocation();
+                _slideButton.style.backgroundImage = _leftArrow;
+                return;
+            }
+            
             _closed = !_closed;
             _routingBox.style.left = Length.Percent(_closed ? -67f : -5f);
             _slideButton.style.rotate = new Rotate(_closed ? 180 : 0);
@@ -587,10 +629,14 @@ namespace POLARIS
             ClearRoute(true);
         }
 
-        private IEnumerator ToggleRouting(bool routing)
+        private IEnumerator ToggleRoutingBox(bool routing)
         {
             if (routing)
             {
+                var timeDiff = Time.time - _closeTime;
+                var waitTime = timeDiff < 0.5f ? 0.5f - timeDiff : 0;
+                yield return new WaitForSeconds(waitTime);
+
                 _routingBox.style.left = Length.Percent(-80f);
                 _routingBox.ToggleDisplayStyle(true);
                 _routingBox.style.left = Length.Percent(-5f);
@@ -605,11 +651,15 @@ namespace POLARIS
 
         private int GetClosestPathPoint(Vector3[] points)
         {
+            var locPos = LocationMarker.transform.position;
+
             var smallestDist = float.MaxValue;
             var smallestIndex = 0;
             for (var i = 0; i < points.Length; i++)
             {
-                var dist = Vector3.Distance(points[i], LocationMarker.transform.position);
+                var dist = Vector2.Distance(
+                    new Vector2(points[i].x, points[i].z), 
+                    new Vector2(locPos.x, locPos.z));
                 if (dist < smallestDist)
                 {
                     smallestDist = dist;
@@ -617,10 +667,14 @@ namespace POLARIS
                 }
             }
 
-            if (smallestDist > 50) // Dont know what dist this is
+            // Auto reroute
+            if (PersistData.UsingCurrent && smallestDist > RerouteDist && Time.time - _lastRerouteTime > 5)
             {
-                // TODO: Auto reroute
-                // Debug.Log("Should recalculate route! - Smallest dist is " + smallestDist);
+                Debug.Log("Should recalculate route! - Smallest dist is " + smallestDist);
+                _lastRerouteTime = Time.time;
+                
+                RemoveLastMarker();
+                PlaceMarkerAtUserLocation();
             }
 
             return smallestIndex;
