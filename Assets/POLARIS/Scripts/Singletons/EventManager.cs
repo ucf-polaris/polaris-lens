@@ -19,8 +19,13 @@ namespace POLARIS.Managers
         private const string EventQueryURL = BaseApiUrl + "/event/scan";
         private const string EventGetURL = BaseApiUrl + "/event/get";
 
-        public List<EventData> dataList;
+        public List<EventData> dataList = new List<EventData>();
         public bool Testing;
+
+        public CallStatus ScanStatus = CallStatus.NotStarted;
+
+        public event EventHandler ImageDownloaded;
+        public event EventHandler ScanSucceed;
         void Awake()
         {
             //create singleton
@@ -42,10 +47,27 @@ namespace POLARIS.Managers
             CallScan();
         }
 
+        private void OnImageDownloaded()
+        {
+            if (ImageDownloaded != null)
+            {
+                ImageDownloaded(this, EventArgs.Empty);
+            }
+        }
+
+        private void OnScanSucceed()
+        {
+            if (ScanSucceed != null)
+            {
+                ScanSucceed(this, EventArgs.Empty);
+            }
+        }
+
         static public EventManager getInstance()
         {
             return Instance;
         }
+
 
         //scans all elements right away
         public void CallScan()
@@ -66,16 +88,19 @@ namespace POLARIS.Managers
                 if (Token != "") Token = userAccess.data.Token;
                 if (RefreshToken != "") RefreshToken = userAccess.data.RefreshToken;
             }
+            ScanStatus = CallStatus.InProgress;
             var www = UnityWebRequest.Post(EventQueryURL, null, "application/json");
             www.SetRequestHeader("authorizationToken", "{\"token\":\"" + Token + "\",\"refreshToken\":\"" + RefreshToken + "\"}");
             yield return www.SendWebRequest();
 
+            ScanStatus = CallStatus.Failed;
             if (www.result != UnityWebRequest.Result.Success)
             {
                 Debug.Log(www.error);
             }
             else
             {
+                ScanStatus = CallStatus.Succeeded;
                 Debug.Log("Form upload complete!");
                 Debug.Log("Status Code: " + www.responseCode);
                 Debug.Log(www.result);
@@ -90,6 +115,7 @@ namespace POLARIS.Managers
                 // {
                 // Debug.Log($"Event {UCFEvent.Name} has description {UCFEvent.Description}");
                 // }
+                OnScanSucceed();
                 getAllRawImages();
             }
             running = null;
@@ -134,6 +160,25 @@ namespace POLARIS.Managers
             Debug.LogWarning("Should not be implement");
         }
 
+        public IEnumerator DownloadImage(string MediaUrl, EventData e)
+        {
+            UnityWebRequest request = UnityWebRequestTexture.GetTexture(MediaUrl);
+            //Debug.Log("Downloading image from " + MediaUrl);
+            yield return request.SendWebRequest();
+            if (request.result == UnityWebRequest.Result.ConnectionError || request.result == UnityWebRequest.Result.ProtocolError)
+            {
+                Debug.Log("ERROR " + request.error);
+                Resources.Load<Texture2D>("UCF_Logo");
+            }
+            else
+            {
+                e.rawImage = ((DownloadHandlerTexture)request.downloadHandler).texture;
+                OnImageDownloaded();
+                //Debug.Log(name + " successfully downloaded");
+            }
+
+        }
+
         public void getAllRawImages()
         {
             if (dataList == null) return;
@@ -145,7 +190,7 @@ namespace POLARIS.Managers
                     if (data.rawImage == null)
                     {
                         data.rawImage = Resources.Load<Texture2D>("UCF_Logo");
-                        StartCoroutine(data.DownloadImage("https://knightconnect.campuslabs.com/engage/image/" + data.Image));
+                        StartCoroutine(DownloadImage("https://knightconnect.campuslabs.com/engage/image/" + data.Image, data));
                     }
                         
                 }  
@@ -213,24 +258,6 @@ namespace POLARIS.Managers
         public void SetPlayerPrefs()
         {
             //Up to you how you want to do this (if at all)
-        }
-
-        public IEnumerator DownloadImage(string MediaUrl)
-        {
-            UnityWebRequest request = UnityWebRequestTexture.GetTexture(MediaUrl);
-            //Debug.Log("Downloading image from " + MediaUrl);
-            yield return request.SendWebRequest();
-            if (request.result == UnityWebRequest.Result.ConnectionError || request.result == UnityWebRequest.Result.ProtocolError)
-            {
-                Debug.Log("ERROR " + request.error);
-                Resources.Load<Texture2D>("UCF_Logo");
-            }   
-            else
-            {
-                rawImage = ((DownloadHandlerTexture)request.downloadHandler).texture;
-                //Debug.Log(name + " successfully downloaded");
-            }
-                
         }
 
         #region Getters and Setters

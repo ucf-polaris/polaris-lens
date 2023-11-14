@@ -25,6 +25,7 @@ namespace POLARIS.MainScene
         //UI Toolkit elements
         private TextField _searchField;
         private Label header;
+        private Label resultsHeader;
 
         // Start is called before the first frame update
         void Start()
@@ -45,6 +46,7 @@ namespace POLARIS.MainScene
             var uiDoc = GetComponent<UIDocument>();
             var rootVisual = uiDoc.rootVisualElement;
             header = rootVisual.Q<Label>("Identifier");
+            resultsHeader = rootVisual.Q<Label>("ResultsLabel");
 
             //set up the search bar
             _searchField = rootVisual.Q<TextField>("SearchBar");
@@ -81,10 +83,11 @@ namespace POLARIS.MainScene
             }
             else
             {
+                resultsHeader.style.display = DisplayStyle.Flex;
                 while (eventManager.dataList.Count == 0) yield return null;
                 if (showSuggestions)
                 {
-                    header.text = "Suggested Events";
+                    header.text = "Events";
                 }
                 else
                 {
@@ -99,43 +102,42 @@ namespace POLARIS.MainScene
         {
             if (showSuggestions && newText == "" && MenUI_Dropdown.currentChoice == "SUGGESTED")
             {
-                header.text = "Suggested Locations";
+                resultsHeader.style.display = DisplayStyle.None;
                 List<LocationData> buildings = new List<LocationData>();
-                foreach (string buildingName in userManager.data.Suggested.Split("~"))
+                if(userManager.data.Suggested != null)
                 {
-                    LocationData building = GetBuildingFromName(buildingName);
-                    if (building != null) buildings.Add(building);
+                    foreach (string buildingName in userManager.data.Suggested.Split("~"))
+                    {
+                        LocationData building = GetBuildingFromName(buildingName);
+                        if (building != null) buildings.Add(building);
+                    }
                 }
+
                 panels.UpdateBuildingSearchUI(buildings);
             }
             else
             {
+                resultsHeader.style.display = DisplayStyle.Flex;
                 LocationManager.LocationFilter filter = LocationManager.LocationFilter.None;
                 //put in logic to shift between drop down options here
                 switch (MenUI_Dropdown.currentChoice)
                 {
                     case "VISITED":
-                        header.text = "Visited Locations";
                         filter = LocationManager.LocationFilter.Visited;
                         break;
                     case "NOT VISITED":
-                        header.text = "Not Visited Locations";
                         filter = LocationManager.LocationFilter.NotVisited;
                         break;
                     case "FAVORITES":
-                        header.text = "Favorited Locations";
                         filter = LocationManager.LocationFilter.Favorites;
                         break;
                     case "CLOSEST":
-                        header.text = "Closest Locations";
                         filter = LocationManager.LocationFilter.Closest;
                         break;
                     case "EVENTS":
-                        header.text = "Most Events per Locations";
                         filter = LocationManager.LocationFilter.Events;
                         break;
                     default:
-                        header.text = "Locations";
                         break;
                 }
                 List<LocationData> buildings = locationManager.GetBuildingsFromSearch(newText, newText.Length > 0 && newText[0] == '~', filter);
@@ -170,9 +172,10 @@ namespace POLARIS.MainScene
             }
             else
             {
+                resultsHeader.style.display = DisplayStyle.Flex;
                 if (showSuggestions && newText == "")
                 {
-                    header.text = "Suggested Events";
+                    header.text = "Events";
                 }
                 else
                 {

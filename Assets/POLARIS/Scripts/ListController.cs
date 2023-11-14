@@ -94,12 +94,14 @@ public class ListController
             return newEntry;
         };
 
-        //bind function
-        EntryList.bindItem = (item, index) =>
+        if (_buildingSearchList.Count != 0)
         {
-            (item.userData as BuildingListEntryController)?.SetBuildingData(_buildingSearchList[index]);
-        };
-
+            //bind function
+            EntryList.bindItem = (item, index) =>
+            {
+                (item.userData as BuildingListEntryController)?.SetBuildingData(_buildingSearchList[index]);
+            };
+        }
         // Set the actual item's source list/array
         EntryList.itemsSource = _buildingSearchList;
     }
@@ -123,11 +125,15 @@ public class ListController
             return newEntry;
         };
 
-        //bind function
-        EntryList.bindItem = (item, index) =>
+        if (_eventSearchList.Count != 0)
         {
-            (item.userData as EventListEntryController)?.SetEventData(_eventSearchList[index]);
-        };
+            //bind function
+            EntryList.bindItem = (item, index) =>
+            {
+                (item.userData as EventListEntryController)?.SetEventData(_eventSearchList[index]);
+            };
+        }
+        
         // Set the actual item's source list/array
         EntryList.itemsSource = _eventSearchList;
     }

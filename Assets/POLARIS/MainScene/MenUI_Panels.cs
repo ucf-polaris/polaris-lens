@@ -26,6 +26,7 @@ namespace POLARIS.MainScene {
         public locationExtendedView ExtendedLocationView;
 
         public static bool userOnListView;
+        private Label resultsHeader;
         // Start is called before the first frame update
         private void Start()
         {
@@ -36,6 +37,7 @@ namespace POLARIS.MainScene {
 
             var uiDoc = GetComponent<UIDocument>();
             var rootVisual = uiDoc.rootVisualElement;
+            resultsHeader = rootVisual.Q<Label>("ResultsLabel");
 
             //define extended views
             ExtendedEventView = new eventExtendedView(rootVisual.Q<VisualElement>("ExtendedEventView"));
@@ -53,6 +55,10 @@ namespace POLARIS.MainScene {
 
             locationManager.UpdateNeeded += RefreshListView;
             locationManager.UpdateNeeded += RefreshLocationExtendedView;
+
+            //when image finishes downloading, refresh
+            eventManager.ImageDownloaded += RefreshListView;
+            eventManager.ImageDownloaded += RefreshEventExtendedView;
         }
 
         // Update is called once per frame
@@ -74,9 +80,17 @@ namespace POLARIS.MainScene {
             ExtendedLocationView.RefreshPage(false);
         }
 
+        private void RefreshEventExtendedView(object sender, EventArgs e)
+        {
+            //if extended location view isn't up, then don't do anything
+            if (!ExtendedEventView.Extended) return;
+            ExtendedEventView.RefreshPage(false);
+        }
+
         public void UpdateBuildingSearchUI(List<LocationData> buildings, bool shouldReset = true)
         {
             listController.Update(buildings);
+            resultsHeader.text = buildings.Count.ToString() + " Results";
             if (shouldReset)
             {
                 ReturnGoToTop();
@@ -87,6 +101,7 @@ namespace POLARIS.MainScene {
         public void UpdateEventSearchUI(List<EventData> events, bool shouldReset = true)
         {
             listController.Update(events);
+            resultsHeader.text = events.Count.ToString() + " Results";
             if (shouldReset)
             {
                 ReturnGoToTop();

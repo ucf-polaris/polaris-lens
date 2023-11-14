@@ -182,7 +182,7 @@ namespace POLARIS.Managers{
             {
                 File.Delete(VisitedFilePath);
             }
-            data.visited.Clear();
+            if(data.favorite != null) data.favorite.Clear();
         }
 
         public void SaveVisited()
@@ -210,7 +210,7 @@ namespace POLARIS.Managers{
             {
                 File.Delete(VisitedFilePath);
             }
-            data.visited.Clear();
+            if (data.visited != null) data.visited.Clear();
         }
 
         public void UpdateBackendCall(IDictionary<string, string> request)
