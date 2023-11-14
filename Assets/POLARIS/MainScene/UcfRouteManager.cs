@@ -684,6 +684,16 @@ namespace POLARIS
                 }
             }
 
+            // End route when less than 25m from destination
+            var endDist = Vector2.Distance(
+                new Vector2(points[^1].x, points[^1].z),
+                new Vector2(locPos.x, locPos.z));
+            if (endDist < 25)
+            {
+                ClearRoute(true);
+                // TODO: Play animation
+            }
+
             // Auto reroute
             if (PersistData.UsingCurrent && smallestDist > RerouteDist && Time.time - _lastRerouteTime > 5)
             {

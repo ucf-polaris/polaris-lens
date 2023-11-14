@@ -114,6 +114,8 @@ namespace POLARIS.GeospatialScene
             // remove old anchors
             ClearPath();
 
+            // TODO: Add destination object/waypoint
+            
             foreach (var point in PersistData.PathPoints)
             {
                 PlacePathGeospatialAnchor(
@@ -187,6 +189,15 @@ namespace POLARIS.GeospatialScene
                     smallestDist = dist;
                     smallestIndex = i;
                 }
+            }
+            
+            // End route when less than 25m from destination
+            var endDist = Vector3.Distance(_pathObjects[^1].transform.position,
+                                           Camera.transform.position);
+            if (endDist < 25)
+            {
+                StopClicked();
+                // TODO: Play animation
             }
 
             // if (smallestDist > 50)
