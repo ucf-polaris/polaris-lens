@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 0}
-  m_IndirectSpecularColor: {r: 0.44657898, g: 0.4964133, b: 0.5748178, a: 1}
+  m_IndirectSpecularColor: {r: 0.44402242, g: 0.49316543, b: 0.5722324, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -732,6 +732,13 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   Camera: {fileID: 1451910691}
   AnchorManager: {fileID: 691323916}
+  LoadDistance: 1500
+  RenderDistance: 200
+  SmallScale: 200
+  SmallTestMode: 1
+  TestCenterCoords:
+    x: 28.61442
+    y: -81.19579
 --- !u!114 &325939930
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2845,6 +2852,8 @@ MonoBehaviour:
   PathPrefab: {fileID: 7448986383624426494, guid: d4a1b7c9fe020fa44a846c4a08cb6b9c,
     type: 3}
   RouteInfo: {fileID: 1158057628}
+  PanelManager: {fileID: 325939929}
+  GeospatialController: {fileID: 384014293}
 --- !u!4 &1621438622
 Transform:
   m_ObjectHideFlags: 0

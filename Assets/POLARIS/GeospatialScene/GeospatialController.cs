@@ -289,7 +289,7 @@ namespace Google.XR.ARCoreExtensions.Samples.Geospatial
                 Destroy(anchor);
             }
 
-            PathManager.ClearPath(_anchorObjects);
+            PathManager.ClearPath();
             PersistData.Routing = false;
             PanelManager.ClearPanels();
             _anchorObjects.Clear();
@@ -413,7 +413,7 @@ namespace Google.XR.ARCoreExtensions.Samples.Geospatial
             // Debug.Log("Stop location services.");
             // Input.location.Stop();
 
-            PathManager.ClearPath(_anchorObjects);
+            PathManager.ClearPath();
             PersistData.Routing = false;
 
             foreach (var anchor in _anchorObjects)
@@ -614,10 +614,6 @@ namespace Google.XR.ARCoreExtensions.Samples.Geospatial
                     if (PersistData.Routing && PersistData.PathPoints != null)
                     {
                         PathManager.LoadPathAnchors(_anchorObjects, AnchorManager);
-                    }
-                    else
-                    {
-                        PathManager.ClearPath(_anchorObjects);
                     }
                 }
             }
@@ -868,6 +864,11 @@ namespace Google.XR.ARCoreExtensions.Samples.Geospatial
 
                 ClearAllButton.gameObject.SetActive(_anchorObjects.Count > 0);
             }
+        }
+
+        public List<GameObject> GetAnchorObjects()
+        {
+            return _anchorObjects;
         }
 
         private GeospatialAnchorHistory CreateHistory(Pose pose, AnchorType anchorType)
