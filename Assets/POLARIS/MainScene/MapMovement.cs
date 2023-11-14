@@ -17,6 +17,7 @@ using Esri.ArcGISMapsSDK.Utils.Math;
 using Esri.HPFramework;
 using System;
 using System.Linq;
+using Esri.GameEngine.Geometry;
 using POLARIS.MainScene;
 using Unity.Mathematics;
 using UnityEngine;
@@ -35,7 +36,13 @@ namespace Esri.ArcGISMapsSDK.Samples.Components
 		
 		private const double MaxCameraHeight = 1500.0;
 		private const double MinCameraHeight = 20;
-		private const double MaxCameraLatitude = 85.0;
+		
+		private const float MinLongitude = -81.209995f;
+		private const float MaxLongitude = -81.181589f;
+		private const float MinLatitude = 28.580255f;
+		private const float MaxLatitude = 28.613986f;
+		private double3 MinWorldPosition;
+		private double3 MaxWorldPosition;
 
 		private double3 _lastCartesianPoint;
 		private bool _firstDragStep = true;
@@ -48,6 +55,8 @@ namespace Esri.ArcGISMapsSDK.Samples.Components
 
 		public double MaxSpeed = 2000000.0;
 		public double MinSpeed = 1000.0;
+		
+		private HPRoot _root;
 
 		private void Awake()
 		{
@@ -67,6 +76,12 @@ namespace Esri.ArcGISMapsSDK.Samples.Components
 		
 		private void Start()
 		{
+			_root = _arcGisMapComponent.GetComponent<HPRoot>();
+			var minPoint = new ArcGISPoint(MinLongitude, MinLatitude, 0, new ArcGISSpatialReference(4326));
+			MinWorldPosition = _arcGisMapComponent.View.GeographicToWorld(minPoint);
+			var maxPoint = new ArcGISPoint(MaxLongitude, MaxLatitude, 0, new ArcGISSpatialReference(4326));
+			MaxWorldPosition = _arcGisMapComponent.View.GeographicToWorld(maxPoint);
+
 			if (_arcGisMapComponent != null) return;
 
 			Debug.LogError("An ArcGISMapComponent could not be found. Please make sure this GameObject is a child of a GameObject with an ArcGISMapComponent attached");
@@ -147,6 +162,8 @@ namespace Esri.ArcGISMapsSDK.Samples.Components
 
 						_lastCartesianPoint = cartesianCoord + delta;
 						cartesianPosition += delta;
+						cartesianPosition.x = Mathf.Clamp((float)cartesianPosition.x, (float)MinWorldPosition.x, (float)MaxWorldPosition.x);
+						cartesianPosition.z = Mathf.Clamp((float)cartesianPosition.z, (float)MinWorldPosition.z, (float)MaxWorldPosition.z);
 						_firstDragStep = false;
 					}
 				}
@@ -157,6 +174,7 @@ namespace Esri.ArcGISMapsSDK.Samples.Components
 			}
 
 			Position = cartesianPosition;
+			// print("new position: " + Position);
 			Rotation = cartesianRotation;
 		}
 
