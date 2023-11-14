@@ -22,6 +22,7 @@ namespace POLARIS.GeospatialScene
         public GeospatialController GeospatialController;
         
         private readonly List<GameObject> _pathAnchorObjects = new();
+        private readonly List<GameObject> _pathObjects = new();
         private ArrowPoint _arrow;
 
         private float _closeTime = 0;
@@ -65,39 +66,45 @@ namespace POLARIS.GeospatialScene
                 StartCoroutine(UcfRouteManager.ToggleRoutingBox(false, _routingBox, _closeTime));
             }
             
-            if (!PersistData.Routing || _pathAnchorObjects.Count < 2) return;
+            if (!PersistData.Routing || _pathObjects.Count < 2) return;
             
             // Disable past route points
             var closest = GetClosestPathPoint();
-            for (var i = 0; i < _pathAnchorObjects.Count; i++)
+            for (var i = 0; i < _pathObjects.Count; i++)
             {
-                _pathAnchorObjects[i].gameObject.SetActive(i >= closest);
+                _pathObjects[i].gameObject.SetActive(i >= closest);
             }
 
             // Set arrows
-            for (var i = closest; i < _pathAnchorObjects.Count - 1; i++)
+            for (var i = closest; i < _pathObjects.Count - 1; i++)
             {
-                var direction = _pathAnchorObjects[i + 1].transform.position -
-                                _pathAnchorObjects[i].transform.position;
+                var direction = _pathObjects[i + 1].transform.position - _pathObjects[i].transform.position;
                 var lookRot = Quaternion.LookRotation(direction, Vector3.up);
                 
-                _pathAnchorObjects[i].transform.rotation = Quaternion.Euler(lookRot.eulerAngles.x, lookRot.eulerAngles.y, lookRot.eulerAngles.z);
+                _pathObjects[i].transform.rotation = Quaternion.Euler(lookRot.eulerAngles.x, lookRot.eulerAngles.y, lookRot.eulerAngles.z);
             }
 
             var percentage = UcfRouteManager.PointPercentage(
-                _pathAnchorObjects.Select(anchor => anchor.transform.position).ToArray(), closest);
+                _pathObjects.Select(anchor => anchor.transform.position).ToArray(), closest);
 
             _routingInfoLabel.text = UcfRouteManager.GetUpdatedRouteText(percentage);
         }
 
         public void ClearPath()
         {
+            foreach (var obj in _pathObjects)
+            {
+                Destroy(obj);
+            }
+            _pathObjects.Clear();
+            
             foreach (var anchor in _pathAnchorObjects)
             {
                 GeospatialController.GetAnchorObjects().Remove(anchor);
                 Destroy(anchor);
             }
-            _pathAnchorObjects.Clear(); 
+            _pathAnchorObjects.Clear();
+
             if (_arrow) _arrow.SetEnabled(false);
         }
 
@@ -109,7 +116,6 @@ namespace POLARIS.GeospatialScene
 
             foreach (var point in PersistData.PathPoints)
             {
-                Debug.Log("zzw point " + point[0] + ", " + point[1]);
                 PlacePathGeospatialAnchor(
                     PanelManager.SmallTestMode 
                         ? new double2(PanelManager.TestMakeSmallDist(point[0], PanelManager.TestCenterCoords.x),
@@ -158,22 +164,23 @@ namespace POLARIS.GeospatialScene
                 yield break;
             }
 
-            var resultGo = result.Anchor.gameObject;
-            var anchorGo = Instantiate(PathPrefab,
-                                       resultGo.transform);
-            anchorGo.transform.parent = resultGo.transform;
+            var anchorGo = result.Anchor.gameObject;
+            var pathGo = Instantiate(PathPrefab,
+                                       anchorGo.transform);
+            pathGo.transform.parent = anchorGo.transform;
 
-            anchorObjects.Add(resultGo);
+            anchorObjects.Add(anchorGo);
             _pathAnchorObjects.Add(anchorGo);
+            _pathObjects.Add(pathGo);
         }
 
         private int GetClosestPathPoint()
         {
             var smallestDist = float.MaxValue;
             var smallestIndex = 0;
-            for (var i = 0; i < _pathAnchorObjects.Count; i++)
+            for (var i = 0; i < _pathObjects.Count; i++)
             {
-                var dist = Vector3.Distance(_pathAnchorObjects[i].transform.position,
+                var dist = Vector3.Distance(_pathObjects[i].transform.position,
                                             Camera.transform.position);
                 if (dist < smallestDist)
                 {

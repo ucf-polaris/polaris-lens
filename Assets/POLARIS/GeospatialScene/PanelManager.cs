@@ -76,22 +76,22 @@ namespace POLARIS.GeospatialScene
 
 
         // Temp function for show
-        public ARGeospatialAnchor PlacePanel(List<GameObject> anchorObjects, GeospatialAnchorHistory history)
-        {
-            if (Camera.gameObject.GetNamedChild("Panel")) return null;
-
-            var panel = AnchorManager.AddComponent<TextPanel>();
-            panel.Instantiate(
-                new GeospatialAnchorContent(
-                    new LocationData(), 
-                    "WHY HELLO THERE <style=Description>third panel <color=green>hello</color></style>",
-                    history), 
-                _display);
-            var anchor = panel.PlacePanelGeospatialAnchor(anchorObjects, AnchorManager);
-            _panels.Add(panel);
-
-            return anchor;
-        }
+        // public ARGeospatialAnchor PlacePanel(List<GameObject> anchorObjects, GeospatialAnchorHistory history)
+        // {
+        //     if (Camera.gameObject.GetNamedChild("Panel")) return null;
+        //
+        //     var panel = AnchorManager.AddComponent<TextPanel>();
+        //     panel.Instantiate(
+        //         new GeospatialAnchorContent(
+        //             new LocationData(), 
+        //             "WHY HELLO THERE <style=Description>third panel <color=green>hello</color></style>",
+        //             history), 
+        //         _display);
+        //     var anchor = panel.PlacePanelGeospatialAnchor(anchorObjects, AnchorManager);
+        //     _panels.Add(panel);
+        //
+        //     return anchor;
+        // }
 
         public double TestMakeSmallDist(double num, double origin)
         {

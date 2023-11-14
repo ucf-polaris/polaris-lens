@@ -117,11 +117,6 @@ namespace Google.XR.ARCoreExtensions.Samples.Geospatial
         public GameObject ARViewCanvas;
 
         /// <summary>
-        /// UI element for clearing all anchors, including history.
-        /// </summary>
-        public Button ClearAllButton;
-
-        /// <summary>
         /// Text displaying <see cref="GeospatialPose"/> information at runtime.
         /// </summary>
         public Text InfoText;
@@ -280,24 +275,6 @@ namespace Google.XR.ARCoreExtensions.Samples.Geospatial
         }
 
         /// <summary>
-        /// Callback handling "Clear All" button click event in AR View.
-        /// </summary>
-        public void OnClearAllClicked()
-        {
-            foreach (var anchor in _anchorObjects)
-            {
-                Destroy(anchor);
-            }
-
-            PathManager.ClearPath();
-            PersistData.Routing = false;
-            PanelManager.ClearPanels();
-            _anchorObjects.Clear();
-            SnackBarText.text = "Anchor(s) cleared!";
-            ClearAllButton.gameObject.SetActive(false);
-        }
-
-        /// <summary>
         /// Callback handling "Continue" button click event in AR View.
         /// </summary>
         public void OnContinueClicked()
@@ -365,7 +342,6 @@ namespace Google.XR.ARCoreExtensions.Samples.Geospatial
 
             _isReturning = false;
             _enablingGeospatial = false;
-            ClearAllButton.gameObject.SetActive(false);
 
             _localizationPassedTime = 0f;
             _isLocalizing = true;
@@ -529,7 +505,6 @@ namespace Google.XR.ARCoreExtensions.Samples.Geospatial
                 {
                     _isLocalizing = true;
                     _localizationPassedTime = 0f;
-                    ClearAllButton.gameObject.SetActive(false);
                     foreach (var go in _anchorObjects)
                     {
                         go.SetActive(false);
@@ -552,7 +527,6 @@ namespace Google.XR.ARCoreExtensions.Samples.Geospatial
                 // Finished localization.
                 _isLocalizing = false;
                 _localizationPassedTime = 0f;
-                ClearAllButton.gameObject.SetActive(_anchorObjects.Count > 0);
                 SnackBarText.text = LocalizationSuccessMessage;
                 foreach (var go in _anchorObjects)
                 {
@@ -768,7 +742,6 @@ namespace Google.XR.ARCoreExtensions.Samples.Geospatial
         //
         //         SnackBarText.text = GetDisplayStringForAnchorPlacedSuccess();
         //
-        //         ClearAllButton.gameObject.SetActive(_anchorObjects.Count > 0);
         //         // SaveGeospatialAnchorHistory();
         //     }
         //     else
@@ -830,8 +803,7 @@ namespace Google.XR.ARCoreExtensions.Samples.Geospatial
                                                 _anchorType);
                     var anchor = PlaceARAnchor(history, hitResults[0].pose,
                                                hitResults[0].trackableId);
-
-                    ClearAllButton.gameObject.SetActive(_anchorObjects.Count > 0);
+                    
                 }
 
                 return;
@@ -860,9 +832,7 @@ namespace Google.XR.ARCoreExtensions.Samples.Geospatial
                 //     return;
                 // }
                 
-                PanelManager.PlacePanel(_anchorObjects, history);
-
-                ClearAllButton.gameObject.SetActive(_anchorObjects.Count > 0);
+                // PanelManager.PlacePanel(_anchorObjects, history);
             }
         }
 
@@ -932,7 +902,6 @@ namespace Google.XR.ARCoreExtensions.Samples.Geospatial
                     {
                         _anchorObjects.Add(anchor.gameObject);
                         
-                        ClearAllButton.gameObject.SetActive(_anchorObjects.Count > 0);
                         SnackBarText.text = GetDisplayStringForAnchorPlacedSuccess();
                     }
                     else
@@ -1157,8 +1126,6 @@ namespace Google.XR.ARCoreExtensions.Samples.Geospatial
             {
                 return;
             }
-
-            ClearAllButton.gameObject.SetActive(false);
 
             Debug.LogError(reason);
             SnackBarText.text = reason;
