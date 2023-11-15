@@ -14,11 +14,6 @@ namespace POLARIS.MainScene
         public static readonly Stack<string> StopNames = new();
 
         public static List<double2> PathPoints = new();
-        // {
-        //     new (28.614402, -81.195860),
-        //     new(28.614469, -81.195702),
-        //     new(28.614369, -81.195760)
-        // };
         public static string RoutingString;
 
         public static string SrcName = "";

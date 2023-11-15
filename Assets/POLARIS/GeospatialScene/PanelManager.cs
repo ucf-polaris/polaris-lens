@@ -19,9 +19,9 @@ namespace POLARIS.GeospatialScene
         public ARAnchorManager AnchorManager;
         
         [Header("Loading")]
-        public float LoadDistance = 1500f; // m
-        public float RenderDistance = 200f; // m
-        public float SmallScale = 200f; // 1/200th the distance
+        public float LoadDistance; // m
+        public float RenderDistance; // m
+        public float SmallScale; // 1/200th the distance
 
         [Header("Testing")]
         public bool SmallTestMode;

@@ -603,6 +603,10 @@ namespace Google.XR.ARCoreExtensions.Samples.Geospatial
                     < 20 => "OK",
                     _ => "Waiting"
                 };
+                if (pose.OrientationYawAccuracy < OrientationYawAccuracyThreshold)
+                {
+                    acc = "Waiting";
+                }
 
                 InfoText.text = string.Format(
                 "Accuracy: {8}",

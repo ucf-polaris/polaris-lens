@@ -17,6 +17,7 @@ namespace POLARIS.GeospatialScene
     {
         public Camera Camera;
         public GameObject PathPrefab;
+        public GameObject DestPrefab;
         public GameObject RouteInfo;
         public PanelManager PanelManager;
         public GeospatialController GeospatialController;
@@ -24,6 +25,7 @@ namespace POLARIS.GeospatialScene
         private readonly List<GameObject> _pathAnchorObjects = new();
         private readonly List<GameObject> _pathObjects = new();
         private ArrowPoint _arrow;
+        private GameObject _endObject;
 
         private float _closeTime = 0;
         private bool _lastRouting = false;
@@ -38,7 +40,7 @@ namespace POLARIS.GeospatialScene
         private void Start()
         {
             PathPrefab = Resources.Load("Polaris/RaisedArrow") as GameObject;
-            
+
             var goList = new List<GameObject>();
             Camera.gameObject.GetChildGameObjects(goList);
             _arrow = goList.Find(go => go.name.Equals("Arrow")).GetComponent<ArrowPoint>();
@@ -67,12 +69,21 @@ namespace POLARIS.GeospatialScene
             }
             
             if (!PersistData.Routing || _pathObjects.Count < 2) return;
-            
-            // Disable past route points
-            var closest = GetClosestPathPoint();
-            for (var i = 0; i < _pathObjects.Count; i++)
+
+            var closest = 0;
+            if (PersistData.UsingCurrent)
             {
-                _pathObjects[i].gameObject.SetActive(i >= closest);
+                var percentage = UcfRouteManager.PointPercentage(
+                    _pathObjects.Select(anchor => anchor.transform.position).ToArray(), closest);
+
+                _routingInfoLabel.text = UcfRouteManager.GetUpdatedRouteText(percentage);
+                
+                // Disable past route points
+                closest = GetClosestPathPoint();
+                for (var i = 0; i < _pathObjects.Count; i++)
+                {
+                    _pathObjects[i].gameObject.SetActive(i >= closest);
+                }
             }
 
             // Set arrows
@@ -83,11 +94,12 @@ namespace POLARIS.GeospatialScene
                 
                 _pathObjects[i].transform.rotation = Quaternion.Euler(lookRot.eulerAngles.x, lookRot.eulerAngles.y, lookRot.eulerAngles.z);
             }
-
-            var percentage = UcfRouteManager.PointPercentage(
-                _pathObjects.Select(anchor => anchor.transform.position).ToArray(), closest);
-
-            _routingInfoLabel.text = UcfRouteManager.GetUpdatedRouteText(percentage);
+            
+            // Spin destination marker
+            if (_endObject)
+            {
+                _endObject.transform.Rotate(Vector3.right, 10);
+            }
         }
 
         public void ClearPath()
@@ -113,25 +125,36 @@ namespace POLARIS.GeospatialScene
             Debug.Log("Loading Path...");
             // remove old anchors
             ClearPath();
-
-            // TODO: Add destination object/waypoint
             
-            foreach (var point in PersistData.PathPoints)
+            for (var i = 0; i < PersistData.PathPoints.Count - 1; i++)
             {
+                var point = PersistData.PathPoints[i];
                 PlacePathGeospatialAnchor(
                     PanelManager.SmallTestMode 
                         ? new double2(PanelManager.TestMakeSmallDist(point[0], PanelManager.TestCenterCoords.x),
                                       PanelManager.TestMakeSmallDist(point[1], PanelManager.TestCenterCoords.y))
                     : point, 
                     anchorObjects, 
-                    anchorManager);
+                    anchorManager,
+                    false);
             }
+            
+            // Add destination object/waypoint
+            var endPoint = PersistData.PathPoints[^1];
+            PlacePathGeospatialAnchor(
+                PanelManager.SmallTestMode 
+                    ? new double2(PanelManager.TestMakeSmallDist(endPoint[0], PanelManager.TestCenterCoords.x),
+                                  PanelManager.TestMakeSmallDist(endPoint[1], PanelManager.TestCenterCoords.y))
+                    : endPoint, 
+                anchorObjects, 
+                anchorManager,
+                true);
 
             _arrow.SetEnabled(true);
             
             _routingSrcLabel.text = PersistData.SrcName;
             _routingDestLabel.text = PersistData.DestName;
-            _routingInfoLabel.text = $"Routing - {PersistData.TravelMinutes:0} min. ({PersistData.TravelMiles:0.0} mi.)";
+            _routingInfoLabel.text = UcfRouteManager.GetUpdatedRouteText(0);
             
             _closeTime = Time.time;
             StartCoroutine(UcfRouteManager.ToggleRoutingBox(true, _routingBox, _closeTime));
@@ -140,7 +163,8 @@ namespace POLARIS.GeospatialScene
         private ARGeospatialAnchor PlacePathGeospatialAnchor(
                                                 double2 point,
                                                 ICollection<GameObject> anchorObjects,
-                                                ARAnchorManager anchorManager)
+                                                ARAnchorManager anchorManager,
+                                                bool finish)
         {
             Debug.Log("ZZ Placing routing anchor at " + point.x + ", " + point.y);
             
@@ -148,12 +172,12 @@ namespace POLARIS.GeospatialScene
                 anchorManager.ResolveAnchorOnTerrainAsync(
                     point[0], point[1], 0, Quaternion.Euler(90, 0, 90));
 
-            StartCoroutine(CheckTerrainPromise(promise, anchorObjects));
+            StartCoroutine(CheckTerrainPromise(promise, anchorObjects, finish));
             return null;
         }
         
         private IEnumerator CheckTerrainPromise(ResolveAnchorOnTerrainPromise promise,
-                                                ICollection<GameObject> anchorObjects)
+                                                ICollection<GameObject> anchorObjects, bool finish)
         {
             yield return promise;
 
@@ -167,13 +191,20 @@ namespace POLARIS.GeospatialScene
             }
 
             var anchorGo = result.Anchor.gameObject;
-            var pathGo = Instantiate(PathPrefab,
+            var pathGo = Instantiate(finish ? DestPrefab : PathPrefab,
                                        anchorGo.transform);
             pathGo.transform.parent = anchorGo.transform;
 
             anchorObjects.Add(anchorGo);
             _pathAnchorObjects.Add(anchorGo);
             _pathObjects.Add(pathGo);
+
+            if (finish)
+            {
+                pathGo.transform.Rotate(Vector3.up, 180);
+                pathGo.transform.localScale *= 0.001f;
+                _endObject = pathGo;
+            }
         }
 
         private int GetClosestPathPoint()
