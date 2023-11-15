@@ -252,6 +252,7 @@ namespace POLARIS.Managers{
             {
                 File.Delete(FavoritesFilePath);
             }
+            if(data.favorite != null) data.favorite.Clear();
         }
 
         public void SaveVisited()
@@ -279,6 +280,18 @@ namespace POLARIS.Managers{
             if (File.Exists(VisitedFilePath))
             {
                 File.Delete(VisitedFilePath);
+            }
+            if (data.visited != null) data.visited.Clear();
+        }
+
+        public void UpdateBackendCall(IDictionary<string, string> request)
+        {
+            //make backend call to update here (or implement system to avoid spams to backend)
+            request["UserID"] = data.UserID1;
+            if (currentCall == null)
+            {
+                currentCall = UpdateFields(request);
+                StartCoroutine(currentCall);
             }
         }
 

@@ -179,7 +179,7 @@ namespace POLARIS
             if (_shouldClose != _lastShouldClose)
             {
                 _shouldClose = _lastShouldClose = false;
-                StartCoroutine(ToggleRoutingBox(false));
+                StartCoroutine(ToggleRoutingBox(false, _routingBox, _closeTime));
             }
 
             RebaseRoute();
@@ -225,12 +225,12 @@ namespace POLARIS
                 PersistData.UsingCurrent = false;
 
                 UpdateRouteInfoIncomplete();
-                StartCoroutine(ToggleRoutingBox(true));
+                StartCoroutine(ToggleRoutingBox(true, _routingBox, _closeTime));
             }
 
             if (_stops.Count == StopCount)
             {
-                StartCoroutine(ToggleRoutingBox(false));
+                StartCoroutine(ToggleRoutingBox(false, _routingBox, _closeTime));
                 _closeTime = Time.time;
                 
                 PersistData.SrcName = PersistData.StopNames.Peek();
@@ -358,12 +358,12 @@ namespace POLARIS
                 var geometry = feature.SelectToken("geometry");
                 var paths = geometry?.SelectToken("paths")?[0];
 
-                var pathList = new List<double[]>();
+                var pathList = new List<double2>();
 
                 foreach(var path in paths)
                 {
                     _breadcrumbs.Add(CreateBreadCrumb((float)path[0], (float)path[1]));
-                    pathList.Add(new[]{(double)path[0], (double)path[1]});
+                    pathList.Add(new double2((double)path[1], (double)path[0]));
 
                     yield return null;
                     yield return null;
@@ -422,7 +422,7 @@ namespace POLARIS
             _routingDestLabel.text = PersistData.DestName;
             
             _routingSrcBox.ToggleDisplayStyle(includeSrc);
-            StartCoroutine(ToggleRoutingBox(true));
+            StartCoroutine(ToggleRoutingBox(true, _routingBox, _closeTime));
         }
 
         private void UpdateRouteInfoIncomplete()
@@ -480,6 +480,13 @@ namespace POLARIS
             _lineRenderer.positionCount = allPoints.Count;
             _lineRenderer.SetPositions(allPoints.ToArray());
             PersistData.Routing = true;
+            
+            // Default color
+            var gradient = new Gradient();
+            gradient.SetKeys(
+                new[] { new GradientColorKey(PathEnd, 0.0f), new GradientColorKey(PathEnd, 1f) },
+                new[] { new GradientAlphaKey(1.0f, 0.0f), new GradientAlphaKey(1.0f, 1.0f) });
+            _lineRenderer.colorGradient = gradient;
         }
 
         // The ArcGIS Rebase component
@@ -503,16 +510,26 @@ namespace POLARIS
                     points[i] += delta;
                 }
                 _lineRenderer.SetPositions(points);
-                var closestPoint = GetClosestPathPoint(points);
-                var pointPercent = PointPercentage(points, closestPoint);
-                _routingInfoLabel.text = GetUpdatedRouteText(pointPercent);
-                
-                var gradient = new Gradient();
-                gradient.SetKeys(
-                    new[] {new GradientColorKey(PathStart, 0.0f), new GradientColorKey(PathStart, pointPercent - 0.01f), new GradientColorKey(PathEnd, pointPercent + 0.01f), new GradientColorKey(PathEnd, 1f)},
-                    new[] { new GradientAlphaKey(1.0f, 0.0f), new GradientAlphaKey(1.0f, 1.0f) }
+
+                if (PersistData.UsingCurrent)
+                {
+                    var closestPoint = GetClosestPathPoint(points);
+                    var pointPercent = PointPercentage(points, closestPoint);
+                    _routingInfoLabel.text = GetUpdatedRouteText(pointPercent);
+
+                    var gradient = new Gradient();
+                    gradient.SetKeys(
+                        new[]
+                        {
+                            new GradientColorKey(PathStart, 0.0f),
+                            new GradientColorKey(PathStart, pointPercent - 0.01f),
+                            new GradientColorKey(PathEnd, pointPercent + 0.01f),
+                            new GradientColorKey(PathEnd, 1f)
+                        },
+                        new[] { new GradientAlphaKey(1.0f, 0.0f), new GradientAlphaKey(1.0f, 1.0f) }
                     );
-                _lineRenderer.colorGradient = gradient;
+                    _lineRenderer.colorGradient = gradient;
+                }
             }
             _lastRootPosition = rootPosition;
         }
@@ -629,23 +646,23 @@ namespace POLARIS
             ClearRoute(true);
         }
 
-        private IEnumerator ToggleRoutingBox(bool routing)
+        public static IEnumerator ToggleRoutingBox(bool routing, VisualElement routingBox, float closeTime)
         {
             if (routing)
             {
-                var timeDiff = Time.time - _closeTime;
+                var timeDiff = Time.time - closeTime;
                 var waitTime = timeDiff < 0.5f ? 0.5f - timeDiff : 0;
                 yield return new WaitForSeconds(waitTime);
 
-                _routingBox.style.left = Length.Percent(-80f);
-                _routingBox.ToggleDisplayStyle(true);
-                _routingBox.style.left = Length.Percent(-5f);
+                routingBox.style.left = Length.Percent(-80f);
+                routingBox.ToggleDisplayStyle(true);
+                routingBox.style.left = Length.Percent(-5f);
             }
             else
             {
-                _routingBox.style.left = Length.Percent(-80f);
+                routingBox.style.left = Length.Percent(-80f);
                 yield return new WaitForSeconds(0.3f);
-                _routingBox.ToggleDisplayStyle(false);
+                routingBox.ToggleDisplayStyle(false);
             }
         }
 
@@ -665,6 +682,16 @@ namespace POLARIS
                     smallestDist = dist;
                     smallestIndex = i;
                 }
+            }
+
+            // End route when less than 25m from destination
+            var endDist = Vector2.Distance(
+                new Vector2(points[^1].x, points[^1].z),
+                new Vector2(locPos.x, locPos.z));
+            if (endDist < 25)
+            {
+                ClearRoute(true);
+                // TODO: Play animation
             }
 
             // Auto reroute

@@ -84,10 +84,8 @@ public class BuildingListEntryController
 
         if (Camera.main != null)
         {
-            _routeManager = Camera.main.transform.parent.gameObject
-                                  .GetComponentInChildren<UcfRouteManager>();
-            geo = Camera.main.transform.parent.gameObject
-                .GetComponentInChildren<Geocoder>();
+            _routeManager = Camera.main?.transform?.parent?.gameObject?.GetComponentInChildren<UcfRouteManager>();
+            geo = Camera.main?.transform?.parent?.gameObject?.GetComponentInChildren<Geocoder>();
         }
 
         MenuUI = GameObject.Find("MenuUI");
@@ -131,8 +129,17 @@ public class BuildingListEntryController
 
     private void OnNavClick(ClickEvent evt)
     {
-        geo.MoveCameraToCoordinates(locationData.BuildingLong, locationData.BuildingLat);
-        _routeManager.RouteToLocation(locationData);
+        if(geo == null|| _routeManager == null)
+        {
+            if (Camera.main != null)
+            {
+                _routeManager = Camera.main?.transform?.parent?.gameObject?.GetComponentInChildren<UcfRouteManager>();
+                geo = Camera.main?.transform?.parent?.gameObject?.GetComponentInChildren<Geocoder>();
+            }
+        }
+
+        if(geo != null) geo.MoveCameraToCoordinates(locationData.BuildingLong, locationData.BuildingLat);
+        if(_routeManager != null) _routeManager.RouteToLocation(locationData);
         extendedView.Extended = false;
         otherView.Extended = false;
 

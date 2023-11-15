@@ -28,7 +28,7 @@ Transform:
   m_GameObject: {fileID: 414594677694596247}
   serializedVersion: 2
   m_LocalRotation: {x: 0.7071068, y: 0, z: 0, w: 0.7071068}
-  m_LocalPosition: {x: 0.003, y: 0.015, z: -0.0085}
+  m_LocalPosition: {x: 0.003, y: 0.015, z: -0.0082}
   m_LocalScale: {x: 0.0025, y: 0.0025, z: 0.0025}
   m_ConstrainProportionsScale: 1
   m_Children: []
@@ -222,6 +222,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   Panel: {fileID: 0}
+  Display: {fileID: 0}
   TouchedPanel: 0
 --- !u!65 &8143330721604937590
 BoxCollider:
@@ -243,7 +244,7 @@ BoxCollider:
   m_Enabled: 1
   serializedVersion: 3
   m_Size: {x: 0.02, y: 0.02000001, z: 0.02000001}
-  m_Center: {x: 0, y: 0.00000035762787, z: -0.000000004656613}
+  m_Center: {x: 0, y: 0, z: 0}
 --- !u!1 &5144013906491467372
 GameObject:
   m_ObjectHideFlags: 0
@@ -270,7 +271,7 @@ RectTransform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 5144013906491467372}
   m_LocalRotation: {x: 0.7071068, y: -0, z: -0, w: 0.7071068}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalPosition: {x: 0, y: 0, z: 0.0012}
   m_LocalScale: {x: 0.0002, y: 0.00025, z: 0.02}
   m_ConstrainProportionsScale: 1
   m_Children: []
@@ -278,8 +279,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 0, y: 0.01}
-  m_SizeDelta: {x: 90, y: 70}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 100, y: 75}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!23 &5144013906491467377
 MeshRenderer:
@@ -343,9 +344,15 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: "<style=Title>Polaris Panel</style>\n\n<style=Description>Hello everyone
-    welcome to our app :)\n\n<indent=0%>\u2022 Hello</indent>\n\nWelcome to the <color=green>Fun
-    Zone</color>\n\n</style>"
+  m_text: '<style=Title>Polaris Panel</style>
+
+
+    <style=Description>Sed ut perspiciatis
+    unde omnis iste natus error sit voluptatem accusantium doloremque laudantium,
+    totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto
+    beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit
+    aspernatur aut odit aut fugit, sed quia consequuntur magni veritatis et quasi
+    architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam volupta</style>'
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: f280660fe9fac9a4a98b3d61d63570c2, type: 2}
   m_sharedMaterial: {fileID: -3305312117766283812, guid: f280660fe9fac9a4a98b3d61d63570c2,
@@ -373,14 +380,14 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 29.4
+  m_fontSize: 25.15
   m_fontSizeBase: 36
   m_fontWeight: 400
   m_enableAutoSizing: 1
   m_fontSizeMin: 24
-  m_fontSizeMax: 48
+  m_fontSizeMax: 42
   m_fontStyle: 0
-  m_HorizontalAlignment: 2
+  m_HorizontalAlignment: 1
   m_VerticalAlignment: 512
   m_textAlignment: 65535
   m_characterSpacing: 0
@@ -446,7 +453,7 @@ Transform:
   m_GameObject: {fileID: 8186767920551491330}
   serializedVersion: 2
   m_LocalRotation: {x: 0.7071068, y: 0, z: 0, w: 0.7071068}
-  m_LocalPosition: {x: -0.00359, y: 0.015, z: -0.0085}
+  m_LocalPosition: {x: -0.00359, y: 0.015, z: -0.0082}
   m_LocalScale: {x: 0.004, y: 0.004, z: 0.004}
   m_ConstrainProportionsScale: 1
   m_Children: []

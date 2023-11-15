@@ -17,15 +17,23 @@ namespace POLARIS.GeospatialScene
         private LocationManager locationManager;
         public Camera Camera;
         public ARAnchorManager AnchorManager;
+        
+        [Header("Loading")]
+        public float LoadDistance; // m
+        public float RenderDistance; // m
+        public float SmallScale; // 1/200th the distance
+
+        [Header("Testing")]
+        public bool SmallTestMode;
+        public double2 TestCenterCoords;
+        
         private DisplayPanel _display;
         
         private readonly List<TextPanel> _panels;
         
         private double2 _loadLocation;
         private float _loadTime;
-
-        private const float LoadDistance = 1.5f; // km
-        private const float RenderDistance = 200f; // m
+        
 
         //public IDictionary<string, float> panel_Test = new Dictionary<string, float>();
         //public List<LocationData> location_test = new List<LocationData>();
@@ -53,7 +61,7 @@ namespace POLARIS.GeospatialScene
             // Wait at least 5 seconds
             // Check for distance
             if (!(Time.time - _loadTime > 5 &&
-                  DistanceInKmBetweenEarthCoordinates(currentLocation, _loadLocation) > LoadDistance/2))
+                  DistanceInKmBetweenEarthCoordinates(currentLocation, _loadLocation) > LoadDistance/2000))
             {
                 // Return nothing
                 return new List<GeospatialAnchorContent>();
@@ -68,32 +76,32 @@ namespace POLARIS.GeospatialScene
 
 
         // Temp function for show
-        public ARGeospatialAnchor PlacePanel(List<GameObject> anchorObjects, GeospatialAnchorHistory history)
+        // public ARGeospatialAnchor PlacePanel(List<GameObject> anchorObjects, GeospatialAnchorHistory history)
+        // {
+        //     if (Camera.gameObject.GetNamedChild("Panel")) return null;
+        //
+        //     var panel = AnchorManager.AddComponent<TextPanel>();
+        //     panel.Instantiate(
+        //         new GeospatialAnchorContent(
+        //             new LocationData(), 
+        //             "WHY HELLO THERE <style=Description>third panel <color=green>hello</color></style>",
+        //             history), 
+        //         _display);
+        //     var anchor = panel.PlacePanelGeospatialAnchor(anchorObjects, AnchorManager);
+        //     _panels.Add(panel);
+        //
+        //     return anchor;
+        // }
+
+        public double TestMakeSmallDist(double num, double origin)
         {
-            if (Camera.gameObject.GetNamedChild("Panel")) return null;
-
-            var panel = AnchorManager.AddComponent<TextPanel>();
-            panel.Instantiate(
-                new GeospatialAnchorContent(
-                    new LocationData(), 
-                    "WHY HELLO THERE <style=Description>third panel <color=green>hello</color></style>",
-                    history), 
-                _display);
-            var anchor = panel.PlacePanelGeospatialAnchor(anchorObjects, AnchorManager);
-            _panels.Add(panel);
-
-            return anchor;
-        }
-
-        private static double TestMakeSmallDist(double num, double origin)
-        {
-            return ((num - origin) / 200) + origin;
+            return ((num - origin) / SmallScale) + origin;
         }
 
         private List<GeospatialAnchorContent> FetchNearby(double2 currentLocation, List<GameObject> anchorObjects)
         {
             // Fetch from internal DB
-            var locations = GetLocationsWithinRadius(currentLocation, LoadDistance);
+            var locations = GetLocationsWithinRadius(currentLocation, LoadDistance/1000);
             //location_test = locations.ToList<LocationData>();
 
             var contentList = locations.Select(location => 
@@ -101,10 +109,12 @@ namespace POLARIS.GeospatialScene
                                                        location,
                                                        TextPanel.GenerateLocationText(location), 
                                                        new GeospatialAnchorHistory(
-                                                           location.BuildingLat, 
-                                                           // TestMakeSmallDist(location.BuildingLat, 28.61442),
-                                                           location.BuildingLong, 
-                                                           // TestMakeSmallDist(location.BuildingLong, -81.19579),
+                                                           SmallTestMode 
+                                                               ? TestMakeSmallDist(location.BuildingLat, TestCenterCoords.x) 
+                                                               : location.BuildingLat,
+                                                           SmallTestMode 
+                                                               ? TestMakeSmallDist(location.BuildingLong, TestCenterCoords.y) 
+                                                               : location.BuildingLong,
                                                            location.BuildingAltitude,
                                                            location.BuildingAltitude == 0 ? AnchorType.Terrain : AnchorType.Geospatial, 
                                                            new Quaternion(0, 0, 0, 0)))).ToList();

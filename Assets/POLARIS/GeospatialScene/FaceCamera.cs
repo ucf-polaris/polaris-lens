@@ -31,7 +31,7 @@ namespace POLARIS.GeospatialScene
 
             _forwardAmount = (float)((panelWidth / 2) / math.tan(PanelManager.DegreesToRadians(fov / 2)));
             // Add margin
-            _forwardAmount *= 2f;
+            _forwardAmount *= 2.4f;
         }
 
         // Update is called once per frame
