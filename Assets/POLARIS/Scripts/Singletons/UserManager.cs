@@ -23,11 +23,11 @@ namespace POLARIS.Managers{
         private const string VisitedFileName = "visited.json";
         private string VisitedFilePath;
         public bool Testing = false;
+        public bool InitFavAndVisit = false;
 
         void Awake()
         {
             FavoritesFilePath = Path.Combine(Application.persistentDataPath, FavoritesFileName);
-            Debug.Log(FavoritesFilePath);
             VisitedFilePath = Path.Combine(Application.persistentDataPath, VisitedFileName);
             Initialize();
         }
@@ -120,6 +120,9 @@ namespace POLARIS.Managers{
             PlayerPrefs.DeleteKey("AuthToken");
             PlayerPrefs.DeleteKey("realName");
             PlayerPrefs.DeleteKey("username");
+            // update favorite and visited in the database with current snapshot
+            // of the lists before clearing the lists and their caches.
+            StartCoroutine(UpdateFavoriteAndVisitedInDB(data));
             ClearFavorites();
             ClearVisited();
             data = new UserData();
@@ -133,6 +136,7 @@ namespace POLARIS.Managers{
 
         public bool LoadPlayerPrefs(UserData data)
         {
+            Debug.Log("Loading player prefs");
             if (data == null) return false;
 
             data.Email = PlayerPrefs.GetString("email");
@@ -143,10 +147,75 @@ namespace POLARIS.Managers{
             data.Username = PlayerPrefs.GetString("username");
             // Default to SU, Library, and Engineering 2 (shoutout to Komila)
             data.Suggested = PlayerPrefs.GetString("suggested", "Student Union~John C. Hitt Library~Engineering Building II");
-            LoadFavorites(data);
-            LoadVisited(data);
+
+            // condition to check if file is empty
+            if (!File.Exists(FavoritesFilePath) && !File.Exists(VisitedFilePath))
+            {
+                Debug.Log("Cache does not exist, reinitialize...");
+                InitFavoriteAndVisited(data);
+            }
+            // if i haven't logged out, meaning my cache hasn't been cleared, just use the cache
+            // instead of requerying the database again.
+            else
+            {
+                Debug.Log("We haven't logged out just yet, we still have a cache!");
+                LoadFavorites(data);
+                LoadVisited(data);
+            }
 
             return data.UserID1 != "" && data.Token != "";
+        }
+
+        public void UpdateBackendCall(IDictionary<string, string> request)
+        {
+            //make backend call to update here (or implement system to avoid spams to backend)
+            request["UserID"] = data.UserID1;
+            if (currentCall == null)
+            {
+                currentCall = UpdateFields(request);
+                StartCoroutine(currentCall);
+            }
+        }
+
+        public void InitFavoriteAndVisited(UserData data)
+        {
+            // this is a goofy ahhh way to do it LMAO
+            IDictionary<string, string> req = new Dictionary<string, string>();
+            req["email"] = data.Email;
+            InitFavAndVisit = true;
+            StartCoroutine(Get(req));
+            InitFavAndVisit = false;
+        }
+
+        public IEnumerator UpdateFavoriteAndVisitedInDB(UserData data)
+        {
+            Debug.Log("UFAVIDB");
+            string Token = data.Token;
+            string RefreshToken = data.RefreshToken;
+            JObject payload =
+                new(
+                    new JProperty("UserID", data.UserID1),
+                    new JProperty("favorite", data.favorite),
+                    new JProperty("visited", data.visited)
+                );
+            var www = UnityWebRequest.Put(updateCodeURL, payload.ToString());
+            www.SetRequestHeader("authorizationToken", "{\"token\":\"" + Token + "\", \"refreshToken\":\"" + RefreshToken + "\"}");
+            yield return www.SendWebRequest();
+            if (www.result != UnityWebRequest.Result.Success)
+            {
+                Debug.Log(www.error);
+            }
+            else if (www.downloadHandler.text.Contains("ERROR"))
+            {
+                Debug.Log(www.downloadHandler.text);
+            }
+            else
+            {
+                Debug.Log("Form upload complete!");
+                Debug.Log("Status Code: " + www.responseCode);
+                Debug.Log(www.result);
+                Debug.Log("Response: " + www.downloadHandler.text);
+            }
         }
         class StoreInFile
         {
@@ -159,6 +228,7 @@ namespace POLARIS.Managers{
 
         public void SaveFavorites()
         {
+            Debug.Log("Saving favorites");
             StoreInFile s = new StoreInFile(data.favorite);
             string json = JsonConvert.SerializeObject(s);
             //string json = JsonUtility.ToJson(data.favorite.ToArray());
@@ -178,15 +248,15 @@ namespace POLARIS.Managers{
 
         public void ClearFavorites()
         {
-            if (File.Exists(VisitedFilePath))
+            if (File.Exists(FavoritesFilePath))
             {
-                File.Delete(VisitedFilePath);
+                File.Delete(FavoritesFilePath);
             }
-            data.visited.Clear();
         }
 
         public void SaveVisited()
         {
+            Debug.Log("saving visited");
             StoreInFile s = new StoreInFile(data.visited);
             string json = JsonConvert.SerializeObject(s);
             //string json = JsonUtility.ToJson(data.favorite.ToArray());
@@ -209,18 +279,6 @@ namespace POLARIS.Managers{
             if (File.Exists(VisitedFilePath))
             {
                 File.Delete(VisitedFilePath);
-            }
-            data.visited.Clear();
-        }
-
-        public void UpdateBackendCall(IDictionary<string, string> request)
-        {
-            //make backend call to update here (or implement system to avoid spams to backend)
-            request["UserID"] = data.UserID1;
-            if (currentCall == null)
-            {
-                currentCall = UpdateFields(request);
-                StartCoroutine(currentCall);
             }
         }
 
@@ -286,6 +344,11 @@ namespace POLARIS.Managers{
                 Debug.Log(www.result);
                 JObject jsonResponse = JObject.Parse(www.downloadHandler.text);
                 Debug.Log("Response: " + jsonResponse);
+                if (InitFavAndVisit)
+                {
+                    data.favorite = jsonResponse["favorite"] != null ? jsonResponse["favorite"].Value<List<string>>() : new List<string>();
+                    data.visited = jsonResponse["visited"] != null ? jsonResponse["visited"].Value<List<string>>() : new List<string>();
+                }
             }
         }
         public IEnumerator ResetPasswordCode(IDictionary<string, string> request, Action<JObject> onSuccess, Action<string> onError)
@@ -422,7 +485,7 @@ namespace POLARIS.Managers{
             if (data.visited == null) data.visited = new List<string>();
             if (add && !data.visited.Contains(building.BuildingName))
             {
-                Debug.Log("ADded");
+                Debug.Log("Added");
                 data.visited.Add(building.BuildingName);
                 building.IsVisited = true;
             }
