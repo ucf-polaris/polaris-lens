@@ -29,6 +29,8 @@ namespace POLARIS.Managers{
         {
             FavoritesFilePath = Path.Combine(Application.persistentDataPath, FavoritesFileName);
             VisitedFilePath = Path.Combine(Application.persistentDataPath, VisitedFileName);
+            Debug.Log(FavoritesFilePath);
+            Debug.Log(VisitedFilePath);
             Initialize();
         }
 
@@ -179,12 +181,12 @@ namespace POLARIS.Managers{
 
         public void InitFavoriteAndVisited(UserData data)
         {
+            Debug.Log("Initiliazing favorites and visited");
             // this is a goofy ahhh way to do it LMAO
             IDictionary<string, string> req = new Dictionary<string, string>();
             req["email"] = data.Email;
             InitFavAndVisit = true;
             StartCoroutine(Get(req));
-            InitFavAndVisit = false;
         }
 
         public IEnumerator UpdateFavoriteAndVisitedInDB(UserData data)
@@ -195,8 +197,8 @@ namespace POLARIS.Managers{
             JObject payload =
                 new(
                     new JProperty("UserID", data.UserID1),
-                    new JProperty("favorite", data.favorite),
-                    new JProperty("visited", data.visited)
+                    new JProperty("favorite", data.favorite == null ? null : data.favorite),
+                    new JProperty("visited", data.visited == null ? null : data.visited)
                 );
             var www = UnityWebRequest.Put(updateCodeURL, payload.ToString());
             www.SetRequestHeader("authorizationToken", "{\"token\":\"" + Token + "\", \"refreshToken\":\"" + RefreshToken + "\"}");
@@ -284,17 +286,6 @@ namespace POLARIS.Managers{
             if (data.visited != null) data.visited.Clear();
         }
 
-        public void UpdateBackendCall(IDictionary<string, string> request)
-        {
-            //make backend call to update here (or implement system to avoid spams to backend)
-            request["UserID"] = data.UserID1;
-            if (currentCall == null)
-            {
-                currentCall = UpdateFields(request);
-                StartCoroutine(currentCall);
-            }
-        }
-
         override public IEnumerator UpdateFields(IDictionary<string, string> request)
         {
             string reqBody = JsonConvert.SerializeObject(request);
@@ -342,6 +333,7 @@ namespace POLARIS.Managers{
             UnityWebRequest www = UnityWebRequest.Post(UserGetURL, payload.ToString(), "application/json");
             www.SetRequestHeader("authorizationToken", "{\"token\":\"" + Token + "\",\"refreshToken\":\"" + RefreshToken + "\"}");
             yield return www.SendWebRequest();
+
             if (www.result != UnityWebRequest.Result.Success)
             {
                 Debug.Log(www.error);
@@ -359,8 +351,13 @@ namespace POLARIS.Managers{
                 Debug.Log("Response: " + jsonResponse);
                 if (InitFavAndVisit)
                 {
-                    data.favorite = jsonResponse["favorite"] != null ? jsonResponse["favorite"].Value<List<string>>() : new List<string>();
-                    data.visited = jsonResponse["visited"] != null ? jsonResponse["visited"].Value<List<string>>() : new List<string>();
+                    Debug.Log("Init-ing");
+                    Debug.Log(jsonResponse["users"][0]["favorite"]);
+                    data.favorite = jsonResponse["users"][0]["favorite"] != null ? jsonResponse["users"][0]["favorite"].ToObject<List<string>>() : new List<string>();
+                    data.visited = jsonResponse["users"][0]["visited"] != null ? jsonResponse["users"][0]["visited"].ToObject<List<string>>() : new List<string>();
+                    SaveFavorites();
+                    SaveVisited();
+                    InitFavAndVisit = false;
                 }
             }
         }
