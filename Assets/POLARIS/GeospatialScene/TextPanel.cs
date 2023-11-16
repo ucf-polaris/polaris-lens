@@ -24,6 +24,8 @@ namespace POLARIS.GeospatialScene
 
         public bool Loaded;
         public bool Visited;
+        
+        public GameObject Indicator;
 
         private ARGeospatialAnchor _anchor;
 
