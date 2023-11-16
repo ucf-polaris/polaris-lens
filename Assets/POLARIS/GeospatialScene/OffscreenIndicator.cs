@@ -50,16 +50,13 @@ public class OffscreenIndicator : MonoBehaviour
                 if (screenPos.z < 0)
                 {
                     screenPos.x = Screen.width - screenPos.x;
-                    // screenPos.y = Screen.height - screenPos.y;
+                    screenPos.y = Screen.height - screenPos.y;
                 }
                 screenPos.z = 0;
                 
-                // Go to right or left of screen
+                // Get pos on left or right edge
                 screenPos.x = (screenPos.x < Screen.width / 2f) ? _minX : _maxX;
-
                 screenPos.y = Mathf.Clamp(screenPos.y, _minY, _maxY);
-
-                print("YY " + screenPos + " for " + panel.Content.Text[13..20]);
                 panel.Indicator.transform.position = screenPos;
 
                 // Rotate away from center

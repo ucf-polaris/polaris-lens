@@ -720,7 +720,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   Camera: {fileID: 1451910691}
   AnchorManager: {fileID: 691323916}
-  LoadDistance: 600
+  LoadDistance: 400
   RenderDistance: 200
   SmallScale: 20
   SmallTestMode: 0
@@ -795,7 +795,8 @@ MonoBehaviour:
   PathManager: {fileID: 1621438621}
   PanelManager: {fileID: 325939929}
   ARCoreExtensions: {fileID: 1476232295}
-  StreetscapeGeometryMaterialBuilding: []
+  StreetscapeGeometryMaterialBuilding:
+  - {fileID: 7770318624900243041, guid: 472a75b27cdef4bf487585489493b7d6, type: 3}
   StreetscapeGeometryMaterialTerrain: {fileID: 2100000, guid: 22262639920f43d6be32430e4e58350d,
     type: 2}
   PrivacyPromptCanvas: {fileID: 782365343}
@@ -2183,6 +2184,7 @@ GameObject:
   - component: {fileID: 1451910693}
   - component: {fileID: 1451910692}
   - component: {fileID: 1451910696}
+  - component: {fileID: 1451910697}
   m_Layer: 0
   m_Name: AR Camera
   m_TagString: MainCamera
@@ -2308,82 +2310,23 @@ MonoBehaviour:
   m_TrackingType: 0
   m_UpdateType: 0
   m_UseRelativeTransform: 0
---- !u!1 &1464447250
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 1464447253}
-  - component: {fileID: 1464447252}
-  - component: {fileID: 1464447251}
-  m_Layer: 0
-  m_Name: TEST OBJ
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 0
---- !u!114 &1464447251
+--- !u!114 &1451910697
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1464447250}
+  m_GameObject: {fileID: 1451910690}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 0b64ef6a81ce6c040ab85f6898897ef9, type: 3}
+  m_Script: {fileID: 11500000, guid: b15f82cc229284894964d2d30806969d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  data:
-    username: 
-    UserID: 
-    email: 
-    realname: 
-    token: 
-    refreshToken: 
-    favorite: []
-    schedule: []
-    visited: []
-    currScene: 
-    suggested: 
-  codeData:
-    userID: 
-    token: 
-  Testing: 1
---- !u!114 &1464447252
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1464447250}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 35fe42ffa57576848b076ccb02c99889, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  dataList: []
-  Testing: 0
-  ScanStatus: 0
---- !u!4 &1464447253
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1464447250}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_HumanSegmentationStencilMode: 0
+  m_HumanSegmentationDepthMode: 0
+  m_EnvironmentDepthMode: 1
+  m_EnvironmentDepthTemporalSmoothing: 1
+  m_OcclusionPreferenceMode: 0
 --- !u!1 &1471100010
 GameObject:
   m_ObjectHideFlags: 0
@@ -3595,6 +3538,5 @@ SceneRoots:
   - {fileID: 384014292}
   - {fileID: 632144985}
   - {fileID: 8400692408531988649}
-  - {fileID: 1464447253}
   - {fileID: 158542448}
   - {fileID: 8845214259929783584}
