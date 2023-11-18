@@ -116,12 +116,13 @@ namespace POLARIS
             userManager = UserManager.getInstance();
             _locationManager = LocationManager.getInstance();
             suggestedLocations = new Queue<string>(numSuggestions);
-            
-            // PersistData.StopLocations.Push(new Vector3(16, -930, 239));
-            // PersistData.StopLocations.Push(new Vector3(115, -970, 59));
-            // PersistData.StopNames.Push("Classroom 2");
-            // PersistData.StopNames.Push("Another building");
-            
+
+            StartCoroutine(PlaceStopLocations());
+        }
+
+        private IEnumerator PlaceStopLocations()
+        {
+            yield return new WaitForSeconds(1f);
             var stopLocations = PersistData.StopLocations.ToArray();
             var stopNames = PersistData.StopNames.ToArray();
             for (var i = 0; i < stopLocations.Length; i++)
@@ -356,7 +357,16 @@ namespace POLARIS
             foreach (var feature in features)
             {
                 var geometry = feature.SelectToken("geometry");
-                var paths = geometry?.SelectToken("paths")?[0];
+                JToken paths;
+                try
+                {
+                    paths = geometry?.SelectToken("paths")?[0];
+                }
+                catch (ArgumentOutOfRangeException e)
+                {
+                    Debug.LogError("No path (likely zero-distance path): " + e);
+                    throw;
+                }
 
                 var pathList = new List<double2>();
 
@@ -446,7 +456,6 @@ namespace POLARIS
                 }
                 _stops.Clear();
                 PersistData.ClearStops();
-                _shouldClose = true;
             }
 
             foreach (var breadcrumb in _breadcrumbs)
@@ -644,6 +653,7 @@ namespace POLARIS
         private void StopClicked()
         {
             ClearRoute(true);
+            _shouldClose = true;
         }
 
         public static IEnumerator ToggleRoutingBox(bool routing, VisualElement routingBox, float closeTime)
@@ -691,6 +701,7 @@ namespace POLARIS
             if (endDist < 25)
             {
                 ClearRoute(true);
+                _shouldClose = true;
                 // TODO: Play animation
             }
 

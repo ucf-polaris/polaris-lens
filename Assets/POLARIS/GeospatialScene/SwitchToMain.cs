@@ -38,7 +38,7 @@ namespace POLARIS
             StartCoroutine(LoadScene(sceneName));
         }
 
-        private static IEnumerator LoadScene(string sceneName)
+        public static IEnumerator LoadScene(string sceneName)
         {
             SceneManager.LoadSceneAsync(sceneName);
 

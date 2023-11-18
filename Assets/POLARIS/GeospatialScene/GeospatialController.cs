@@ -17,6 +17,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
+using POLARIS;
 using POLARIS.GeospatialScene;
 using POLARIS.MainScene;
 using POLARIS.Managers;
@@ -921,7 +922,8 @@ namespace Google.XR.ARCoreExtensions.Samples.Geospatial
             Debug.LogError(reason);
             SnackBarText.text = reason;
             _isReturning = true;
-            Invoke(nameof(QuitApplication), ErrorDisplaySeconds);
+            // Invoke(nameof(QuitApplication), ErrorDisplaySeconds);
+            StartCoroutine(SwitchToMain.LoadScene("MainScene"));
         }
 
         private void QuitApplication()
