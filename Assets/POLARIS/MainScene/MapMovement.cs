@@ -37,10 +37,10 @@ namespace Esri.ArcGISMapsSDK.Samples.Components
 		private const double MaxCameraHeight = 1500.0;
 		private const double MinCameraHeight = 20;
 		
-		private const float MinLongitude = -81.209995f;
-		private const float MaxLongitude = -81.181589f;
-		private const float MinLatitude = 28.580255f;
-		private const float MaxLatitude = 28.613986f;
+		private const float MinLongitude = -81.215f;
+		private const float MaxLongitude = -81.185f;
+		private const float MinLatitude = 28.589f;
+		private const float MaxLatitude = 28.614f;
 		private double3 MinWorldPosition;
 		private double3 MaxWorldPosition;
 
@@ -55,6 +55,10 @@ namespace Esri.ArcGISMapsSDK.Samples.Components
 
 		public double MaxSpeed = 2000000.0;
 		public double MinSpeed = 1000.0;
+		public double VelocityDrag;
+
+		private bool _usingMomentum = false;
+		private double3 _velocity = double3.zero;
 		
 		private HPRoot _root;
 
@@ -95,6 +99,12 @@ namespace Esri.ArcGISMapsSDK.Samples.Components
 			// Not functional until we have a spatial reference
 			if (_arcGisMapComponent.View.SpatialReference == null) return;
 			
+			_velocity *= (1 - VelocityDrag);
+			if (_velocity.ToVector3().magnitude < 0.01)
+			{
+				_velocity = double3.zero;
+			}
+			
 			if (!MenUI_Panels.userOnListView) TouchEvent();
 		}
 		
@@ -102,8 +112,9 @@ namespace Esri.ArcGISMapsSDK.Samples.Components
 		{
 			var cartesianPosition = Position;
 			var cartesianRotation = Rotation;
-			
-			var deltaTouch =  GetTouchDelta();
+
+			var deltaTouch = GetTouchDelta();
+			_usingMomentum = true;
 
 			if (!_firstOnFocus)
 			{
@@ -139,6 +150,8 @@ namespace Esri.ArcGISMapsSDK.Samples.Components
 					// Lateral movement
 					foreach (var touch in Input.touches)
 					{
+						_usingMomentum = false;
+
 						if (touch.phase != TouchPhase.Moved)
 						{
 							_lastCartesianPoint = GetCartesianCoord(cartesianPosition);
@@ -156,15 +169,12 @@ namespace Esri.ArcGISMapsSDK.Samples.Components
 
 						var cartesianCoord = cartesianPosition + worldRayDir * intersection;
 
-						var delta = _firstDragStep
+						_velocity = _firstDragStep
 							? double3.zero
 							: _lastCartesianPoint - cartesianCoord;
 
-						_lastCartesianPoint = cartesianCoord + delta;
-						cartesianPosition += delta;
-						cartesianPosition.x = Mathf.Clamp((float)cartesianPosition.x, (float)MinWorldPosition.x, (float)MaxWorldPosition.x);
-						cartesianPosition.z = Mathf.Clamp((float)cartesianPosition.z, (float)MinWorldPosition.z, (float)MaxWorldPosition.z);
-						_firstDragStep = false;
+						_lastCartesianPoint = cartesianCoord + _velocity;
+						cartesianPosition += _velocity;
 					}
 				}
 			}
@@ -172,9 +182,29 @@ namespace Esri.ArcGISMapsSDK.Samples.Components
 			{
 				_firstOnFocus = false;
 			}
+			_firstDragStep = false;
+			
+			if (_usingMomentum)
+			{
+				cartesianPosition += _velocity;
+				
+				// Bounce on walls
+				if (cartesianPosition.x < MinWorldPosition.x || cartesianPosition.x > MaxWorldPosition.x)
+				{
+					_velocity.x = -_velocity.x;
+				}
+				if (cartesianPosition.z < MinWorldPosition.z || cartesianPosition.z > MaxWorldPosition.z)
+				{
+					_velocity.z = -_velocity.z;
+				}
+			}
+			else
+			{
+				cartesianPosition.x = Mathf.Clamp((float)cartesianPosition.x, (float)MinWorldPosition.x, (float)MaxWorldPosition.x);
+				cartesianPosition.z = Mathf.Clamp((float)cartesianPosition.z, (float)MinWorldPosition.z, (float)MaxWorldPosition.z);
+			}
 
 			Position = cartesianPosition;
-			// print("new position: " + Position);
 			Rotation = cartesianRotation;
 		}
 
