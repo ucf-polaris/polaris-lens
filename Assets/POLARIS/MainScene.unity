@@ -859,7 +859,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   MaxSpeed: 2000000
   MinSpeed: 1000
-  VelocityDrag: 0.04
+  VelocityDrag: 0.08
 --- !u!1 &985640667
 GameObject:
   m_ObjectHideFlags: 0

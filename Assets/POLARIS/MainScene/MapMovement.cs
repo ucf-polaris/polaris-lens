@@ -17,6 +17,7 @@ using Esri.ArcGISMapsSDK.Utils.Math;
 using Esri.HPFramework;
 using System;
 using System.Linq;
+using Esri.GameEngine;
 using Esri.GameEngine.Geometry;
 using POLARIS.MainScene;
 using Unity.Mathematics;
@@ -43,10 +44,10 @@ namespace Esri.ArcGISMapsSDK.Samples.Components
 		private const float MaxLatitude = 28.614f;
 		private double3 MinWorldPosition;
 		private double3 MaxWorldPosition;
+		private bool _hasCalculatedMinMax;
 
 		private double3 _lastCartesianPoint;
 		private bool _firstDragStep = true;
-		private bool _lastDragStep = false;
 
 		private Vector2 _rotStartPosition;
 
@@ -80,22 +81,31 @@ namespace Esri.ArcGISMapsSDK.Samples.Components
 		
 		private void Start()
 		{
+			if (_arcGisMapComponent == null) 
+			{
+				Debug.LogError(
+					"An ArcGISMapComponent could not be found. Please make sure this GameObject is a child of a GameObject with an ArcGISMapComponent attached");
+				enabled = false;
+				return;
+			}
+			
 			_root = _arcGisMapComponent.GetComponent<HPRoot>();
-			var minPoint = new ArcGISPoint(MinLongitude, MinLatitude, 0, new ArcGISSpatialReference(4326));
-			MinWorldPosition = _arcGisMapComponent.View.GeographicToWorld(minPoint);
-			var maxPoint = new ArcGISPoint(MaxLongitude, MaxLatitude, 0, new ArcGISSpatialReference(4326));
-			MaxWorldPosition = _arcGisMapComponent.View.GeographicToWorld(maxPoint);
-
-			if (_arcGisMapComponent != null) return;
-
-			Debug.LogError("An ArcGISMapComponent could not be found. Please make sure this GameObject is a child of a GameObject with an ArcGISMapComponent attached");
-			enabled = false;
 		}
 
 		private void Update()
 		{
 			if (_arcGisMapComponent == null) return;
 
+			if (!_hasCalculatedMinMax &&
+			    _arcGisMapComponent.View.Map.LoadStatus == ArcGISLoadStatus.Loaded)
+			{
+				var minPoint = new ArcGISPoint(MinLongitude, MinLatitude, 0, new ArcGISSpatialReference(4326));
+				var maxPoint = new ArcGISPoint(MaxLongitude, MaxLatitude, 0, new ArcGISSpatialReference(4326));
+				MinWorldPosition = _arcGisMapComponent.View.GeographicToWorld(minPoint);
+				MaxWorldPosition = _arcGisMapComponent.View.GeographicToWorld(maxPoint);
+				_hasCalculatedMinMax = true;
+			}
+			
 			// Not functional until we have a spatial reference
 			if (_arcGisMapComponent.View.SpatialReference == null) return;
 			
@@ -198,11 +208,9 @@ namespace Esri.ArcGISMapsSDK.Samples.Components
 					_velocity.z = -_velocity.z;
 				}
 			}
-			else
-			{
-				cartesianPosition.x = Mathf.Clamp((float)cartesianPosition.x, (float)MinWorldPosition.x, (float)MaxWorldPosition.x);
-				cartesianPosition.z = Mathf.Clamp((float)cartesianPosition.z, (float)MinWorldPosition.z, (float)MaxWorldPosition.z);
-			}
+
+			cartesianPosition.x = Mathf.Clamp((float)cartesianPosition.x, (float)MinWorldPosition.x, (float)MaxWorldPosition.x);
+			cartesianPosition.z = Mathf.Clamp((float)cartesianPosition.z, (float)MinWorldPosition.z, (float)MaxWorldPosition.z);
 
 			Position = cartesianPosition;
 			Rotation = cartesianRotation;
