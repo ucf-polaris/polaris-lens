@@ -61,6 +61,21 @@ namespace POLARIS.MainScene {
             eventManager.ImageDownloaded += RefreshEventExtendedView;
         }
 
+        private void OnDisable()
+        {
+            if(LocationManager.getInstance() != null)
+            {
+                locationManager.UpdateNeeded -= RefreshListView;
+                locationManager.UpdateNeeded -= RefreshLocationExtendedView;
+            }
+
+            if (EventManager.getInstance() != null)
+            {
+                eventManager.ImageDownloaded -= RefreshListView;
+                eventManager.ImageDownloaded -= RefreshEventExtendedView;
+            }
+        }
+
         // Update is called once per frame
         private void Update()
         {
@@ -192,6 +207,7 @@ namespace POLARIS.MainScene {
         public void ExtendMenu(EventData evtData, bool closeOther)
         {
             if (evtData == null) return;
+            BackToTop();
             _eventData = evtData;
             RefreshPage(closeOther);
         }
@@ -283,6 +299,7 @@ namespace POLARIS.MainScene {
         public void ExtendMenu(LocationData locData, bool closeOther)
         {
             if (locData == null) return;
+            BackToTop();
             locationData = locData;
             RefreshPage(closeOther);
         }

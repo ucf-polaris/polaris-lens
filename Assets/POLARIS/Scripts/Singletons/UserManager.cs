@@ -6,6 +6,7 @@ using Newtonsoft.Json.Linq;
 using Newtonsoft.Json;
 using System;
 using System.IO;
+using System.Linq;
 
 namespace POLARIS.Managers{
     public class UserManager : BaseManager
@@ -25,6 +26,8 @@ namespace POLARIS.Managers{
         public bool Testing = false;
         public bool InitFavAndVisit = false;
 
+        public CallStatus CheckPermanenceStatus = CallStatus.NotStarted;
+        public event EventHandler GetSucceed;
         void Awake()
         {
             FavoritesFilePath = Path.Combine(Application.persistentDataPath, FavoritesFileName);
@@ -58,7 +61,8 @@ namespace POLARIS.Managers{
             [SerializeField]
             private string currScene;
             [SerializeField]
-            private string suggested;
+            private string suggested = "Student Union~John C. Hitt Library~Engineering Building II";
+            private DateTime lastLogin;
 
             #region Setters and Getters
             public string Username { get => username; set { username = value; PlayerPrefs.SetString("username", value); } }
@@ -69,6 +73,7 @@ namespace POLARIS.Managers{
             public string RefreshToken { get => refreshToken; set { refreshToken = value; PlayerPrefs.SetString("RefreshToken", value); } }
             public string CurrScene { get => currScene; set { currScene = value; PlayerPrefs.SetString("currScene", value); } }
             public string Suggested { get => suggested; set { suggested = value; PlayerPrefs.SetString("suggested", value); } }
+            public DateTime LastLogin { get => lastLogin; set { lastLogin = value; PlayerPrefs.SetString("lastLogin", value.ToString()); } }
             #endregion
         }
 
@@ -104,7 +109,14 @@ namespace POLARIS.Managers{
                 Instance = this;
                 data = new UserData();
                 LoadPlayerPrefs(data);
-                Debug.Log(data.UserID1);
+            }
+        }
+
+        private void OnGetSucceed()
+        {
+            if (GetSucceed != null)
+            {
+                GetSucceed(this, EventArgs.Empty);
             }
         }
 
@@ -112,9 +124,16 @@ namespace POLARIS.Managers{
         {
             return Instance != null && Instance.data != null;
         }
+
+        public void CheckPermanence()
+        {
+            IDictionary<string, string> request = new Dictionary<string, string>();
+            request.Add("email", data.Email);
+            StartCoroutine(Get(request));
+        }
         
         //On log out destroy player prefs
-        public void Logout()
+        public void Logout(bool saveData)
         {
             PlayerPrefs.DeleteKey("email");
             PlayerPrefs.DeleteKey("UserID");
@@ -122,20 +141,17 @@ namespace POLARIS.Managers{
             PlayerPrefs.DeleteKey("AuthToken");
             PlayerPrefs.DeleteKey("realName");
             PlayerPrefs.DeleteKey("username");
+            PlayerPrefs.DeleteKey("lastLogin");
+            PlayerPrefs.DeleteKey("suggested");
+            PlayerPrefs.DeleteKey("currScene");
             // update favorite and visited in the database with current snapshot
             // of the lists before clearing the lists and their caches.
-            StartCoroutine(UpdateFavoriteAndVisitedInDB(data));
-            ClearFavorites();
-            ClearVisited();
-            data = new UserData();
+            if(saveData) StartCoroutine(UpdateFavoriteAndVisitedInDB(data, true, true, true));
 
-            /*
-            PlayerPrefs.DeleteKey("favorites");
-            PlayerPrefs.DeleteKey("schedule");
-            PlayerPrefs.DeleteKey("visited");
-            */
+            data = new UserData();
         }
 
+        //should only be called if cache exists
         public bool LoadPlayerPrefs(UserData data)
         {
             Debug.Log("Loading player prefs");
@@ -151,7 +167,7 @@ namespace POLARIS.Managers{
             data.Suggested = PlayerPrefs.GetString("suggested", "Student Union~John C. Hitt Library~Engineering Building II");
 
             // condition to check if file is empty
-            if (!File.Exists(FavoritesFilePath) && !File.Exists(VisitedFilePath))
+            /*if (!File.Exists(FavoritesFilePath) && !File.Exists(VisitedFilePath))
             {
                 Debug.Log("Cache does not exist, reinitialize...");
                 InitFavoriteAndVisited(data);
@@ -163,7 +179,7 @@ namespace POLARIS.Managers{
                 Debug.Log("We haven't logged out just yet, we still have a cache!");
                 LoadFavorites(data);
                 LoadVisited(data);
-            }
+            }*/
 
             return data.UserID1 != "" && data.Token != "";
         }
@@ -179,30 +195,41 @@ namespace POLARIS.Managers{
             }
         }
 
-        public void InitFavoriteAndVisited(UserData data)
+        public IEnumerator UpdateFavoriteAndVisitedInDB(UserData data, bool favorite, bool visited, bool clear=false)
         {
-            Debug.Log("Initiliazing favorites and visited");
-            // this is a goofy ahhh way to do it LMAO
-            IDictionary<string, string> req = new Dictionary<string, string>();
-            req["email"] = data.Email;
-            InitFavAndVisit = true;
-            StartCoroutine(Get(req));
-        }
+            if (!favorite && !visited) yield break;
 
-        public IEnumerator UpdateFavoriteAndVisitedInDB(UserData data)
-        {
-            Debug.Log("UFAVIDB");
             string Token = data.Token;
             string RefreshToken = data.RefreshToken;
             JObject payload =
                 new(
-                    new JProperty("UserID", data.UserID1),
-                    new JProperty("favorite", data.favorite == null ? null : data.favorite),
-                    new JProperty("visited", data.visited == null ? null : data.visited)
+                    new JProperty("UserID", data.UserID1)
                 );
+
+            //add to payload and limit how much data can be written (if file path doesn't exist then no changes were made)
+            if (favorite && File.Exists(FavoritesFilePath))
+            {
+                if (data.favorite != null && data.favorite.Count <= 130 && !data.favorite.Any(x => x.Length > 70) && data.favorite.Count > 0)
+                    payload.Add(new JProperty("favorite", data.favorite ));
+                else if(data.favorite.Count == 0 || data.favorite == null)
+                    payload.Add(new JProperty("favorite", null));
+
+            }
+            if (visited && File.Exists(VisitedFilePath))
+            {
+                if (data.visited != null && data.visited.Count <= 130 && !data.visited.Any(x => x.Length > 70) && data.visited.Count > 0)
+                    payload.Add(new JProperty("visited", data.visited));
+                else if (data.visited.Count == 0 || data.visited == null)
+                    payload.Add(new JProperty("visited", null));
+            }
+
+            if (payload.Count < 2) yield break;
+
+            //update user
             var www = UnityWebRequest.Put(updateCodeURL, payload.ToString());
             www.SetRequestHeader("authorizationToken", "{\"token\":\"" + Token + "\", \"refreshToken\":\"" + RefreshToken + "\"}");
             yield return www.SendWebRequest();
+
             if (www.result != UnityWebRequest.Result.Success)
             {
                 Debug.Log(www.error);
@@ -217,6 +244,11 @@ namespace POLARIS.Managers{
                 Debug.Log("Status Code: " + www.responseCode);
                 Debug.Log(www.result);
                 Debug.Log("Response: " + www.downloadHandler.text);
+            }
+            if (clear)
+            {
+                ClearFavorites();
+                ClearVisited();
             }
         }
         class StoreInFile
@@ -238,14 +270,15 @@ namespace POLARIS.Managers{
             File.WriteAllText(FavoritesFilePath, json);
         }
 
-        public void LoadFavorites(UserData data)
+        public List<string> LoadFavorites(UserData data)
         {
             if (File.Exists(FavoritesFilePath))
             {
                 string json = File.ReadAllText(FavoritesFilePath);
                 StoreInFile obj = JsonConvert.DeserializeObject<StoreInFile>(json);
-                data.favorite = obj.listy;
+                return obj.listy;
             }
+            return new List<string>();
         }
 
         public void ClearFavorites()
@@ -267,14 +300,15 @@ namespace POLARIS.Managers{
             File.WriteAllText(VisitedFilePath, json);
         }
 
-        public void LoadVisited(UserData data)
+        public List<string> LoadVisited(UserData data)
         {
             if (File.Exists(VisitedFilePath))
             {
                 string json = File.ReadAllText(VisitedFilePath);
                 StoreInFile obj = JsonConvert.DeserializeObject<StoreInFile>(json);
-                data.visited = obj.listy;
+                return obj.listy;
             }
+            return new List<string>();
         }
 
         public void ClearVisited()
@@ -285,6 +319,8 @@ namespace POLARIS.Managers{
             }
             if (data.visited != null) data.visited.Clear();
         }
+
+        //LoadPlayerPrefs(data);
 
         override public IEnumerator UpdateFields(IDictionary<string, string> request)
         {
@@ -323,25 +359,39 @@ namespace POLARIS.Managers{
         }
         override protected IEnumerator Get(IDictionary<string, string> request)
         {
-            string Token = data.Token;
-            string RefreshToken = data.RefreshToken;
+            CheckPermanenceStatus = CallStatus.InProgress;
+            string token = data.Token;
+            string refreshToken = data.RefreshToken;
 
-            JObject payload =
-                new(
+            //get payload
+            JObject payload = new();
+            if (request.ContainsKey("email"))
+            {
+                payload = new(
                     new JProperty("email", request["email"])
                 );
+            }
+
+            //make request
             UnityWebRequest www = UnityWebRequest.Post(UserGetURL, payload.ToString(), "application/json");
-            www.SetRequestHeader("authorizationToken", "{\"token\":\"" + Token + "\",\"refreshToken\":\"" + RefreshToken + "\"}");
+            www.SetRequestHeader("authorizationToken", "{\"token\":\"" + token + "\",\"refreshToken\":\"" + refreshToken + "\"}");
             yield return www.SendWebRequest();
 
+            //if unauthorized, call failed
             if (www.result != UnityWebRequest.Result.Success)
             {
                 Debug.Log(www.error);
+                CheckPermanenceStatus = CallStatus.Failed;
+                Logout(false);
             }
+            //if error but succeeded, tampering was done
             else if (www.downloadHandler.text.Contains("ERROR"))
             {
                 Debug.Log(www.downloadHandler.text);
+                CheckPermanenceStatus = CallStatus.Failed;
+                Logout(false);
             }
+            //if succeed, update everything but favorites and visited (only update these if the associated files don't exist)
             else
             {
                 Debug.Log("Form upload complete!");
@@ -349,16 +399,85 @@ namespace POLARIS.Managers{
                 Debug.Log(www.result);
                 JObject jsonResponse = JObject.Parse(www.downloadHandler.text);
                 Debug.Log("Response: " + jsonResponse);
-                if (InitFavAndVisit)
+                CheckPermanenceStatus = CallStatus.Succeeded;
+
+                //set fields
+                data.Realname = jsonResponse["users"][0]["name"] != null ? jsonResponse["users"][0]["name"].ToObject<string>() : "";
+                data.Email = jsonResponse["users"][0]["email"] != null ? jsonResponse["users"][0]["email"].ToObject<string>() : "";
+                data.UserID1 = jsonResponse["users"][0]["UserID"] != null ? jsonResponse["users"][0]["UserID"].ToObject<string>() : "";
+                data.Username = jsonResponse["users"][0]["username"] != null ? jsonResponse["users"][0]["username"].ToObject<string>() : "";
+
+                DealWithVisitedAndFavorites(jsonResponse);
+
+                OnGetSucceed();
+            }
+        }
+
+        private void DealWithVisitedAndFavorites(JObject jsonResponse)
+        {
+            //flags are to see if you need to update database
+            bool visitedFlag = false;
+            bool favoritesFlag = false;
+            //if visited file exists then load from that, if it doesn't then load from database (will always assume cache is the most up to date)
+            if (File.Exists(VisitedFilePath))
+            {
+                var newData = LoadVisited(data);
+                var obtainedData = jsonResponse["users"][0]["visited"].ToObject<List<string>>();
+
+                //if what was returned from get is empty (if what's in cache is empty don't update, otherwise update; means they're both empty if both are null)
+                if (obtainedData == null)
+                    visitedFlag = newData != null;
+                //if both lists match, don't update
+                else
+                    visitedFlag = newData == null ? true : !Enumerable.SequenceEqual(obtainedData.OrderBy(fElement => fElement), newData.OrderBy(sElement => sElement));
+
+                data.visited = newData == null ? new List<string>() : newData;
+                //check if amount of elements is over 100 or the amount of characters is over 70
+                if (data.visited.Count > 130 || data.visited.Any(x => x.Length > 70))
                 {
-                    Debug.Log("Init-ing");
-                    Debug.Log(jsonResponse["users"][0]["favorite"]);
-                    data.favorite = jsonResponse["users"][0]["favorite"] != null ? jsonResponse["users"][0]["favorite"].ToObject<List<string>>() : new List<string>();
                     data.visited = jsonResponse["users"][0]["visited"] != null ? jsonResponse["users"][0]["visited"].ToObject<List<string>>() : new List<string>();
-                    SaveFavorites();
                     SaveVisited();
-                    InitFavAndVisit = false;
+                    visitedFlag = false;
                 }
+            }
+            else
+            {
+                data.visited = jsonResponse["users"][0]["visited"] != null ? jsonResponse["users"][0]["visited"].ToObject<List<string>>() : new List<string>();
+                SaveVisited();
+            }
+
+            //if favorites file exists then load from that, if it doesn't then load from database (will always assume cache is the most up to date)
+            if (File.Exists(FavoritesFilePath))
+            {
+                var newData = LoadFavorites(data);
+                var obtainedData = jsonResponse["users"][0]["favorite"].ToObject<List<string>>();
+
+                //if what was returned from get is empty (if what's in cache is empty don't update, otherwise update; means they're both empty if both are null)
+                if (obtainedData == null)
+                    favoritesFlag = newData != null;
+                //if both lists match, don't update
+                else
+                    favoritesFlag = newData == null ? true : !Enumerable.SequenceEqual(obtainedData.OrderBy(fElement => fElement), newData.OrderBy(sElement => sElement));
+
+                data.favorite = newData == null ? new List<string>() : newData;
+
+                //check if amount of elements is over 100 or the amount of characters is over 70
+                if (data.favorite.Count > 130 || data.favorite.Any(x => x.Length > 70))
+                {
+                    data.favorite = jsonResponse["users"][0]["favorite"] != null ? jsonResponse["users"][0]["favorite"].ToObject<List<string>>() : new List<string>();
+                    SaveFavorites();
+                    favoritesFlag = false;
+                }
+            }
+            else
+            {
+                data.favorite = jsonResponse["users"][0]["favorite"] != null ? jsonResponse["users"][0]["favorite"].ToObject<List<string>>() : new List<string>();
+                SaveFavorites();
+            }
+
+            if (File.Exists(FavoritesFilePath) || File.Exists(VisitedFilePath))
+            {
+                StartCoroutine(UpdateFavoriteAndVisitedInDB(data, favoritesFlag, visitedFlag));
             }
         }
         public IEnumerator ResetPasswordCode(IDictionary<string, string> request, Action<JObject> onSuccess, Action<string> onError)

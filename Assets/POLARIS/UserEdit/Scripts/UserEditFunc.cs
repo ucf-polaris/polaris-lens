@@ -320,7 +320,7 @@ public class UserEditFunc : MonoBehaviour
     #region OtherButtonFunctions
     public void OnLogOutClick()
     {
-        UserInstance.Logout();
+        UserInstance.Logout(true);
         SceneManager.LoadScene("Login");
     }
 

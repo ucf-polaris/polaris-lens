@@ -1,7 +1,7 @@
 <ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" xsi="http://www.w3.org/2001/XMLSchema-instance" engine="UnityEngine.UIElements" editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
     <Style src="project://database/Assets/POLARIS/UI%20Assets/EntryStyles.uss?fileID=7433441132597879392&amp;guid=629c839b3d5f78642bc3d93c6d881c59&amp;type=3#EntryStyles" />
     <ui:VisualElement picking-mode="Ignore" class="panelEntity" style="flex-grow: 0; position: relative;">
-        <Shadow class="panelShadow" style="width: 950px; display: none;" />
+        <Shadow class="panelShadow" style="width: 950px; display: flex;" />
         <ui:VisualElement class="panel" style="flex-grow: 1; width: 1000px;">
             <ui:VisualElement class="panelImage" style="flex-grow: 1;" />
             <ui:VisualElement name="ParkingIcon" style="flex-grow: 0; position: absolute; top: -5%; left: 908px; visibility: visible; display: none;">

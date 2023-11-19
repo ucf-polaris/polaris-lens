@@ -31,8 +31,6 @@ public class LoginUser : MonoBehaviour
         StartCoroutine(SendLoginRequest(emailInput.text, passwordInput.text));
     }
     
-    
-    
     IEnumerator SendLoginRequest(string email, string password)
     {
         password = Hashing.HashPassword(password);
@@ -73,6 +71,8 @@ public class LoginUser : MonoBehaviour
                 instance.data.visited = jsonResponse["visited"] != null ? jsonResponse["visited"].ToObject<List<string>>() : new List<string>();
                 instance.data.Token = (string)jsonResponse["tokens"]["token"];
                 instance.data.RefreshToken = (string)jsonResponse["tokens"]["refreshToken"];
+                //keep track of when last logged in.
+                instance.data.LastLogin = DateTime.UtcNow;
                 SceneManager.LoadScene("MainScene");
             }
             else
