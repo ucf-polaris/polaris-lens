@@ -176,7 +176,6 @@ namespace POLARIS.Managers
                 OnImageDownloaded();
                 //Debug.Log(name + " successfully downloaded");
             }
-
         }
 
         public void getAllRawImages()

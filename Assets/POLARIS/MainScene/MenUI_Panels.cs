@@ -59,6 +59,8 @@ namespace POLARIS.MainScene {
             //when image finishes downloading, refresh
             eventManager.ImageDownloaded += RefreshListView;
             eventManager.ImageDownloaded += RefreshEventExtendedView;
+            locationManager.ImageDownloaded += RefreshListView;
+            locationManager.ImageDownloaded += RefreshEventExtendedView;
         }
 
         private void OnDisable()
@@ -67,6 +69,8 @@ namespace POLARIS.MainScene {
             {
                 locationManager.UpdateNeeded -= RefreshListView;
                 locationManager.UpdateNeeded -= RefreshLocationExtendedView;
+                locationManager.ImageDownloaded -= RefreshListView;
+                locationManager.ImageDownloaded -= RefreshEventExtendedView;
             }
 
             if (EventManager.getInstance() != null)
@@ -313,6 +317,8 @@ namespace POLARIS.MainScene {
             TitleText.text = locationData.BuildingName;
             AddressText.text = locationData.BuildingAddress;
             DescriptionText.text = string.IsNullOrEmpty(locationData.BuildingDesc) ? "None" : locationData.BuildingDesc;
+
+            image.style.backgroundImage = locationData.rawImage;
 
             //handle favorites
             FavoritesIcon.UnregisterCallback<ClickEvent>(OnFavoritesClick);

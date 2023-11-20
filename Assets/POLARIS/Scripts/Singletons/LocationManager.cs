@@ -31,8 +31,8 @@ namespace POLARIS.Managers
         public CallStatus GarageScanStatus = CallStatus.NotStarted;
 
         public event EventHandler UpdateNeeded;
-        public event EventHandler GarageUpdateNeeded;
         public event EventHandler ScanSucceed;
+        public event EventHandler ImageDownloaded;
         public enum LocationFilter
         {
             None,
@@ -85,6 +85,14 @@ namespace POLARIS.Managers
             if (ScanSucceed != null)
             {
                 ScanSucceed(this, EventArgs.Empty);
+            }
+        }
+
+        private void OnImageDownloaded()
+        {
+            if (ImageDownloaded != null)
+            {
+                ImageDownloaded(this, EventArgs.Empty);
             }
         }
 
@@ -252,7 +260,6 @@ namespace POLARIS.Managers
             else
             {
                 l.rawImage = ((DownloadHandlerTexture)request.downloadHandler).texture;
-                //Debug.Log(name + " successfully downloaded");
             }
 
         }
@@ -260,20 +267,21 @@ namespace POLARIS.Managers
         public void getAllRawImages()
         {
             if (dataList == null) return;
+
             foreach (var data in dataList)
             {
-                //StartCoroutine(data.DownloadImage("https://i.ibb.co/55QcxKh/Classroom-Building-II.jpg"));
-                //download if image exists (the ones with images are set, add boolean in backend from if it's from knights connect or ucf evetns)
-                /*if (!string.IsNullOrEmpty(data.BuildingImage))
+                if(!string.IsNullOrEmpty(data.BuildingImage))
                 {
                     if (data.rawImage == null)
-                        StartCoroutine(DownloadImage("https://knightconnect.campuslabs.com/engage/image/" + data.BuildingImage, data));
+                    {
+                        data.rawImage = Resources.Load<Texture2D>("UCF_Logo");
+                        StartCoroutine(DownloadImage(data.BuildingImage, data));
+                    }   
                 }
                 else
                 {
                     data.rawImage = Resources.Load<Texture2D>("UCF_Logo_2");
-                }*/
-                data.rawImage = Resources.Load<Texture2D>("UCF_Logo_2");
+                }
             }
         }
         
@@ -335,6 +343,25 @@ namespace POLARIS.Managers
         public void SetPlayerPrefs()
         {
             //implement saving the full list of locations here
+        }
+
+        public IEnumerator DownloadImage(string MediaUrl, EventData e)
+        {
+            UnityWebRequest request = UnityWebRequestTexture.GetTexture(MediaUrl);
+            //Debug.Log("Downloading image from " + MediaUrl);
+            yield return request.SendWebRequest();
+            if (request.result == UnityWebRequest.Result.ConnectionError || request.result == UnityWebRequest.Result.ProtocolError)
+            {
+                Debug.Log("ERROR " + request.error);
+                Resources.Load<Texture2D>("UCF_Logo");
+            }
+            else
+            {
+                e.rawImage = ((DownloadHandlerTexture)request.downloadHandler).texture;
+                OnImageDownloaded();
+                //Debug.Log(name + " successfully downloaded");
+            }
+
         }
 
         private void UpdateFavoritesInBuildings()
