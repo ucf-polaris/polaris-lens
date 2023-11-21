@@ -28,7 +28,8 @@ public class LoginUser : MonoBehaviour
         NotStarted,
         InProgress,
         Failed,
-        Succeed
+        Succeed,
+        NotVerified
     }
 
     private LoginState _currentState = LoginState.NotStarted;
@@ -97,8 +98,12 @@ public class LoginUser : MonoBehaviour
             }
             else
             {
+                JObject jobj = JObject.Parse(www.downloadHandler.text);
+
+                instance.codeData.UserID = jobj["UserID"].Value<string>();
+                instance.codeData.Token = jobj["tokens"]["token"].Value<string>();
                 //SceneManager.LoadScene("Verify");
-                CurrentState = LoginState.Failed;
+                CurrentState = LoginState.NotVerified;
             }
             
         }

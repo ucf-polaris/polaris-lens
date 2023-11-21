@@ -52,6 +52,7 @@ public class UserEditFunc : MonoBehaviour
     private Press logOutPress;
     private Press resetPasswordPress;
     private IEnumerator callingFunction;
+    private TransitionManager TransitionInstance;
 
     public bool errorTesting;
     private void Start()
@@ -62,6 +63,7 @@ public class UserEditFunc : MonoBehaviour
         UiDoc = gameObject.GetComponent<UIDocument>();
         buttonNameList = new string[] { "Confirm", "ResetPassword", "LogOut" };
         fieldNames = new string[] { "Email", "Username", "Name" };
+        TransitionInstance = TransitionManager.getInstance();
 
         //define the three button fields
         buttonList = new Dictionary<string, Press>();
@@ -326,7 +328,7 @@ public class UserEditFunc : MonoBehaviour
 
     public void OnResetPasswordClick()
     {
-        SceneManager.LoadScene("ForgotPWCode");
+        TransitionInstance.Upwards("ForgotPWCode");
     }
     #endregion
 

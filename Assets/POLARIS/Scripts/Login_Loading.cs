@@ -12,9 +12,23 @@ public class Login_Loading : Welcome_Loading
 {
     VisualElement backdrop;
     BaseManager.CallStatus loadStatus = BaseManager.CallStatus.NotStarted;
+    public static Login_Loading instance;
+    private void Awake()
+    {
+        if (instance != null && instance != this)
+        {
+            Destroy(gameObject);
+        }
+        else
+        {
+            instance = this;
+        }
+    }
+
     // Start is called before the first frame update
     void Start()
     {
+        
         DontDestroyOnLoad(gameObject);
         userManager = UserManager.getInstance();
         var UiDoc = GetComponent<UIDocument>();
@@ -37,6 +51,11 @@ public class Login_Loading : Welcome_Loading
         window.errorLabel.style.translate = new Translate(0, Length.Percent(-50));
         backdrop.RemoveFromClassList("navyColor");
         backdrop.AddToClassList("magentaColor");
+    }
+
+    new private void OnDisable()
+    {
+        if(instance == this) instance = null;
     }
 
     public void TurnOn()
