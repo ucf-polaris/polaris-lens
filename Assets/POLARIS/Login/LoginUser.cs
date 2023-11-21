@@ -9,9 +9,11 @@ using Newtonsoft.Json.Linq;
 using TMPro; 
 using UnityEngine.SceneManagement;
 using POLARIS.Managers;
+using UnityEngine.EventSystems;
 
 public class LoginUser : MonoBehaviour
 {
+    private Animator ani;
     public TMP_InputField emailInput;
     public TMP_InputField passwordInput;
     private UserManager instance;
@@ -21,14 +23,29 @@ public class LoginUser : MonoBehaviour
     private string prevScene;
     public string loginURL = "https://api.ucfpolaris.com/user/login";
 
+    public enum LoginState
+    {
+        NotStarted,
+        InProgress,
+        Failed,
+        Succeed
+    }
+
+    private LoginState _currentState = LoginState.NotStarted;
+    public LoginState CurrentState { get => _currentState; set { if(ani != null) ani.SetInteger("State", (int)value); _currentState = value; } }
     public void Start()
     {
+        ani = GetComponent<Animator>();
         instance = UserManager.getInstance();
         instance.data.CurrScene = SceneManager.GetActiveScene().name;
     }
     public void Login()
     {
-        StartCoroutine(SendLoginRequest(emailInput.text, passwordInput.text));
+        if(CurrentState == LoginState.NotStarted)
+        {
+            CurrentState = LoginState.InProgress;
+            StartCoroutine(SendLoginRequest(emailInput.text, passwordInput.text));
+        }  
     }
     
     IEnumerator SendLoginRequest(string email, string password)
@@ -48,10 +65,12 @@ public class LoginUser : MonoBehaviour
         if (www.result != UnityWebRequest.Result.Success)
         {
             Debug.Log(www.error);
+            CurrentState = LoginState.Failed;
         }
         else if (www.downloadHandler.text.Contains("ERROR"))
         {
             Debug.Log(www.downloadHandler.text);
+            CurrentState = LoginState.Failed;
         }
         else
         {
@@ -73,12 +92,15 @@ public class LoginUser : MonoBehaviour
                 instance.data.RefreshToken = (string)jsonResponse["tokens"]["refreshToken"];
                 //keep track of when last logged in.
                 instance.data.LastLogin = DateTime.UtcNow;
-                SceneManager.LoadScene("MainScene");
+                //SceneManager.LoadScene("MainScene");
+                CurrentState = LoginState.Succeed;
             }
             else
             {
-                SceneManager.LoadScene("Verify");
+                //SceneManager.LoadScene("Verify");
+                CurrentState = LoginState.Failed;
             }
+            
         }
     }
     

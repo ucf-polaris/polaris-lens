@@ -22,7 +22,7 @@ namespace POLARIS.MainScene
             return true;
         }
 
-        protected void StartLoop(LoadingWindow window)
+        protected virtual void StartLoop(LoadingWindow window)
         {
             //if already done, don't load this
             if (CheckFunction(new BaseManager.CallStatus[] { BaseManager.CallStatus.Succeeded }, window))
@@ -60,7 +60,7 @@ namespace POLARIS.MainScene
                     StartCoroutine(window.showError);
                 }
 
-                yield return new WaitForSeconds(1.5f);
+                yield return new WaitForSeconds(0.5f);
 
                 if (isIn)
                 {

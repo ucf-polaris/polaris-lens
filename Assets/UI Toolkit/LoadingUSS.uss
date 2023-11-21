@@ -1,0 +1,7 @@
+.navyColor {
+    background-color: rgb(28, 37, 75);
+}
+
+.magentaColor {
+    background-color: rgb(172, 86, 156);
+}
