@@ -124,14 +124,14 @@ namespace POLARIS.GeospatialScene
             var keepPanels = new int[_panels.Count];
             for (var i = 0; i < contentList.Count; i++)
             {
-                var resultLat = contentList[i].History.Latitude;
-                var resultLong = contentList[i].History.Longitude;
+                var resultLat = contentList[i].Location.BuildingLat;
+                var resultLong = contentList[i].Location.BuildingLong;
 
                 var found = false;
                 for (var j = 0; j < _panels.Count; j++)
                 {
-                    if (Math.Abs(resultLat - _panels[j].Content.History.Latitude) < 0.000001 &&
-                        Math.Abs(resultLong - _panels[j].Content.History.Longitude) < 0.000001)
+                    if (Math.Abs(resultLat - _panels[j].Content.Location.BuildingLat) < 0.000001 &&
+                        Math.Abs(resultLong - _panels[j].Content.Location.BuildingLong) < 0.000001)
                     {
                         keepPanels[j] = 1;
                         found = true;
