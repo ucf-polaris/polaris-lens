@@ -8,7 +8,9 @@ public class DoAnimation : MonoBehaviour
     
     private Animator _animator;
     private Image _image;
+    
     private static readonly int Play = Animator.StringToHash("Play");
+    private static readonly int End = Animator.StringToHash("End");
 
     private bool _animating;
     private bool _playing;
@@ -66,6 +68,7 @@ public class DoAnimation : MonoBehaviour
 
     private void StopAnimation()
     {
+        _animator.SetTrigger(End);
         _animating = false;
         _playing = false;
         gameObject.SetActive(false);
