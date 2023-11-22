@@ -31,6 +31,7 @@ namespace POLARIS
         public GameObject Route;
         public GameObject RouteInfo;
         public GameObject LocationMarker;
+        public DoAnimation DoAnimation;
 
         [Header("Path Colors")] 
         public Color PathStart;
@@ -700,9 +701,7 @@ namespace POLARIS
                 new Vector2(locPos.x, locPos.z));
             if (endDist < 25)
             {
-                ClearRoute(true);
-                _shouldClose = true;
-                // TODO: Play animation
+                RouteComplete();
             }
 
             // Auto reroute
@@ -716,6 +715,15 @@ namespace POLARIS
             }
 
             return smallestIndex;
+        }
+
+        private void RouteComplete()
+        {
+            ClearRoute(true);
+            _shouldClose = true;
+            
+            DoAnimation.gameObject.SetActive(true);
+            DoAnimation.PlayAnimation();
         }
         
         public static float PointPercentage(IReadOnlyList<Vector3> linePositions, int point)
