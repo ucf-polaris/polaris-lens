@@ -11,40 +11,29 @@ using UnityEngine.SceneManagement;
 using POLARIS.Managers;
 using UnityEngine.EventSystems;
 
-public class LoginUser : MonoBehaviour
+public class LoginUser : NonManagerEndpoint
 {
-    private Animator ani;
+    
     public TMP_InputField emailInput;
     public TMP_InputField passwordInput;
-    private UserManager instance;
+    
     private string Token;
     private string UserID;
     private string RefreshToken;
     private string prevScene;
     public string loginURL = "https://api.ucfpolaris.com/user/login";
 
-    public enum LoginState
+    
+    new public void Start()
     {
-        NotStarted,
-        InProgress,
-        Failed,
-        Succeed,
-        NotVerified
-    }
-
-    private LoginState _currentState = LoginState.NotStarted;
-    public LoginState CurrentState { get => _currentState; set { if(ani != null) ani.SetInteger("State", (int)value); _currentState = value; } }
-    public void Start()
-    {
-        ani = GetComponent<Animator>();
-        instance = UserManager.getInstance();
+        base.Start();
         instance.data.CurrScene = SceneManager.GetActiveScene().name;
     }
     public void Login()
     {
-        if(CurrentState == LoginState.NotStarted)
+        if(CurrentState == EndpointState.NotStarted)
         {
-            CurrentState = LoginState.InProgress;
+            CurrentState = EndpointState.InProgress;
             StartCoroutine(SendLoginRequest(emailInput.text, passwordInput.text));
         }  
     }
@@ -66,12 +55,12 @@ public class LoginUser : MonoBehaviour
         if (www.result != UnityWebRequest.Result.Success)
         {
             Debug.Log(www.error);
-            CurrentState = LoginState.Failed;
+            CurrentState = EndpointState.Failed;
         }
         else if (www.downloadHandler.text.Contains("ERROR"))
         {
             Debug.Log(www.downloadHandler.text);
-            CurrentState = LoginState.Failed;
+            CurrentState = EndpointState.Failed;
         }
         else
         {
@@ -94,7 +83,7 @@ public class LoginUser : MonoBehaviour
                 //keep track of when last logged in.
                 instance.data.LastLogin = DateTime.UtcNow;
                 //SceneManager.LoadScene("MainScene");
-                CurrentState = LoginState.Succeed;
+                CurrentState = EndpointState.Succeed;
             }
             else
             {
@@ -103,7 +92,7 @@ public class LoginUser : MonoBehaviour
                 instance.codeData.UserID = jobj["UserID"].Value<string>();
                 instance.codeData.Token = jobj["tokens"]["token"].Value<string>();
                 //SceneManager.LoadScene("Verify");
-                CurrentState = LoginState.NotVerified;
+                CurrentState = EndpointState.NotVerified;
             }
             
         }
