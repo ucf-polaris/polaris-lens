@@ -43,7 +43,7 @@ namespace POLARIS.MainScene
         private void Update()
         {
             // Double tap to view building name
-            if (Input.touchCount != 1) return;
+            if (Input.touchCount != 1 || MenUI_Panels.userOnListView) return;
             
             var touch = Input.GetTouch(0);
             if (touch.phase != TouchPhase.Began) return;
