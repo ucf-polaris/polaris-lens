@@ -639,6 +639,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   verificationCodeInput: {fileID: 7385630889380707870}
   verifyCodeURL: https://v21x6ajyg9.execute-api.us-east-2.amazonaws.com/dev/user/registrationcode
+  parentAnimator: {fileID: 0}
 --- !u!1 &5584036323930187547
 GameObject:
   m_ObjectHideFlags: 0
@@ -781,7 +782,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: 611bd04747d3c46a9831a8414b7aabf6, type: 3}
+  m_Sprite: {fileID: 21300000, guid: f00ecacc0b82b924cb191642a473d17f, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
