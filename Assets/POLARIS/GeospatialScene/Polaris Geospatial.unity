@@ -722,7 +722,7 @@ MonoBehaviour:
   AnchorManager: {fileID: 691323916}
   LoadDistance: 400
   RenderDistance: 200
-  SmallScale: 20
+  SmallScale: 30
   SmallTestMode: 0
   TestCenterCoords:
     x: 28.61442
@@ -2409,7 +2409,7 @@ MonoBehaviour:
   m_FocusMode: -1
   m_LightEstimationMode: -1
   m_AutoFocus: 1
-  m_LightEstimation: 1
+  m_LightEstimation: 9
   m_FacingDirection: 1
   m_RenderMode: 0
 --- !u!4 &1451910695
@@ -2461,7 +2461,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_HumanSegmentationStencilMode: 0
   m_HumanSegmentationDepthMode: 0
-  m_EnvironmentDepthMode: 1
+  m_EnvironmentDepthMode: 2
   m_EnvironmentDepthTemporalSmoothing: 1
   m_OcclusionPreferenceMode: 0
 --- !u!1 &1471100010
@@ -2928,6 +2928,8 @@ MonoBehaviour:
   PanelManager: {fileID: 325939929}
   Camera: {fileID: 1451910691}
   Margin: 140
+  RenderDist: 60
+  SlerpFactor: 0.3
 --- !u!1 &1769789001
 GameObject:
   m_ObjectHideFlags: 0

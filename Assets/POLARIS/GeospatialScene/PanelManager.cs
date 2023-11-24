@@ -160,18 +160,21 @@ namespace POLARIS.GeospatialScene
             foreach (var newPanel in addPanels)
             {
                 var alternates = new TextPanel[]{};
-                foreach (var loc in contentList[newPanel].Location.BuildingEntrances)
+                if (contentList[newPanel].Location.BuildingEntrances != null)
                 {
-                    var newContent = contentList[newPanel];
-                    newContent.History.Longitude = loc.BuildingLong;
-                    newContent.History.Latitude = loc.BuildingLat;
+                    foreach (var loc in contentList[newPanel].Location.BuildingEntrances)
+                    {
+                        var newContent = contentList[newPanel];
+                        newContent.History.Longitude = loc.BuildingLong;
+                        newContent.History.Latitude = loc.BuildingLat;
                     
-                    var altPanel = AnchorManager.AddComponent<TextPanel>();
-                    altPanel.Instantiate(newContent, _display, null);
-                    altPanel.PlacePanelGeospatialAnchor(anchorObjects, AnchorManager);
-                    _panels.Add(altPanel);
+                        var altPanel = AnchorManager.AddComponent<TextPanel>();
+                        altPanel.Instantiate(newContent, _display, null);
+                        altPanel.PlacePanelGeospatialAnchor(anchorObjects, AnchorManager);
+                        _panels.Add(altPanel);
+                    }
                 }
-                
+
                 var panel = AnchorManager.AddComponent<TextPanel>();
                 panel.Instantiate(contentList[newPanel], _display, alternates);
                 panel.PlacePanelGeospatialAnchor(anchorObjects, AnchorManager);

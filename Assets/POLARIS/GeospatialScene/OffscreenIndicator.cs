@@ -1,4 +1,6 @@
+using System;
 using POLARIS.GeospatialScene;
+using Unity.Mathematics;
 using UnityEngine;
 
 public class OffscreenIndicator : MonoBehaviour
@@ -8,6 +10,8 @@ public class OffscreenIndicator : MonoBehaviour
     public Camera Camera;
 
     public float Margin;
+    public float RenderDist;
+    public float SlerpFactor;
     
     private float _minX;
     private float _maxX;
@@ -32,18 +36,22 @@ public class OffscreenIndicator : MonoBehaviour
             if (!panel.Loaded) continue;
             
             var pos = panel.CurrentPrefab.transform.position;
-            var screenPos = Camera.WorldToScreenPoint(pos);
-
             var cameraPos = Camera.transform.position;
+            
+            if (math.abs((pos - cameraPos).magnitude) > RenderDist) continue;
+            
             var cameraForward = Camera.transform.forward;
+            var screenPos = Camera.WorldToScreenPoint(pos);
 
             // If behind or out of FOV
             if (Vector3.Dot(pos - cameraPos, cameraForward) < 0
                 || Vector3.Angle(pos - cameraPos, cameraForward) > Camera.fieldOfView * ((float)Screen.width / Screen.height))
             {
+                var justCreated = false;
                 if (panel.Indicator == null)
                 {
                     panel.Indicator = Instantiate(IndicatorPrefab, transform);
+                    justCreated = true;
                 }
                 
                 // Reverse if behind
@@ -54,9 +62,17 @@ public class OffscreenIndicator : MonoBehaviour
                 }
                 screenPos.z = 0;
                 
+                // Slerp direction (Dont change too much at once)
+                if (!justCreated)
+                {
+                    var oldScreenPos = panel.Indicator.transform.position;
+                    screenPos = Vector3.Slerp(oldScreenPos, screenPos, SlerpFactor);
+                }
+                
                 // Get pos on left or right edge
                 screenPos.x = (screenPos.x < Screen.width / 2f) ? _minX : _maxX;
                 screenPos.y = Mathf.Clamp(screenPos.y, _minY, _maxY);
+
                 panel.Indicator.transform.position = screenPos;
 
                 // Rotate away from center
