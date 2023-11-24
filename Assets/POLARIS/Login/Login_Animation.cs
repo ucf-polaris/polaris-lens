@@ -58,7 +58,13 @@ public class Login_Animation : MonoBehaviour
         {
             LoadingUI.transform.GetChild(0).gameObject.SetActive(false);
         }
+        StartCoroutine(DelayBeforePress());
+        
+    }
 
+    private IEnumerator DelayBeforePress()
+    {
+        yield return new WaitForSeconds(0.3f);
         //disable user from being able to interact with anything
         EventSystem eventSystem = GameObject.Find("EventSystem").GetComponent<EventSystem>();
         if (eventSystem != null)

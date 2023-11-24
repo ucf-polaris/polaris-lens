@@ -5480,7 +5480,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   LoadingUI: {fileID: 0}
-  ExpandOnFinish: 1
+  ExpandOnFinish: 0
 --- !u!114 &1643979102166299488
 MonoBehaviour:
   m_ObjectHideFlags: 0
