@@ -21,6 +21,7 @@ namespace POLARIS.MainScene
 
         private MenUI_Panels panels;
         private ChangeTabImage tab;
+        private MenUI_Dropdown drop;
 
         //UI Toolkit elements
         private TextField _searchField;
@@ -37,6 +38,7 @@ namespace POLARIS.MainScene
 
             panels = GetComponent<MenUI_Panels>();
             tab = GetComponent<ChangeTabImage>();
+            drop = GetComponent<MenUI_Dropdown>();
 
             //change this to event system
             //currentTab = ChangeTabImage._lastPressed;
@@ -79,63 +81,63 @@ namespace POLARIS.MainScene
             if (tab.MyLastPressed == "location")
             {
                 while (locationManager.dataList.Count == 0) yield return null;
-                OnChangeDropdown(MenUI_Dropdown.currentChoice);
+                //call to set default values (especially when you swap tabs)
+                OnChangeDropdownLocation(drop.GetDropDown(drop.Locations).value);
             }
             else
             {
                 resultsHeader.style.display = DisplayStyle.Flex;
                 while (eventManager.dataList.Count == 0) yield return null;
-                if (showSuggestions)
-                {
-                    header.text = "Events";
-                }
-                else
-                {
-                    header.text = "Events";
-                }
-                List<EventData> events = eventManager.dataList;
-                panels.UpdateEventSearchUI(events);
+                OnChangeDropDownEvent(drop.GetDropDown(drop.Events).value);
             }
+        }
+
+        private List<LocationData> SearchSuggestedLocations()
+        {
+            resultsHeader.style.display = DisplayStyle.None;
+            List<LocationData> buildings = new List<LocationData>();
+            if (userManager.data.Suggested != null)
+            {
+                foreach (string buildingName in userManager.data.Suggested.Split("~"))
+                {
+                    LocationData building = GetBuildingFromName(buildingName);
+                    if (building != null) buildings.Add(building);
+                }
+            }
+
+            return buildings;
         }
 
         private void HandleLocationFilter(string newText, bool flag)
         {
-            if (showSuggestions && newText == "" && MenUI_Dropdown.currentChoice == "SUGGESTED")
+            var dropMenu = drop.GetDropDown(drop.Locations);
+            if (showSuggestions && newText == "" && dropMenu.value == "SUGGESTED")
             {
-                resultsHeader.style.display = DisplayStyle.None;
-                List<LocationData> buildings = new List<LocationData>();
-                if(userManager.data.Suggested != null)
-                {
-                    foreach (string buildingName in userManager.data.Suggested.Split("~"))
-                    {
-                        LocationData building = GetBuildingFromName(buildingName);
-                        if (building != null) buildings.Add(building);
-                    }
-                }
-
+                List<LocationData> buildings = SearchSuggestedLocations();
                 panels.UpdateBuildingSearchUI(buildings);
             }
             else
             {
                 resultsHeader.style.display = DisplayStyle.Flex;
-                LocationManager.LocationFilter filter = LocationManager.LocationFilter.None;
+                LocationFilter filter = LocationFilter.None;
+
                 //put in logic to shift between drop down options here
-                switch (MenUI_Dropdown.currentChoice)
+                switch (dropMenu.value)
                 {
                     case "VISITED":
-                        filter = LocationManager.LocationFilter.Visited;
+                        filter = LocationFilter.Visited;
                         break;
                     case "NOT VISITED":
-                        filter = LocationManager.LocationFilter.NotVisited;
+                        filter = LocationFilter.NotVisited;
                         break;
                     case "FAVORITES":
-                        filter = LocationManager.LocationFilter.Favorites;
+                        filter = LocationFilter.Favorites;
                         break;
                     case "CLOSEST":
-                        filter = LocationManager.LocationFilter.Closest;
+                        filter = LocationFilter.Closest;
                         break;
                     case "EVENTS":
-                        filter = LocationManager.LocationFilter.Events;
+                        filter = LocationFilter.Events;
                         break;
                     default:
                         break;
@@ -143,6 +145,35 @@ namespace POLARIS.MainScene
                 List<LocationData> buildings = locationManager.GetBuildingsFromSearch(newText, newText.Length > 0 && newText[0] == '~', filter);
                 panels.UpdateBuildingSearchUI(buildings, !flag);
             }
+        }
+
+        private void HandleEventFilter(string newText, bool flag)
+        {
+            var dropMenu = drop.GetDropDown(drop.Events);
+
+            resultsHeader.style.display = DisplayStyle.Flex;
+            EventFilters filter = EventFilters.None;
+
+            //put in logic to shift between drop down options here
+            switch (dropMenu.value)
+            {
+                case "ASCEND DATE":
+                    filter = EventFilters.DateClosest;
+                    break;
+                case "DESCEND DATE":
+                    filter = EventFilters.DateFarthest;
+                    break;
+                case "DISTANCE":
+                    filter = EventFilters.Distance;
+                    break;
+                case "UPCOMING":
+                    filter = EventFilters.Upcoming;
+                    break;
+                default:
+                    break;
+            }
+            List<EventData> events = eventManager.GetEventsFromSearch(newText, newText.Length > 0 && newText[0] == '~', filter);
+            panels.UpdateEventSearchUI(events, !flag);
         }
 
         private void OnSearchValueChanged(ChangeEvent<string> evt)
@@ -173,16 +204,7 @@ namespace POLARIS.MainScene
             else
             {
                 resultsHeader.style.display = DisplayStyle.Flex;
-                if (showSuggestions && newText == "")
-                {
-                    header.text = "Events";
-                }
-                else
-                {
-                    header.text = "Events";
-                }
-                List<EventData> events = eventManager.GetEventsFromSearch(newText, newText.Length > 0 && newText[0] == '~');
-                panels.UpdateEventSearchUI(events, !flag);
+                HandleEventFilter(newText, flag);
             }
         }
 
@@ -210,12 +232,20 @@ namespace POLARIS.MainScene
             return null;
         }
 
-        public void OnChangeDropdown(string choice)
+        public void OnChangeDropdownLocation(string choice)
         {
             shouldTriggerOnChangeEvent = false;
             //clear search view
             if (_searchField.value != "Search for locations" && _searchField.value != "Search for events") _searchField.value = "Search for locations";
             HandleLocationFilter("", false);
+        }
+
+        public void OnChangeDropDownEvent(string choice)
+        {
+            shouldTriggerOnChangeEvent = false;
+            //clear search view
+            if (_searchField.value != "Search for locations" && _searchField.value != "Search for events") _searchField.value = "Search for locations";
+            HandleEventFilter("", false);
         }
 
         #region HelperFunctions

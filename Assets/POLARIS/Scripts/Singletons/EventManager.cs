@@ -5,6 +5,8 @@ using UnityEngine;
 using UnityEngine.Networking;
 using System.Collections.Generic;
 using POLARIS.MainScene;
+using System.Linq;
+using Unity.Mathematics;
 
 namespace POLARIS.Managers
 {
@@ -26,6 +28,13 @@ namespace POLARIS.Managers
 
         public event EventHandler ImageDownloaded;
         public event EventHandler ScanSucceed;
+
+        static public EventManager getInstance()
+        {
+            return Instance;
+        }
+
+        #region Monobehaviors
         void Awake()
         {
             //create singleton
@@ -46,7 +55,9 @@ namespace POLARIS.Managers
             userAccess = UserManager.getInstance();
             CallScan();
         }
+        #endregion
 
+        #region EventFunctions
         private void OnImageDownloaded()
         {
             if (ImageDownloaded != null)
@@ -62,12 +73,9 @@ namespace POLARIS.Managers
                 ScanSucceed(this, EventArgs.Empty);
             }
         }
+        #endregion
 
-        static public EventManager getInstance()
-        {
-            return Instance;
-        }
-
+        #region EndpointFunctions
 
         //scans all elements right away
         public void CallScan()
@@ -199,7 +207,30 @@ namespace POLARIS.Managers
                 }
             }
         }
-        public List<EventData> GetEventsFromSearch(string query, bool fuzzySearch)
+
+        #endregion
+
+        #region FilterFunctions
+        private bool filterEvents(EventData e, EventFilters filter)
+        {
+            if (filter == EventFilters.Upcoming) return e.DateTime > DateTime.Now;
+            return true;
+        }
+
+        private List<EventData> sortEvents(List<EventData> list, EventFilters filter)
+        {
+            if (filter == EventFilters.DateClosest)
+                list = list.OrderBy(c => c.DateTime.Date).ThenBy(c => c.DateTime.TimeOfDay).ToList();
+            else if(filter == EventFilters.Upcoming)
+                list = list.OrderBy(c => c.DateTime.Date).ThenBy(c => c.DateTime.TimeOfDay).ToList();
+            else if (filter == EventFilters.DateFarthest)
+                list = list.OrderByDescending(c => c.DateTime.Date).ThenBy(c => c.DateTime.TimeOfDay).ToList();
+            else if(filter == EventFilters.Distance)
+                list = list.OrderBy(evt => DistanceInMiBetweenEarthCoordinates(new double2(GetUserCurrentLocation._latitude, GetUserCurrentLocation._longitude), new double2(evt.Location.BuildingLat, evt.Location.BuildingLong))).ToList();
+            return list;
+        }
+
+        public List<EventData> GetEventsFromSearch(string query, bool fuzzySearch, EventFilters eventFilter = EventFilters.None)
         {
             const int TOLERANCE = 1;
 
@@ -209,14 +240,40 @@ namespace POLARIS.Managers
                 if (UCFEvent.Name.IndexOf(query, StringComparison.OrdinalIgnoreCase) >= 0 ||
                     (fuzzySearch && FuzzyMatch(UCFEvent.Name, query, TOLERANCE)))
                 {
-                    events.Add(UCFEvent);
+                    if(filterEvents(UCFEvent, eventFilter))
+                     events.Add(UCFEvent);
                 }
             }
-
+            events = sortEvents(events, eventFilter);
             return events;
         }
+        #endregion
+
+        #region HelperFunctions
+        public double DistanceInMiBetweenEarthCoordinates(double2 pointA, double2 pointB)
+        {
+            const int earthRadiusKm = 6371;
+            const double KmToMi = 0.621371;
+
+            var distLat = DegreesToRadians(pointB.x - pointA.x);
+            var distLon = DegreesToRadians(pointB.y - pointA.y);
+
+            var latA = DegreesToRadians(pointA.x);
+            var latB = DegreesToRadians(pointB.x);
+
+            var a = Math.Sin(distLat / 2) * Math.Sin(distLat / 2) +
+                    Math.Sin(distLon / 2) * Math.Sin(distLon / 2) * Math.Cos(latA) * Math.Cos(latB);
+            var c = 2 * Math.Atan2(Math.Sqrt(a), Math.Sqrt(1 - a));
+            return earthRadiusKm * c * KmToMi;
+        }
+
+        private static double DegreesToRadians(double degrees)
+        {
+            return degrees * Math.PI / 180;
+        }
+        #endregion
     }
-    
+
     [Serializable]
     public class EventData
     {
@@ -279,6 +336,15 @@ namespace POLARIS.Managers
     {
         public double BuildingLat;
         public double BuildingLong;
+    }
+
+    public enum EventFilters
+    {
+        None,
+        DateFarthest,
+        DateClosest,
+        Distance,
+        Upcoming
     }
 }
 

@@ -33,16 +33,13 @@ namespace POLARIS.Managers
         public event EventHandler UpdateNeeded;
         public event EventHandler ScanSucceed;
         public event EventHandler ImageDownloaded;
-        public enum LocationFilter
+
+        static public LocationManager getInstance()
         {
-            None,
-            Favorites,
-            NotVisited,
-            Visited,
-            Closest,
-            Events
+            return Instance;
         }
 
+        #region Monobehaviors
         void Awake()
         {
             //create singleton
@@ -66,11 +63,17 @@ namespace POLARIS.Managers
             CallGarage();
         }
 
-        static public LocationManager getInstance()
+        private void Update()
         {
-            return Instance;
+            //refresh every hour
+            if (DateTime.UtcNow - lastGaragePull > nextPullDuration)
+            {
+                CallGarage();
+            }
         }
+        #endregion
 
+        #region EventFunctions
         //calls all functions subscribed to event
         private void OnEvent()
         {
@@ -95,7 +98,9 @@ namespace POLARIS.Managers
                 ImageDownloaded(this, EventArgs.Empty);
             }
         }
+        #endregion
 
+        #region EndpointFunctions
         //scans all elements right away
         public void CallScan()
         {
@@ -284,7 +289,9 @@ namespace POLARIS.Managers
                 }
             }
         }
-        
+        #endregion
+
+        #region FilterFunctions
         private bool filterLocation(LocationData location, LocationFilter filter)
         {
             if (filter == LocationFilter.Favorites) return location.IsFavorited;
@@ -334,36 +341,9 @@ namespace POLARIS.Managers
             buildings = sortLocations(buildings, locFilter);
             return buildings;
         }
+        #endregion
 
-        private void LoadPlayerPrefs()
-        {
-            //implement loading the full list of locations here
-        }
-
-        public void SetPlayerPrefs()
-        {
-            //implement saving the full list of locations here
-        }
-
-        public IEnumerator DownloadImage(string MediaUrl, EventData e)
-        {
-            UnityWebRequest request = UnityWebRequestTexture.GetTexture(MediaUrl);
-            //Debug.Log("Downloading image from " + MediaUrl);
-            yield return request.SendWebRequest();
-            if (request.result == UnityWebRequest.Result.ConnectionError || request.result == UnityWebRequest.Result.ProtocolError)
-            {
-                Debug.Log("ERROR " + request.error);
-                Resources.Load<Texture2D>("UCF_Logo");
-            }
-            else
-            {
-                e.rawImage = ((DownloadHandlerTexture)request.downloadHandler).texture;
-                OnImageDownloaded();
-                //Debug.Log(name + " successfully downloaded");
-            }
-
-        }
-
+        #region HelperFunctions
         private void UpdateFavoritesInBuildings()
         {
             for(var i = 0; i < dataList.Count; i++)
@@ -416,13 +396,16 @@ namespace POLARIS.Managers
             return degrees * Math.PI / 180;
         }
 
-        private void Update()
+        #endregion
+
+        private void LoadPlayerPrefs()
         {
-            //refresh every hour
-            if(DateTime.UtcNow - lastGaragePull > nextPullDuration)
-            {
-                CallGarage();
-            }
+            //implement loading the full list of locations here
+        }
+
+        public void SetPlayerPrefs()
+        {
+            //implement saving the full list of locations here
         }
     }
 
@@ -478,6 +461,16 @@ namespace POLARIS.Managers
         {
             //LoadPlayerPrefs();
         }
+    }
+
+    public enum LocationFilter
+    {
+        None,
+        Favorites,
+        NotVisited,
+        Visited,
+        Closest,
+        Events
     }
 }
 
