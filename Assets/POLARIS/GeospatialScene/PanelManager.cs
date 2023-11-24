@@ -1,12 +1,10 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Google.XR.ARCoreExtensions;
 using Google.XR.ARCoreExtensions.Samples.Geospatial;
 using POLARIS.Managers;
 using Unity.Mathematics;
 using Unity.VisualScripting;
-using Unity.XR.CoreUtils;
 using UnityEngine;
 using UnityEngine.XR.ARFoundation;
 
@@ -14,7 +12,7 @@ namespace POLARIS.GeospatialScene
 {
     public class PanelManager : MonoBehaviour
     {
-        private LocationManager locationManager;
+        private LocationManager _locationManager;
         public Camera Camera;
         public ARAnchorManager AnchorManager;
         
@@ -41,7 +39,7 @@ namespace POLARIS.GeospatialScene
         void Start()
         {
             _display = GetComponent<DisplayPanel>();
-            locationManager = LocationManager.getInstance();
+            _locationManager = LocationManager.getInstance();
         }
         
         public PanelManager()
@@ -126,14 +124,14 @@ namespace POLARIS.GeospatialScene
             var keepPanels = new int[_panels.Count];
             for (var i = 0; i < contentList.Count; i++)
             {
-                var resultLat = contentList[i].History.Latitude;
-                var resultLong = contentList[i].History.Longitude;
+                var resultLat = contentList[i].Location.BuildingLat;
+                var resultLong = contentList[i].Location.BuildingLong;
 
                 var found = false;
                 for (var j = 0; j < _panels.Count; j++)
                 {
-                    if (Math.Abs(resultLat - _panels[j].Content.History.Latitude) < 0.000001 &&
-                        Math.Abs(resultLong - _panels[j].Content.History.Longitude) < 0.000001)
+                    if (Math.Abs(resultLat - _panels[j].Content.Location.BuildingLat) < 0.000001 &&
+                        Math.Abs(resultLong - _panels[j].Content.Location.BuildingLong) < 0.000001)
                     {
                         keepPanels[j] = 1;
                         found = true;
@@ -161,10 +159,28 @@ namespace POLARIS.GeospatialScene
             // Add new panels
             foreach (var newPanel in addPanels)
             {
+                var alternates = new TextPanel[]{};
+                foreach (var loc in contentList[newPanel].Location.BuildingEntrances)
+                {
+                    var newContent = contentList[newPanel];
+                    newContent.History.Longitude = loc.BuildingLong;
+                    newContent.History.Latitude = loc.BuildingLat;
+                    
+                    var altPanel = AnchorManager.AddComponent<TextPanel>();
+                    altPanel.Instantiate(newContent, _display, null);
+                    altPanel.PlacePanelGeospatialAnchor(anchorObjects, AnchorManager);
+                    _panels.Add(altPanel);
+                }
+                
                 var panel = AnchorManager.AddComponent<TextPanel>();
-                panel.Instantiate(contentList[newPanel], _display);
+                panel.Instantiate(contentList[newPanel], _display, alternates);
                 panel.PlacePanelGeospatialAnchor(anchorObjects, AnchorManager);
                 _panels.Add(panel);
+
+                foreach (var alt in alternates)
+                {
+                    alt.MainPanel = panel;
+                }
             }
 
             return contentList;
@@ -205,7 +221,7 @@ namespace POLARIS.GeospatialScene
 
         private IEnumerable<LocationData> GetLocationsWithinRadius(double2 loc, double radius)
         {
-            return locationManager.dataList.Where(
+            return _locationManager.dataList.Where(
                 location => DistanceInKmBetweenEarthCoordinates(
                     loc, new double2(location.BuildingLat, location.BuildingLong)) < radius);
             // .Where(data => data.BuildingEvents?.Length > 0).ToList();

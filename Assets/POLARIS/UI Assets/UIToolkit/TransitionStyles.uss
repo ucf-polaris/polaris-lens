@@ -1,0 +1,40 @@
+.Default {
+    translate: 0 100%;
+}
+
+.FadeIn {
+    translate: 0 0;
+    opacity: 0;
+}
+
+.FadeOut {
+    translate: 0 0;
+}
+
+.FromBottomIn {
+    translate: 0 100%;
+    transition-property: translate;
+    transition-duration: 1s;
+    transition-timing-function: ease-in-out-circ;
+}
+
+.FromBottomOut {
+    translate: 0 0;
+    transition-property: translate;
+    transition-duration: 1s;
+    transition-timing-function: ease-in-out-circ;
+}
+
+.FromTopIn {
+    translate: 0 -100%;
+    transition-property: translate;
+    transition-duration: 1s;
+    transition-timing-function: ease-in-out-circ;
+}
+
+.FromTopOut {
+    translate: 0 0;
+    transition-property: translate;
+    transition-duration: 1s;
+    transition-timing-function: ease-in-out-circ;
+}

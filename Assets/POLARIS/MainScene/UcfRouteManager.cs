@@ -31,6 +31,7 @@ namespace POLARIS
         public GameObject Route;
         public GameObject RouteInfo;
         public GameObject LocationMarker;
+        public DoAnimation DoAnimation;
 
         [Header("Path Colors")] 
         public Color PathStart;
@@ -438,9 +439,10 @@ namespace POLARIS
         private void UpdateRouteInfoIncomplete()
         {
             _routingInfoLabel.text = "Hold to choose start";
-            _routingSrcLabel.text = "Current Location";
+            _routingSrcLabel.text = GetUserCurrentLocation.displayLocation ? "Current Location" : "";
             _routingDestLabel.text = PersistData.DestName;
-            
+
+            _slideButton.ToggleDisplayStyle(GetUserCurrentLocation.displayLocation);
             _slideButton.style.backgroundImage = _checkMark;
             _slideIsCheck = true;
             _routingSrcBox.ToggleDisplayStyle(true);
@@ -643,7 +645,7 @@ namespace POLARIS
                 _slideButton.style.backgroundImage = _leftArrow;
                 return;
             }
-            
+        
             _closed = !_closed;
             _routingBox.style.left = Length.Percent(_closed ? -67f : -5f);
             _slideButton.style.rotate = new Rotate(_closed ? 180 : 0);
@@ -700,9 +702,7 @@ namespace POLARIS
                 new Vector2(locPos.x, locPos.z));
             if (endDist < 25)
             {
-                ClearRoute(true);
-                _shouldClose = true;
-                // TODO: Play animation
+                RouteComplete();
             }
 
             // Auto reroute
@@ -716,6 +716,15 @@ namespace POLARIS
             }
 
             return smallestIndex;
+        }
+
+        private void RouteComplete()
+        {
+            ClearRoute(true);
+            _shouldClose = true;
+            
+            DoAnimation.gameObject.SetActive(true);
+            DoAnimation.PlayAnimation();
         }
         
         public static float PointPercentage(IReadOnlyList<Vector3> linePositions, int point)

@@ -27,6 +27,9 @@ namespace POLARIS.GeospatialScene
         
         public GameObject Indicator;
 
+        private TextPanel[] _alternatePanels;
+        public TextPanel MainPanel;
+        
         private ARGeospatialAnchor _anchor;
 
         private GameObject _bottomPanel;
@@ -47,14 +50,15 @@ namespace POLARIS.GeospatialScene
             _userManager = UserManager.getInstance();
         }
 
-        public void Instantiate(GeospatialAnchorContent content, DisplayPanel display)
+        public void Instantiate(GeospatialAnchorContent content, DisplayPanel display, TextPanel[] alternates)
         {
             Content = content;
             _display = display;
+            _alternatePanels = alternates;
             PanelPrefab = Resources.Load("Polaris/PanelParent") as GameObject;
             LoadingPrefab = Resources.Load("Polaris/Capsule") as GameObject;
         }
-
+        
         public ARGeospatialAnchor PlacePanelGeospatialAnchor(
             List<GameObject> anchorObjects, ARAnchorManager anchorManager)
         {
@@ -179,16 +183,41 @@ namespace POLARIS.GeospatialScene
             Visited = _userManager.isVisited(Content.Location);
             if (Visited) return;
             
-            _visitedIndicator.SetActive(false);
-            // Update API
-            _userManager.UpdateVisited(true, Content.Location);
+            // Alternate
+            if (_alternatePanels == null)
+            {
+                MainPanel.VisitedPanel();
+            }
+            else
+            // Main
+            {
+                _userManager.UpdateVisited(true, Content.Location);
+                _visitedIndicator.SetActive(false);
+                foreach (var alt in _alternatePanels)
+                {
+                    alt._visitedIndicator.SetActive(false);
+                }
+            }
         }
 
         public void FavoritedClicked()
         {
-            var favorited = !_userManager.isFavorite(Content.Location);
-            _userManager.UpdateFavorites(favorited, Content.Location);
-            GetComponentInChildren<FavButton>().UpdateSprite(favorited);
+            // Alternate
+            if (_alternatePanels == null)
+            {
+                MainPanel.FavoritedClicked();
+            }
+            // Main
+            else
+            {
+                var favorited = !_userManager.isFavorite(Content.Location);
+                _userManager.UpdateFavorites(favorited, Content.Location);
+                GetComponentInChildren<FavButton>().UpdateSprite(favorited);
+                foreach (var alt in _alternatePanels)
+                {
+                    alt.GetComponentInChildren<FavButton>().UpdateSprite(favorited);
+                }
+            }
         }
 
         public void PoiButtonClicked()

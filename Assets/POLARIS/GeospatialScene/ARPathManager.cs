@@ -21,6 +21,7 @@ namespace POLARIS.GeospatialScene
         public GameObject RouteInfo;
         public PanelManager PanelManager;
         public GeospatialController GeospatialController;
+        public DoAnimation DoAnimation;
         
         private readonly List<GameObject> _pathAnchorObjects = new();
         private readonly List<GameObject> _pathObjects = new();
@@ -227,8 +228,7 @@ namespace POLARIS.GeospatialScene
                                            Camera.transform.position);
             if (endDist < 25)
             {
-                StopClicked();
-                // TODO: Play animation
+                RouteComplete();
             }
 
             // if (smallestDist > 50)
@@ -238,6 +238,14 @@ namespace POLARIS.GeospatialScene
             // }
 
             return smallestIndex;
+        }
+        
+        private void RouteComplete()
+        {
+            StopClicked();
+            
+            DoAnimation.gameObject.SetActive(true);
+            DoAnimation.PlayAnimation();
         }
 
         private void ToggleSlide()

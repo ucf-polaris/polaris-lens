@@ -10,7 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 4198236222273517689}
   - component: {fileID: 4289873811566132166}
-  - component: {fileID: 3350788700531347713}
+  - component: {fileID: 7268862100106973330}
   m_Layer: 0
   m_Name: TransitionManager
   m_TagString: Untagged
@@ -45,18 +45,21 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 192601d49b46c324fb78f26c95406807, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
---- !u!114 &3350788700531347713
+  RaycastBlocker: {fileID: 0}
+--- !u!114 &7268862100106973330
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1818419334698093827}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d67c98b7e13ef2242ab21e804668ad46, type: 3}
+  m_Script: {fileID: 19102, guid: 0000000000000000e000000000000000, type: 0}
   m_Name: 
   m_EditorClassIdentifier: 
-  passoverTemplate: {fileID: 6267467207588088641, guid: e805a164126c710499819163ac26e621,
+  m_PanelSettings: {fileID: 11400000, guid: cad20797a674f2e40b55b4190a340851, type: 2}
+  m_ParentUI: {fileID: 0}
+  sourceAsset: {fileID: 9197481963319205126, guid: 02e5d25c3f6a216428bca11fa4e1a3b5,
     type: 3}
-  destroyPassoverObject: 0
+  m_SortingOrder: 0

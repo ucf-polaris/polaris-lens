@@ -323,12 +323,12 @@ public class UserEditFunc : MonoBehaviour
     public void OnLogOutClick()
     {
         UserInstance.Logout(true);
-        SceneManager.LoadScene("Login");
+        TransitionInstance.StartPlay("Login", Transitions.FromTopIn, Transitions.FadeOut, 0.4f, 0f, 0.5f, 0f);
     }
 
     public void OnResetPasswordClick()
     {
-        TransitionInstance.Upwards("ForgotPWCode");
+        TransitionInstance.StartPlay("ForgotPWCode", Transitions.FromBottomIn, Transitions.FromTopOut, 0.4f, 0f, 0.5f, 0f);
     }
     #endregion
 

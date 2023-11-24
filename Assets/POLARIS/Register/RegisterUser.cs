@@ -9,23 +9,24 @@ using Newtonsoft.Json.Linq;
 using TMPro;
 using UnityEngine.SceneManagement;
 using POLARIS.Managers;
+using UnityEngine.EventSystems;
 
-public class RegistrationScript : MonoBehaviour
+public class RegistrationScript : NonManagerEndpoint
 {
     public TMP_InputField emailInput;
     public TMP_InputField passwordInput;
     public string registrationURL = "https://api.ucfpolaris.com/user/register";
     // Public variable to store the token
     public static string AuthToken;
-    private UserManager instance;
+    public Animator parentAnimator;
 
-    public void Start()
-    {
-        instance = UserManager.getInstance();        
-    }
     public void Register()
     {
-        StartCoroutine(SendRegistrationRequest(emailInput.text, passwordInput.text));
+        if(CurrentState == EndpointState.NotStarted)
+        {
+            CurrentState = EndpointState.InProgress;
+            StartCoroutine(SendRegistrationRequest(emailInput.text, passwordInput.text));
+        }  
     }
 
     IEnumerator SendRegistrationRequest(string email, string password)
@@ -36,9 +37,6 @@ public class RegistrationScript : MonoBehaviour
                 new JProperty("email", email),
                 new JProperty("password", password)
             );
-            
-        
-        
 
         UnityWebRequest www = UnityWebRequest.Post(registrationURL, payload.ToString(), "application/json");
 
@@ -47,10 +45,12 @@ public class RegistrationScript : MonoBehaviour
         if (www.result != UnityWebRequest.Result.Success)
         {
             Debug.Log(www.error);
+            CurrentState = EndpointState.Failed;
         }
         else if (www.downloadHandler.text.Contains("ERROR"))
         {
             Debug.Log(www.downloadHandler.text);
+            CurrentState = EndpointState.Failed;
         }
         else
         {
@@ -63,9 +63,16 @@ public class RegistrationScript : MonoBehaviour
             instance.codeData.UserID = jsonResponse["UserID"].Value<string>();
             instance.codeData.Token = (string)jsonResponse["token"];
 
-            SceneManager.LoadScene("Verify");
-
             Debug.Log("token saved: " + AuthToken);
+            CurrentState = EndpointState.Succeed;
+            StartCoroutine(Verify());
         }
+    }
+
+    IEnumerator Verify()
+    {
+        yield return new WaitUntil(() => ani.GetInteger("State") == 0);
+        EventSystem.current.enabled = false;
+        parentAnimator.Play("ToVerify");
     }
 }
