@@ -72,7 +72,7 @@ public class ListController
         //set settings for list view's scroll
         ScrollView SV = EntryList.Q<ScrollView>();
         SV.verticalScrollerVisibility = ScrollerVisibility.Hidden;
-        SV.touchScrollBehavior = ScrollView.TouchScrollBehavior.Elastic;
+        SV.touchScrollBehavior = ScrollView.TouchScrollBehavior.Clamped;
     }
 
     void FillListBuilding()

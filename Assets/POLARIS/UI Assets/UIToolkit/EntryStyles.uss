@@ -47,8 +47,8 @@
     height: auto;
     width: auto;
     flex-shrink: 0;
-    margin-bottom: 0;
-    padding-bottom: 100px;
+    margin-bottom: 120px;
+    padding-bottom: 0;
     min-height: auto;
     min-width: auto;
     right: auto;
@@ -56,14 +56,14 @@
     padding-top: 20px;
     margin-right: 0;
     margin-left: 0;
-    padding-top: 80px;
+    padding-top: 50px;
     padding-right: 100px;
     padding-left: 100px;
 }
 
 .panelImage {
     flex-grow: 0;
-    background-image: url('project://database/Assets/POLARIS/UI%20Assets/UCF_Logo.png?fileID=21300000&guid=d6e2ed841dbad5744bf8102c99e72680&type=3#UCF_Logo');
+    background-image: url('project://database/Assets/POLARIS/UI%20Assets/Images/UCF_Logo.png?fileID=21300000&guid=d6e2ed841dbad5744bf8102c99e72680&type=3#UCF_Logo');
     -unity-background-scale-mode: stretch-to-fill;
     height: 90%;
     flex-shrink: 0;
