@@ -119,7 +119,7 @@ public class Login_Loading : Welcome_Loading
         window.errorLabel.text = msg;
         string[] names = { msg, msg + ".", msg + "..", msg + "..." };
         int index = 0;
-        while (CheckFunction(new BaseManager.CallStatus[] { BaseManager.CallStatus.Failed, BaseManager.CallStatus.NotStarted, BaseManager.CallStatus.InProgress }, window))
+        while (CheckFunction(new BaseManager.CallStatus[] { BaseManager.CallStatus.Failed, BaseManager.CallStatus.NotStarted, BaseManager.CallStatus.InProgress }, window, true))
         {
             yield return new WaitForSeconds(0.5f);
             window.errorLabel.text = names[index];

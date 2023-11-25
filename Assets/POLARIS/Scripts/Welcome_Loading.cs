@@ -85,7 +85,7 @@ public class Welcome_Loading : LoadingBase
         //show loading buildings
         ShowFeedbackMessage(window, "Loading Buildings");
         if (window.loadingText != null) StopCoroutine(window.loadingText);
-        window.loadingText = ErrorText(window);
+        window.loadingText = errorTextWelc(window);
         StartCoroutine(window.loadingText);
 
         //wait till buildings are loaded
@@ -102,12 +102,12 @@ public class Welcome_Loading : LoadingBase
         yield return async;
     }
 
-    protected IEnumerator ErrorText(LoadingWindow window)
+    protected IEnumerator errorTextWelc(LoadingWindow window)
     {
         window.errorLabel.text = msg;
         string[] names = { msg, msg + ".", msg + "..", msg + "..." };
         int index = 0;
-        while (CheckFunction(new BaseManager.CallStatus[] { BaseManager.CallStatus.Failed, BaseManager.CallStatus.NotStarted, BaseManager.CallStatus.InProgress }, window))
+        while (CheckFunction(new BaseManager.CallStatus[] { BaseManager.CallStatus.Failed, BaseManager.CallStatus.NotStarted, BaseManager.CallStatus.InProgress }, window, true))
         {
             yield return new WaitForSeconds(0.5f);
             window.errorLabel.text = names[index];
