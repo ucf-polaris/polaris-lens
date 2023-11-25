@@ -5,6 +5,8 @@ namespace POLARIS.GeospatialScene
 {
     public class ArrowPoint : MonoBehaviour
     {
+        public Vector3 Offset;
+        
         private GameObject _arCamera;
         private bool _enabled;
 
@@ -14,7 +16,7 @@ namespace POLARIS.GeospatialScene
         {
             _arCamera = GameObject.FindGameObjectWithTag("MainCamera");
 
-            var offset = _arCamera.transform.forward * 8 + _arCamera.transform.up * -3;
+            var offset = _arCamera.transform.forward * Offset.z + _arCamera.transform.up * Offset.y;
             transform.position = offset;
         }
 
