@@ -93,7 +93,11 @@ public class Login_Loading : Welcome_Loading
             yield return null;
         }
 
-        window.errorLabel.text = "Loading Buildings";
+        //reset text animation
+        msg = "Loading Buildings";
+        if (window.loadingText != null) StopCoroutine(window.loadingText);
+        window.loadingText = ErrorText(window);
+        
         //wait till buildings are loaded
         yield return new WaitUntil(() => BuildingsLoaded == BaseManager.CallStatus.Succeeded || BuildingsLoaded == BaseManager.CallStatus.Failed);
 
