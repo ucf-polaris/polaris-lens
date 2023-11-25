@@ -97,6 +97,7 @@ public class Login_Loading : Welcome_Loading
         msg = "Loading Buildings";
         if (window.loadingText != null) StopCoroutine(window.loadingText);
         window.loadingText = ErrorText(window);
+        StartCoroutine(window.loadingText);
         
         //wait till buildings are loaded
         yield return new WaitUntil(() => BuildingsLoaded == BaseManager.CallStatus.Succeeded || BuildingsLoaded == BaseManager.CallStatus.Failed);
