@@ -7,6 +7,7 @@ using Newtonsoft.Json;
 using System;
 using System.IO;
 using System.Linq;
+using UnityEngine.SceneManagement;
 
 namespace POLARIS.Managers{
     public class UserManager : BaseManager
@@ -334,6 +335,13 @@ namespace POLARIS.Managers{
             if (www.result != UnityWebRequest.Result.Success)
             {
                 Debug.Log(www.error);
+                if (www.error.Contains("Forbidden"))
+                {
+                    Logout(false);
+                    TransitionManager tm = TransitionManager.getInstance();
+                    if (tm != null) tm.StartPlay("Login", Transitions.FromTopIn, Transitions.FromTopOut, 0.5f, 0f, 0.5f, 0f);
+                    else SceneManager.LoadScene("Login");
+                }
             }
             else if (www.downloadHandler.text.Contains("ERROR"))
             {
@@ -355,6 +363,9 @@ namespace POLARIS.Managers{
                 data.schedule = jsonResponse["schedule"] != null ? jsonResponse["schedule"].Value<List<string>>() : data.schedule;
                 data.favorite = jsonResponse["favorite"] != null ? jsonResponse["favorite"].Value<List<string>>() : data.favorite;
                 data.visited = jsonResponse["visited"] != null ? jsonResponse["visited"].Value<List<string>>() : data.visited;
+
+                //update token
+                data.Token = jsonResponse["tokens"]["token"] != null ? jsonResponse["tokens"]["token"].Value<string>() : data.Token;
             }
             currentCall = null;
         }

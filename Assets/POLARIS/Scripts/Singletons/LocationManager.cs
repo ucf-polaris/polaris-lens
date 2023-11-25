@@ -8,6 +8,7 @@ using System.Linq;
 using POLARIS;
 using Unity.Mathematics;
 using System.Globalization;
+using UnityEngine.SceneManagement;
 
 namespace POLARIS.Managers
 {
@@ -136,6 +137,13 @@ namespace POLARIS.Managers
             {
                 Debug.Log(www.error);
                 ScanStatus = CallStatus.Failed;
+                if (www.error.Contains("Forbidden"))
+                {
+                    UserManager.getInstance().Logout(false);
+                    TransitionManager tm = TransitionManager.getInstance();
+                    if (tm != null) tm.StartPlay("Login", Transitions.FromTopIn, Transitions.FromTopOut, 0.5f, 0f, 0.5f, 0f);
+                    else SceneManager.LoadScene("Login");
+                }
             }
             else
             {
