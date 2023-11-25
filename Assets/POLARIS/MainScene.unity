@@ -1119,15 +1119,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   buttonNameList: []
-  ForgotPasswordIn:
-    transition: 1
-    Duration: 0.5
-    AfterDelay: 1.5
-  ForgotPasswordOut:
-    transition: 2
-    Duration: 0.5
-    AfterDelay: 1
-  errorTesting: 1
+  errorTesting: 0
 --- !u!1 &1079395654
 GameObject:
   m_ObjectHideFlags: 0

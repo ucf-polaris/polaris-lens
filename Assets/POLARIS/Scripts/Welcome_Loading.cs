@@ -14,6 +14,7 @@ public class Welcome_Loading : LoadingBase
     public LoadingWindow window;
     protected UserManager userManager;
     protected VisualElement fullElement;
+    public BaseManager.CallStatus BuildingsLoaded = BaseManager.CallStatus.NotStarted;
 
     void Start()
     {
@@ -65,11 +66,30 @@ public class Welcome_Loading : LoadingBase
         // this line prevents the scene from instant activation
         async.allowSceneActivation = false;
 
+        yield return new WaitForSeconds(1f);
+        ShowFeedbackMessage(window, "Loading");
+
+        while (!async.isDone)
+        {
+            //if progress is almost done
+            if (async.progress >= 0.9f)
+            {
+                //play the disappear animation
+                async.allowSceneActivation = true;
+                yield return new WaitForSeconds(1f);
+            }
+            yield return null;
+        }
+
+        //show loading buildings
+        ShowFeedbackMessage(window, "Loading Buildings...");
+
+        //wait till buildings are loaded
+        yield return new WaitUntil(() => BuildingsLoaded == BaseManager.CallStatus.Succeeded || BuildingsLoaded == BaseManager.CallStatus.Failed);
+
         //wait for the disappear animation to finish
         yield return StartCoroutine(DisappearAnimation(window));
-        async.allowSceneActivation = true;
 
-        yield return new WaitForSeconds(0.1f);
         //make everything fade out
         fullElement.style.opacity = 0;
         yield return new WaitForSeconds(0.75f);
@@ -83,6 +103,13 @@ public class Welcome_Loading : LoadingBase
         window.loadingLabel.style.visibility = Visibility.Hidden;
         window.errorLabel.style.visibility = Visibility.Visible;
         window.errorLabel.text = msg;
+    }
+
+    private void ShowRegularMessage(LoadingWindow window, string msg)
+    {
+        window.loadingLabel.style.visibility = Visibility.Visible;
+        window.errorLabel.style.visibility = Visibility.Hidden;
+        window.loadingLabel.text = msg;
     }
 
     //play animation when screen leaves then disable screen
@@ -119,10 +146,11 @@ public class Welcome_Loading : LoadingBase
         yield return new WaitForSeconds(0.75f);
     }
 
-    override protected bool CheckFunction(BaseManager.CallStatus[] acceptList, LoadingWindow window)
+    override protected bool CheckFunction(BaseManager.CallStatus[] acceptList, LoadingWindow window, bool or=false)
     {
         BaseManager.CallStatus status = userManager.CheckPermanenceStatus;
-        if (acceptList.Contains(status)) return true;
+        if (acceptList.Contains(status) && acceptList.Contains(BuildingsLoaded) && !or) return true;
+        else if ((acceptList.Contains(status) || acceptList.Contains(BuildingsLoaded)) && or) return true;
         return false;
     }
 }

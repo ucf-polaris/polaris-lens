@@ -11,13 +11,14 @@ namespace POLARIS.MainScene
     public abstract class LoadingBase : MonoBehaviour
     {
         protected string LoadingMessage = "Loading";
+        protected bool OrOnFail = false;
         protected virtual IEnumerator showErrorMessage(LoadingWindow window)
         {
             yield break;
         }
 
         //checks if current state (defined by class) is in accept list
-        protected virtual bool CheckFunction(BaseManager.CallStatus[] acceptList, LoadingWindow window)
+        protected virtual bool CheckFunction(BaseManager.CallStatus[] acceptList, LoadingWindow window, bool or=false)
         {
             return true;
         }
@@ -50,11 +51,11 @@ namespace POLARIS.MainScene
 
             bool isIn = true;
 
-            //while endpoint is not success
-            while (CheckFunction(new BaseManager.CallStatus[] { BaseManager.CallStatus.Failed, BaseManager.CallStatus.NotStarted, BaseManager.CallStatus.InProgress}, window))
+            //while endpoint(s) is not success
+            while (CheckFunction(new BaseManager.CallStatus[] { BaseManager.CallStatus.Failed, BaseManager.CallStatus.NotStarted, BaseManager.CallStatus.InProgress}, window, true))
             {
                 //if you've failed the call or the call hasn't started (it reset), show error
-                if ((CheckFunction(new BaseManager.CallStatus[] { BaseManager.CallStatus.Failed, BaseManager.CallStatus.NotStarted}, window) && window.showError == null))
+                if ((CheckFunction(new BaseManager.CallStatus[] { BaseManager.CallStatus.Failed, BaseManager.CallStatus.NotStarted}, window, OrOnFail) && window.showError == null))
                 {
                     window.showError = showErrorMessage(window);
                     StartCoroutine(window.showError);

@@ -129,7 +129,8 @@ namespace POLARIS.Managers{
         {
             IDictionary<string, string> request = new Dictionary<string, string>();
             request.Add("email", data.Email);
-            StartCoroutine(Get(request));
+            if(PlayerPrefs.HasKey("email") && PlayerPrefs.HasKey("AuthToken") && PlayerPrefs.HasKey("RefreshToken"))
+                StartCoroutine(Get(request));
         }
         
         //On log out destroy player prefs

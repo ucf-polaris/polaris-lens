@@ -58,6 +58,7 @@ namespace POLARIS
     public class UcfBuildingsQuery : MonoBehaviour
     {
         private LocationManager _locationManager;
+        private Welcome_Loading loadingScreen;
         
         [SerializeField] private Color32 BaseBuildingColor = new (23, 103, 194, 255);
         [SerializeField] private Color32 TopBuildingColor = new (123, 13, 194, 255);
@@ -110,6 +111,9 @@ namespace POLARIS
             {
                 ArcGisMapComponent.View.SpatialReferenceChanged += () => _runCreate = true;
             }
+
+            //for loading
+            loadingScreen = FindObjectOfType<Welcome_Loading>();
         }
         
         private void Update()
@@ -123,6 +127,7 @@ namespace POLARIS
         // Sends the Request to get features from the service
         private IEnumerator GetFeatures() //Action<UnityWebRequest> callback
         {
+            if (loadingScreen != null) loadingScreen.BuildingsLoaded = BaseManager.CallStatus.InProgress;
             var jsonTravelModeAsset = Resources.Load("UCF_BuildingNa_ArcGIS_Query") as TextAsset;
             if (jsonTravelModeAsset != null)
             {
@@ -146,6 +151,7 @@ namespace POLARIS
                 if (request.result != UnityWebRequest.Result.Success)
                 {
                     Debug.Log(request.error);
+                    if (loadingScreen != null) loadingScreen.BuildingsLoaded = BaseManager.CallStatus.Failed;
                 }
                 else
                 {
@@ -241,6 +247,7 @@ namespace POLARIS
                 _polyExtruder.createPrism(feature.attributes.BuildingNa, height, vertices2D, 
                                           colorOfBuilding, true, false, true);
             }
+            if (loadingScreen != null) loadingScreen.BuildingsLoaded = BaseManager.CallStatus.Succeeded;
         }
         
         private int? GetNumEventsBuilding(string buildingName)

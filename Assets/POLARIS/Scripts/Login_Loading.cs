@@ -13,6 +13,8 @@ public class Login_Loading : Welcome_Loading
     VisualElement backdrop;
     BaseManager.CallStatus loadStatus = BaseManager.CallStatus.NotStarted;
     public static Login_Loading instance;
+    string msg = "Logging In";
+
     private void Awake()
     {
         if (instance != null && instance != this)
@@ -39,7 +41,7 @@ public class Login_Loading : Welcome_Loading
         window = new LoadingWindow(UiDoc.rootVisualElement.Q<VisualElement>("LoadingScreen"), false);
         window.errorLabel.text = "Logging In...";
         Initialize();
-        userManager.GetSucceed += OnFoundSession;
+        //userManager.GetSucceed += OnFoundSession;
         fullElement.style.display = DisplayStyle.None;
     }
 
@@ -91,9 +93,14 @@ public class Login_Loading : Welcome_Loading
             yield return null;
         }
 
+        window.errorLabel.text = "Loading Buildings";
+        //wait till buildings are loaded
+        yield return new WaitUntil(() => BuildingsLoaded == BaseManager.CallStatus.Succeeded || BuildingsLoaded == BaseManager.CallStatus.Failed);
+
         //play disappear animation
         loadStatus = BaseManager.CallStatus.Succeeded;
         yield return StartCoroutine(DisappearAnimation(window));
+
         //make everything fade out
         fullElement.style.opacity = 0;
         yield return new WaitForSeconds(0.75f);
@@ -104,7 +111,6 @@ public class Login_Loading : Welcome_Loading
 
     protected IEnumerator ErrorText(LoadingWindow window)
     {
-        var msg = "Logging In";
         window.errorLabel.text = msg;
         string[] names = { msg, msg + ".", msg + "..", msg + "..." };
         int index = 0;
@@ -143,8 +149,10 @@ public class Login_Loading : Welcome_Loading
         yield break;
     }
 
-    override protected bool CheckFunction(BaseManager.CallStatus[] acceptList, LoadingWindow window)
+    override protected bool CheckFunction(BaseManager.CallStatus[] acceptList, LoadingWindow window, bool or=false)
     {
-        return acceptList.Contains(loadStatus);
+        if (acceptList.Contains(loadStatus) && acceptList.Contains(BuildingsLoaded) && !or) return true;
+        else if ((acceptList.Contains(loadStatus) || acceptList.Contains(BuildingsLoaded)) && or) return true;
+        return false;
     }
 }

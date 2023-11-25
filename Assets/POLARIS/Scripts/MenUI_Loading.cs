@@ -139,7 +139,7 @@ namespace POLARIS.MainScene
             if (isLocation) return locationManager.ScanStatus;
             return eventManager.ScanStatus;
         }
-        override protected bool CheckFunction(BaseManager.CallStatus[] acceptList, LoadingWindow window)
+        override protected bool CheckFunction(BaseManager.CallStatus[] acceptList, LoadingWindow window, bool or = false)
         {
             BaseManager.CallStatus status = CheckStatus(window.isLocation);
             if (acceptList.Contains(status)) return true;
