@@ -173,7 +173,7 @@ namespace POLARIS.MainScene
             Pieces.Add(new LoadingPiece(container.Q<VisualElement>("4"), Dimension.Height, 109, 0.8f));
             Pieces.Add(new LoadingPiece(container.Q<VisualElement>("5"), Dimension.Height, 81));
             Pieces.Add(new LoadingPiece(container.Q<VisualElement>("6"), Dimension.Width, 149, 0.8f));
-            Pieces.Add(new LoadingPiece(container.Q<VisualElement>("7"), Dimension.Width, 72, 0.1f));
+            Pieces.Add(new LoadingPiece(container.Q<VisualElement>("7"), Dimension.Width, 72, 0.5f));
 
             loadingLabel = container.Q<Label>("LoadingLabel");
             errorLabel = container.Q<Label>("ErrorLabel");
