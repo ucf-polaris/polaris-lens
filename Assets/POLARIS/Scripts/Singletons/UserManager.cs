@@ -419,6 +419,9 @@ namespace POLARIS.Managers{
                 data.UserID1 = jsonResponse["users"][0]["UserID"] != null ? jsonResponse["users"][0]["UserID"].ToObject<string>() : "";
                 data.Username = jsonResponse["users"][0]["username"] != null ? jsonResponse["users"][0]["username"].ToObject<string>() : "";
 
+                //update token
+                data.Token = jsonResponse["tokens"]["token"] != null ? jsonResponse["tokens"]["token"].Value<string>() : data.Token;
+
                 DealWithVisitedAndFavorites(jsonResponse);
 
                 OnGetSucceed();
