@@ -15,6 +15,7 @@ public class Welcome_Loading : LoadingBase
     protected UserManager userManager;
     protected VisualElement fullElement;
     public BaseManager.CallStatus BuildingsLoaded = BaseManager.CallStatus.NotStarted;
+    string msg = "Loading Buildings";
 
     void Start()
     {
@@ -82,7 +83,10 @@ public class Welcome_Loading : LoadingBase
         }
 
         //show loading buildings
-        ShowFeedbackMessage(window, "Loading Buildings...");
+        ShowFeedbackMessage(window, "Loading Buildings");
+        if (window.loadingText != null) StopCoroutine(window.loadingText);
+        window.loadingText = ErrorText(window);
+        StartCoroutine(window.loadingText);
 
         //wait till buildings are loaded
         yield return new WaitUntil(() => BuildingsLoaded == BaseManager.CallStatus.Succeeded || BuildingsLoaded == BaseManager.CallStatus.Failed);
@@ -98,18 +102,27 @@ public class Welcome_Loading : LoadingBase
         yield return async;
     }
 
+    protected IEnumerator ErrorText(LoadingWindow window)
+    {
+        window.errorLabel.text = msg;
+        string[] names = { msg, msg + ".", msg + "..", msg + "..." };
+        int index = 0;
+        while (CheckFunction(new BaseManager.CallStatus[] { BaseManager.CallStatus.Failed, BaseManager.CallStatus.NotStarted, BaseManager.CallStatus.InProgress }, window))
+        {
+            yield return new WaitForSeconds(0.5f);
+            window.errorLabel.text = names[index];
+            index += 1;
+            index %= names.Length;
+        }
+
+        window.loadingText = null;
+    }
+
     private void ShowFeedbackMessage(LoadingWindow window, string msg)
     {
         window.loadingLabel.style.visibility = Visibility.Hidden;
         window.errorLabel.style.visibility = Visibility.Visible;
         window.errorLabel.text = msg;
-    }
-
-    private void ShowRegularMessage(LoadingWindow window, string msg)
-    {
-        window.loadingLabel.style.visibility = Visibility.Visible;
-        window.errorLabel.style.visibility = Visibility.Hidden;
-        window.loadingLabel.text = msg;
     }
 
     //play animation when screen leaves then disable screen
