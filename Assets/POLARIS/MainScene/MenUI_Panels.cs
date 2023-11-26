@@ -140,11 +140,16 @@ namespace POLARIS.MainScene {
 
             //clear with empty version of list type
             if (listController.sw == type2)
-                listController.Update(eventManager.dataList);
+            {
+                UpdateEventSearchUI(eventManager.dataList, false);
                 // listController.Update(new List<EventData>());
+            }
             else if (listController.sw == type1)
-                listController.Update(locationManager.dataList);
+            {
+                UpdateBuildingSearchUI(locationManager.dataList, false);
                 // listController.Update(new List<Building>());
+            }
+
         }
 
         public void ReturnGoToTop()
