@@ -5,6 +5,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 using POLARIS.Managers;
+using UnityEngine.EventSystems;
 
 public class EmailCode : NonManagerEndpoint
 {
@@ -13,7 +14,7 @@ public class EmailCode : NonManagerEndpoint
     private string Token;
     private string RefreshToken;
     private string UserID;
-    public GameObject next;
+    public Animator parentAnimator;
 
     public void OnSendCodeClick()
     {
@@ -52,15 +53,13 @@ public class EmailCode : NonManagerEndpoint
     {
         yield return new WaitUntil(() => ani.GetInteger("State") == 0);
         Debug.Log("Error: " + error);
-        errorMessageText.text = "An error occurred, please try again later";
+        errorMessageText.text = error != "" && error.Length <= 40 ? error : "An error occurred, please try again later";
         errorMessageText.color = Color.red;
     }
 
     IEnumerator OnSuccess()
     {
         yield return new WaitUntil(() => ani.GetInteger("State") == 0);
-        // switch to the next gameobject
-        gameObject.transform.parent.gameObject.SetActive(false);
-        next.SetActive(true);
+        parentAnimator.Play("ToCode");
     }
 }

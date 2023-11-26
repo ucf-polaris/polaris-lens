@@ -87,7 +87,7 @@ public class VerificationCodeScript : NonManagerEndpoint
     IEnumerator ToLogin()
     {
         yield return new WaitUntil(() => ani.GetInteger("State") == 0);
-        EventSystem.current.enabled = false;
+        if(EventSystem.current != null) EventSystem.current.enabled = false;
         TransitionManager.getInstance().StartPlay("Login", Transitions.FadeIn, Transitions.FadeOut, 0.5f, 0f, 0.5f, 0f);
     }
 }

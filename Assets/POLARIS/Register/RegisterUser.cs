@@ -72,7 +72,7 @@ public class RegistrationScript : NonManagerEndpoint
     IEnumerator Verify()
     {
         yield return new WaitUntil(() => ani.GetInteger("State") == 0);
-        EventSystem.current.enabled = false;
+        if(EventSystem.current != null) EventSystem.current.enabled = false;
         parentAnimator.Play("ToVerify");
     }
 }

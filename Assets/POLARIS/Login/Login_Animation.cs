@@ -11,6 +11,7 @@ public class Login_Animation : MonoBehaviour
     public GameObject LoadingUI;
     public bool ExpandOnFinish = true;
     private NonManagerEndpoint NME;
+    public bool deactivateBlocker = true;
 
     private void Start()
     {
@@ -58,14 +59,13 @@ public class Login_Animation : MonoBehaviour
         {
             LoadingUI.transform.GetChild(0).gameObject.SetActive(false);
         }
-        StartCoroutine(DelayBeforePress());
+        if(deactivateBlocker) StartCoroutine(DelayBeforePress());
         
     }
 
     private IEnumerator DelayBeforePress()
     {
         yield return new WaitForSeconds(0.3f);
-        //disable user from being able to interact with anything
         EventSystem eventSystem = GameObject.Find("EventSystem").GetComponent<EventSystem>();
         if (eventSystem != null)
         {
@@ -78,7 +78,7 @@ public class Login_Animation : MonoBehaviour
         if(NME.CurrentState == EndpointState.NotVerified)
         {
             //TransitionManager.getInstance().Fade("Verify");
-            SceneManager.LoadScene("Verify");
+            TransitionManager.getInstance().StartPlay("Register", Transitions.FadeIn, Transitions.FadeOut, 0.5f, 0f, 0.5f, 0f);
         }
         //if loginging in (and the animations associated) are still in progress, don't reset
         else if (NME.CurrentState != EndpointState.InProgress && NME.CurrentState != EndpointState.Failed)

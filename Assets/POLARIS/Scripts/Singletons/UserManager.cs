@@ -406,25 +406,35 @@ namespace POLARIS.Managers{
             //if succeed, update everything but favorites and visited (only update these if the associated files don't exist)
             else
             {
+
                 Debug.Log("Form upload complete!");
                 Debug.Log("Status Code: " + www.responseCode);
                 Debug.Log(www.result);
                 JObject jsonResponse = JObject.Parse(www.downloadHandler.text);
                 Debug.Log("Response: " + jsonResponse);
-                CheckPermanenceStatus = CallStatus.Succeeded;
+                if (jsonResponse["users"][0]["verified"].Value<bool>() == true)
+                {
+                    CheckPermanenceStatus = CallStatus.Succeeded;
 
-                //set fields
-                data.Realname = jsonResponse["users"][0]["name"] != null ? jsonResponse["users"][0]["name"].ToObject<string>() : "";
-                data.Email = jsonResponse["users"][0]["email"] != null ? jsonResponse["users"][0]["email"].ToObject<string>() : "";
-                data.UserID1 = jsonResponse["users"][0]["UserID"] != null ? jsonResponse["users"][0]["UserID"].ToObject<string>() : "";
-                data.Username = jsonResponse["users"][0]["username"] != null ? jsonResponse["users"][0]["username"].ToObject<string>() : "";
+                    //set fields
+                    data.Realname = jsonResponse["users"][0]["name"] != null ? jsonResponse["users"][0]["name"].ToObject<string>() : "";
+                    data.Email = jsonResponse["users"][0]["email"] != null ? jsonResponse["users"][0]["email"].ToObject<string>() : "";
+                    data.UserID1 = jsonResponse["users"][0]["UserID"] != null ? jsonResponse["users"][0]["UserID"].ToObject<string>() : "";
+                    data.Username = jsonResponse["users"][0]["username"] != null ? jsonResponse["users"][0]["username"].ToObject<string>() : "";
 
-                //update token
-                data.Token = jsonResponse["tokens"]["token"] != null ? jsonResponse["tokens"]["token"].Value<string>() : data.Token;
+                    //update token
+                    data.Token = jsonResponse["tokens"]["token"] != null ? jsonResponse["tokens"]["token"].Value<string>() : data.Token;
 
-                DealWithVisitedAndFavorites(jsonResponse);
+                    DealWithVisitedAndFavorites(jsonResponse);
 
-                OnGetSucceed();
+                    OnGetSucceed();
+                }
+                else
+                {
+                    CheckPermanenceStatus = CallStatus.Failed;
+                    Logout(false);
+                }
+                    
             }
         }
 
@@ -513,7 +523,7 @@ namespace POLARIS.Managers{
             else if (www.downloadHandler.text.Contains("ERROR"))
             {
                 Debug.Log(www.downloadHandler.text);
-                onError?.Invoke(www.error);
+                onError?.Invoke(www.downloadHandler.text);
             }
             else
             {
@@ -542,7 +552,7 @@ namespace POLARIS.Managers{
             else if (www.downloadHandler.text.Contains("ERROR"))
             {
                 Debug.Log(www.downloadHandler.text);
-                onError?.Invoke(www.error);
+                onError?.Invoke(www.downloadHandler.text);
             }
             else
             {
@@ -576,8 +586,7 @@ namespace POLARIS.Managers{
             }
             else if (www.downloadHandler.text.Contains("ERROR"))
             {
-                Debug.Log(www.downloadHandler.text);
-                onError?.Invoke(www.error);
+                onError?.Invoke(www.downloadHandler.text);
             }
             else
             {

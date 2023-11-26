@@ -5,24 +5,13 @@ using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 using POLARIS.Managers;
+using UnityEngine.EventSystems;
 
-public class ResetCode : MonoBehaviour
+public class ResetCode : NonManagerEndpoint
 {
     public TMP_InputField textBox;
     public TMP_Text errorMessageText;
-    public Button btn;
-    private UserManager instance;
-    private string Token;
-    private string RefreshToken;
-    private string UserID;
-    public GameObject next;
-    // Start is called before the first frame update
-    void Start()
-    {
-        textBox = GetComponentInChildren<TMP_InputField>();
-        btn = GetComponentInChildren<Button>();
-        instance = UserManager.getInstance();
-    }
+    public Animator parentAnimator;
 
     public void OnEnterCodeClick()
     {
@@ -38,6 +27,7 @@ public class ResetCode : MonoBehaviour
 
         // Make a request to UserManager.ResetPasswordCode()
         // this sends the inputted code to see if it was correct or not
+        CurrentState = EndpointState.InProgress;
         StartCoroutine(instance.ResetPasswordCode(request, (response) => {
             Debug.Log("Received response: " + response);
             // set the success value based on what the api tells us
@@ -54,16 +44,29 @@ public class ResetCode : MonoBehaviour
                 errorMessageText.color = Color.red;
                 return;
             }
+
             // switch to the next game object
-            gameObject.SetActive(false);
-            next.SetActive(true);
+            CurrentState = EndpointState.Succeed;
+            StartCoroutine(OnSuccess());
         }, (error) => {
             Debug.Log("Error: " + error);
-            errorMessageText.text = "An error occurred while trying to validate your code, please try again later.";
-            errorMessageText.color = Color.red;
-            // put up an error message saying an error occurred
-            // no clue how to do this...
+            
+            CurrentState = EndpointState.Failed;
+            StartCoroutine(OnFail(error));
             return;
         }));
+    }
+
+    IEnumerator OnSuccess()
+    {
+        yield return new WaitUntil(() => ani.GetInteger("State") == 0);
+        parentAnimator.Play("ToReset");
+    }
+
+    IEnumerator OnFail(string error)
+    {
+        yield return new WaitUntil(() => ani.GetInteger("State") == 0);
+        errorMessageText.text = error != "" && error.Length <= 40 ? error : "An error occurred, please try again later";
+        errorMessageText.color = Color.red;
     }
 }
