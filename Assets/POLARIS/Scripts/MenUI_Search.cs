@@ -13,6 +13,7 @@ namespace POLARIS.MainScene
     {
         [SerializeField] private bool showSuggestions = true;
         private bool shouldTriggerOnChangeEvent = true;
+        string placeholder = "";
 
         //Managers
         private UserManager userManager;
@@ -27,6 +28,7 @@ namespace POLARIS.MainScene
         private TextField _searchField;
         private Label header;
         private Label resultsHeader;
+        private Label SearchPlaceholder;
 
         // Start is called before the first frame update
         void Start()
@@ -49,13 +51,17 @@ namespace POLARIS.MainScene
             var rootVisual = uiDoc.rootVisualElement;
             header = rootVisual.Q<Label>("Identifier");
             resultsHeader = rootVisual.Q<Label>("ResultsLabel");
+            SearchPlaceholder = rootVisual.Q<Label>("SearchPlaceholder");
 
             //set up the search bar
             _searchField = rootVisual.Q<TextField>("SearchBar");
             _searchField.RegisterValueChangedCallback(OnSearchValueChanged);
             _searchField.RegisterCallback<FocusEvent>(tab.RaiseMenu);
             _searchField.selectAllOnFocus = true;
-            SetPlaceholderText(_searchField, tab.MyLastPressed == "location" ? "Search for locations" : "Search for events");
+            _searchField.RegisterCallback<FocusInEvent>(_ => onFocusIn());
+            _searchField.RegisterCallback<FocusOutEvent>(_ => onFocusOut());
+            placeholder = tab.MyLastPressed == "location" ? "Search for locations" : "Search for events";
+            SearchPlaceholder.text = placeholder;
 
             StartCoroutine(FillSearch());
         }
@@ -73,7 +79,9 @@ namespace POLARIS.MainScene
         {
             panels.ClearSearchResults(true);
             _searchField.value = "";
-            SetPlaceholderText(_searchField, tab.MyLastPressed == "location" ? "Search for locations" : "Search for events");
+            SearchPlaceholder.style.display = DisplayStyle.Flex;
+            placeholder = tab.MyLastPressed == "location" ? "Search for locations" : "Search for events";
+            SearchPlaceholder.text = placeholder;
         }
 
         private IEnumerator FillSearch()
@@ -196,7 +204,7 @@ namespace POLARIS.MainScene
             }
 
             //when you replace placeholder by focusing on text box
-            bool flag = (evt.previousValue == "Search for locations" || evt.previousValue == "Search for events") && evt.newValue == "";
+            bool flag = (evt.previousValue == "") && evt.newValue == "";
             if (tab.MyLastPressed == "location")
             {
                 HandleLocationFilter(newText, flag);
@@ -235,44 +243,38 @@ namespace POLARIS.MainScene
         public void OnChangeDropdownLocation(string choice)
         {
             shouldTriggerOnChangeEvent = false;
+            if (_searchField.value != "")
+            {
+                _searchField.value = "";
+            }
             //clear search view
-            if (_searchField.value != "Search for locations" && _searchField.value != "Search for events") _searchField.value = "Search for locations";
             HandleLocationFilter("", false);
         }
 
         public void OnChangeDropDownEvent(string choice)
         {
+            Debug.Log("VALUE: " +_searchField.value);
             shouldTriggerOnChangeEvent = false;
+            if(_searchField.value != "")
+            {
+                _searchField.value = "";
+            }
             //clear search view
-            if (_searchField.value != "Search for locations" && _searchField.value != "Search for events") _searchField.value = "Search for locations";
             HandleEventFilter("", false);
         }
 
         #region HelperFunctions
-        public static void SetPlaceholderText(TextField textField, string placeholder)
+
+        void onFocusIn()
         {
-            string placeholderClass = TextField.ussClassName + "__placeholder";
+            SearchPlaceholder.style.display = DisplayStyle.None;
+        }
 
-            onFocusOut();
-            textField.RegisterCallback<FocusInEvent>(_ => onFocusIn());
-            textField.RegisterCallback<FocusOutEvent>(_ => onFocusOut());
-
-            void onFocusIn()
+        void onFocusOut()
+        {
+            if (string.IsNullOrEmpty(_searchField.text))
             {
-                if (textField.ClassListContains(placeholderClass))
-                {
-                    textField.value = string.Empty;
-                    textField.RemoveFromClassList(placeholderClass);
-                }
-            }
-
-            void onFocusOut()
-            {
-                if (string.IsNullOrEmpty(textField.text))
-                {
-                    textField.SetValueWithoutNotify(placeholder);
-                    textField.AddToClassList(placeholderClass);
-                }
+                SearchPlaceholder.style.display = DisplayStyle.Flex;
             }
         }
 

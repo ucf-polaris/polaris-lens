@@ -147,33 +147,6 @@ namespace POLARIS.MainScene {
                 // listController.Update(new List<Building>());
         }
 
-        public static void SetPlaceholderText(TextField textField, string placeholder)
-        {
-            string placeholderClass = TextField.ussClassName + "__placeholder";
-
-            onFocusOut();
-            textField.RegisterCallback<FocusInEvent>(_ => onFocusIn());
-            textField.RegisterCallback<FocusOutEvent>(_ => onFocusOut());
-
-            void onFocusIn()
-            {
-                if (textField.ClassListContains(placeholderClass))
-                {
-                    textField.value = string.Empty;
-                    textField.RemoveFromClassList(placeholderClass);
-                }
-            }
-
-            void onFocusOut()
-            {
-                if (string.IsNullOrEmpty(textField.text))
-                {
-                    textField.SetValueWithoutNotify(placeholder);
-                    textField.AddToClassList(placeholderClass);
-                }
-            }
-        }
-
         public void ReturnGoToTop()
         {
             ScrollView SV = listController.GetScrollView();
