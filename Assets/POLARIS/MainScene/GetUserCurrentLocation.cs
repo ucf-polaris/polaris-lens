@@ -1,5 +1,6 @@
 using UnityEngine;
 using System.Collections;
+using System.Collections.Generic;
 using Esri.ArcGISMapsSDK.Components;
 using Esri.ArcGISMapsSDK.Utils.GeoCoord;
 using Esri.GameEngine.Geometry;
@@ -7,21 +8,22 @@ using Esri.HPFramework;
 using POLARIS.MainScene;
 using Unity.Mathematics;
 using UnityEngine.Serialization;
+using UnityEngine.UIElements;
 
 public class GetUserCurrentLocation : MonoBehaviour
 {
     public GameObject LocationMarker;
+    public GameObject raycaster;
     public float DesiredAccuracy;
     
     public static float _longitude;
     public static float _latitude;
     public static bool displayLocation;
-    private bool created;
     private float lonMin = -81.209995f;
     private float lonMax = -81.181589f;
     private float latMin = 28.580255f;
     private float latMax = 28.613986f;
-
+    
     public bool testing = false;
     public float testingLong;
     public float testingLat;
@@ -30,6 +32,11 @@ public class GetUserCurrentLocation : MonoBehaviour
     
     private ArcGISMapComponent _arcGisMapComponent;
     private HPRoot _hpRoot;
+
+    private int numUpdates = 0;
+
+    private bool updating, creating, created, elevating = false;
+    
     private void Start()
     {
         _hpRoot = FindObjectOfType<HPRoot>();
@@ -43,17 +50,17 @@ public class GetUserCurrentLocation : MonoBehaviour
         {
             // Location service running and in bounds of map
             if (Input.location.status == LocationServiceStatus.Running &&
-                PointInBounds(Input.location.lastData.longitude, Input.location.lastData.latitude))
+                PointInBounds(Input.location.lastData.longitude, Input.location.lastData.latitude)  &&
+                (_longitude != Input.location.lastData.longitude || _latitude != Input.location.lastData.latitude))
             {
                 displayLocation = true;
                 _longitude = Input.location.lastData.longitude;
                 _latitude = Input.location.lastData.latitude;
                 /*if (!created) CreateLocationMarker();
                 else UpdateLocationMarker();*/
-                if (!created) CreateLocationMarker();
-                else UpdateMarker();
+                UpdateMarker();
             }
-            else
+            else if (!PointInBounds(_longitude, _latitude))
             {
                 displayLocation = false;
             }
@@ -63,10 +70,6 @@ public class GetUserCurrentLocation : MonoBehaviour
             displayLocation = true;
             _longitude = testingLong;
             _latitude = testingLat;
-
-            if(_longitude != lastLong || _latitude != lastLat) UpdateMarker();
-            /*if (!created) CreateLocationMarker();
-            else UpdateLocationMarker();*/
         }
     }
     
@@ -98,6 +101,8 @@ public class GetUserCurrentLocation : MonoBehaviour
             yield break;
         }
 #endif
+        yield return new WaitForSecondsRealtime(3);
+        
         // Start service before querying location
         Input.location.Start(DesiredAccuracy, DesiredAccuracy);
                 
@@ -131,7 +136,7 @@ public class GetUserCurrentLocation : MonoBehaviour
             Debug.LogFormat("Unable to determine device location. Failed with status {0}", Input.location.status);
             yield break;
         } 
-        else 
+        else
         {
             Debug.LogFormat("Location service live. status {0}", Input.location.status);
             // Access granted and location value could be retrieved
@@ -141,14 +146,7 @@ public class GetUserCurrentLocation : MonoBehaviour
                 + Input.location.lastData.altitude + " " 
                 + Input.location.lastData.horizontalAccuracy + " " 
                 + Input.location.lastData.timestamp);
-            
-            _longitude = Input.location.lastData.longitude;
-            _latitude = Input.location.lastData.latitude;
-            CreateLocationMarker();
         }
-        
-        // Stop service if there is no need to query location updates continuously
-        // Input.location.Stop();
     }
 
     private void UpdateMarker()
@@ -170,44 +168,60 @@ public class GetUserCurrentLocation : MonoBehaviour
         return hitInfo.point.y + 10;
     }
 
-    private void CreateLocationMarker()
-    {
-        CreateLocationMarkerComponent();
-        SetElevation(LocationMarker);
-        Debug.Log("Marker created!");
-        created = true;
-    }
+
     
-    private void CreateLocationMarkerComponent()
+    private void CreateRaycasterComponent()
     {
-        var location = LocationMarker.AddComponent<ArcGISLocationComponent>();
-        location.Position = new ArcGISPoint(_longitude, _latitude, 2f, new ArcGISSpatialReference(4326));
+        var component = raycaster.AddComponent<ArcGISLocationComponent>();
+        component.Position = new ArcGISPoint(_longitude, _latitude, 2f, new ArcGISSpatialReference(4326));
     }
 
     private void UpdateLocationMarker()
     {
-        UpdateLocationMarkerComponent();
-        SetElevation(LocationMarker);
+        StartCoroutine(UpdateLocationMarkerComponent());
+    }
+    
+    private IEnumerator UpdateLocationMarkerComponent()
+    {
+        updating = true;
+        
+        var markerComponent = LocationMarker.GetComponent<ArcGISLocationComponent>();
+        Destroy(markerComponent);
+        yield return new WaitWhile(() => markerComponent != null);
+        
+        var raycasterComponent = raycaster.GetComponent<ArcGISLocationComponent>();
+        Destroy(raycasterComponent);
+        yield return new WaitWhile(() => raycasterComponent != null);
+        
+        CreateRaycasterComponent();
+        
+        StartCoroutine(CreateMarkerWithCorrectElevation());
+        yield return new WaitWhile(() => elevating);
+        
         Debug.Log("Marker updated!");
+        numUpdates++;
+        
+        updating = false;
     }
     
-    private void UpdateLocationMarkerComponent()
+    private IEnumerator CreateMarkerWithCorrectElevation()
     {
-        var location = LocationMarker.GetComponent<ArcGISLocationComponent>();
-        location.Position = new ArcGISPoint(_longitude, _latitude, 2f, new ArcGISSpatialReference(4326));
-    }
-    
-    private void SetElevation(GameObject locationMarker)
-    {
+        elevating = true;
         // start the raycast in the air at an arbitrary to ensure it is above the ground
         const int raycastHeight = 1000;
-        var position = locationMarker.transform.position;
+        var position = raycaster.transform.position;
         var raycastStart = new Vector3(position.x, position.y + raycastHeight, position.z);
-            
-        if (!Physics.Raycast(raycastStart, Vector3.down, out var hitInfo)) return;
-            
-        var location = locationMarker.GetComponent<ArcGISLocationComponent>();
+
+        if (!Physics.Raycast(raycastStart, Vector3.down, out var hitInfo))
+        {
+            elevating = false;
+            yield break;
+        }
+        
+        var location = LocationMarker.AddComponent<ArcGISLocationComponent>();
         location.Position = HitToGeoPosition(hitInfo, 2f);
+        Debug.Log("Hit da cast");
+        elevating = false;
     }
     
     private ArcGISPoint HitToGeoPosition(RaycastHit hit, float yOffset = 0)
