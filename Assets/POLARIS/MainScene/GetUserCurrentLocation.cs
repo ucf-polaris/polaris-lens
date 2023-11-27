@@ -25,6 +25,8 @@ public class GetUserCurrentLocation : MonoBehaviour
     public bool testing = false;
     public float testingLong;
     public float testingLat;
+    private float lastLong = 0;
+    private float lastLat = 0;
     
     private ArcGISMapComponent _arcGisMapComponent;
     private HPRoot _hpRoot;
@@ -46,8 +48,10 @@ public class GetUserCurrentLocation : MonoBehaviour
                 displayLocation = true;
                 _longitude = Input.location.lastData.longitude;
                 _latitude = Input.location.lastData.latitude;
+                /*if (!created) CreateLocationMarker();
+                else UpdateLocationMarker();*/
                 if (!created) CreateLocationMarker();
-                else UpdateLocationMarker();
+                else UpdateMarker();
             }
             else
             {
@@ -59,8 +63,10 @@ public class GetUserCurrentLocation : MonoBehaviour
             displayLocation = true;
             _longitude = testingLong;
             _latitude = testingLat;
-            if (!created) CreateLocationMarker();
-            else UpdateLocationMarker();
+
+            if(_longitude != lastLong || _latitude != lastLat) UpdateMarker();
+            /*if (!created) CreateLocationMarker();
+            else UpdateLocationMarker();*/
         }
     }
     
@@ -143,6 +149,25 @@ public class GetUserCurrentLocation : MonoBehaviour
         
         // Stop service if there is no need to query location updates continuously
         // Input.location.Stop();
+    }
+
+    private void UpdateMarker()
+    {
+        double3 worldPos = _arcGisMapComponent.View.GeographicToWorld(new ArcGISPoint(_longitude, _latitude, 2f, new ArcGISSpatialReference(4326)));
+        double3 unityPos = _hpRoot.TransformPoint(worldPos);
+        LocationMarker.transform.position = new Vector3((float)unityPos.x, updateElevation(LocationMarker), (float)unityPos.z);
+    }
+
+    private float updateElevation(GameObject locationMarker)
+    {
+        // start the raycast in the air at an arbitrary to ensure it is above the ground
+        const int raycastHeight = 1000;
+        var position = locationMarker.transform.position;
+        var raycastStart = new Vector3(position.x, position.y + raycastHeight, position.z);
+
+        if (!Physics.Raycast(raycastStart, Vector3.down, out var hitInfo)) return -998f;
+
+        return hitInfo.point.y + 10;
     }
 
     private void CreateLocationMarker()
