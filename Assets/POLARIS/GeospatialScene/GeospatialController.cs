@@ -579,23 +579,28 @@ namespace Google.XR.ARCoreExtensions.Samples.Geospatial
             {
                 var acc = pose.HorizontalAccuracy switch
                 {
-                    < 1  => "Magnificent",
-                    < 2  => "Excellent",
-                    < 5  => "Great",
-                    < 10 => "Good",
-                    < 20 => "OK",
-                    _ => "Waiting"
+                    < 1                           => "Magnificent",
+                    < 2                           => "Excellent",
+                    < 5                           => "Great",
+                    < 10                          => "Good",
+                    < HorizontalAccuracyThreshold => "OK",
+                    _                             => "Waiting"
                 };
-                if (pose.OrientationYawAccuracy < OrientationYawAccuracyThreshold)
+                var yawAcc = pose.OrientationYawAccuracy switch
                 {
-                    acc = "Waiting";
-                }
+                    < 1                               => "Magnificent",
+                    < 3                               => "Excellent",
+                    < 7                               => "Great",
+                    < 12                              => "Good",
+                    < OrientationYawAccuracyThreshold => "OK",
+                    _                                 => "Waiting"
+                };
 
                 InfoText.text = string.Format(
-                "Accuracy: {8}",
+                "Positioning: {8}{0}View: {9}",
                 Environment.NewLine, pose.Latitude, pose.Longitude, 
                 pose.HorizontalAccuracy, pose.Altitude, pose.VerticalAccuracy,
-                pose.EunRotation.ToString("F1"), pose.OrientationYawAccuracy, acc);
+                pose.EunRotation.ToString("F1"), pose.OrientationYawAccuracy, acc, yawAcc);
             }
             else
             {
