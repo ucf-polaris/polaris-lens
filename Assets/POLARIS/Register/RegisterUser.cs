@@ -15,6 +15,8 @@ public class RegistrationScript : NonManagerEndpoint
 {
     public TMP_InputField emailInput;
     public TMP_InputField passwordInput;
+    public TMP_InputField confirmPasswordInput;
+    public TMP_Text errorMessageText;
     public string registrationURL = "https://api.ucfpolaris.com/user/register";
     // Public variable to store the token
     public static string AuthToken;
@@ -31,6 +33,14 @@ public class RegistrationScript : NonManagerEndpoint
 
     IEnumerator SendRegistrationRequest(string email, string password)
     {
+        yield return new WaitUntil(() => ani.GetInteger("State") != 0);
+        if (password != confirmPasswordInput.text)
+        {
+            Debug.Log("PASSWORDS DIDN'T MATCH");
+            CurrentState = EndpointState.Failed;
+            StartCoroutine(OnDifferentPassword());
+            yield break;
+        }
         password = Hashing.HashPassword(password);
         JObject payload =
             new JObject(
@@ -74,5 +84,16 @@ public class RegistrationScript : NonManagerEndpoint
         yield return new WaitUntil(() => ani.GetInteger("State") == 0);
         if(EventSystem.current != null) EventSystem.current.enabled = false;
         parentAnimator.Play("ToVerify");
+    }
+    IEnumerator OnDifferentPassword()
+    {
+        yield return new WaitUntil(() => ani.GetInteger("State") == 0);
+        errorMessageText.text = "Passwords do not match, please try again.";
+        errorMessageText.color = Color.red;
+        EventSystem eventSystem = GameObject.Find("EventSystem").GetComponent<EventSystem>();
+        if (eventSystem != null)
+        {
+            eventSystem.enabled = true;
+        }
     }
 }
