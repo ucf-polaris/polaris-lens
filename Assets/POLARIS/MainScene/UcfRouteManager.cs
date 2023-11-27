@@ -439,10 +439,10 @@ namespace POLARIS
         private void UpdateRouteInfoIncomplete()
         {
             _routingInfoLabel.text = "Hold to choose start";
-            _routingSrcLabel.text = GetUserCurrentLocation.displayLocation ? "Current Location" : "";
+            _routingSrcLabel.text =  GetUserCurrentLocation.displayLocation ? "Current Location" : "";
             _routingDestLabel.text = PersistData.DestName;
 
-            _slideButton.ToggleDisplayStyle(GetUserCurrentLocation.displayLocation);
+            // _slideButton.ToggleDisplayStyle(GetUserCurrentLocation.displayLocation);
             _slideButton.style.backgroundImage = _checkMark;
             _slideIsCheck = true;
             _routingSrcBox.ToggleDisplayStyle(true);
@@ -587,10 +587,10 @@ namespace POLARIS
             PlaceMarker(worldPosition,  buildingName, true, false);
             
             // TODO: MAKE IT SO CLICKING THE "CHOOSE STARTING POINT MENU" SELECTS USER CURRENT LOCATION
-            if (GetUserCurrentLocation.displayLocation)
-            {
-                PlaceMarkerAtUserLocation();
-            }
+            // if (GetUserCurrentLocation.displayLocation)
+            // {
+                // PlaceMarkerAtUserLocation();
+            // }
         }
 
         public void RouteToLocation(LocationData locationData)
@@ -610,10 +610,10 @@ namespace POLARIS
             PlaceMarker(worldPosition, buildingName, true, false);
 
             // TODO: MAKE IT SO CLICKING THE "CHOOSE STARTING POINT MENU" SELECTS USER CURRENT LOCATION
-            if (GetUserCurrentLocation.displayLocation)
-            {
-                PlaceMarkerAtUserLocation();
-            }
+            // if (GetUserCurrentLocation.displayLocation)
+            // {
+                // PlaceMarkerAtUserLocation();
+            // }
         }
 
         private void PlaceMarkerAtUserLocation()
