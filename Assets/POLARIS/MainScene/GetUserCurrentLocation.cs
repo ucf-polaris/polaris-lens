@@ -62,7 +62,7 @@ public class GetUserCurrentLocation : MonoBehaviour
                 Input.location.Stop();
                 StartCoroutine(LocationCoroutine());
             }
-            else
+            else if (!PointInBounds(_longitude, _latitude))
             {
                 displayLocation = false;
             }
