@@ -105,7 +105,7 @@ namespace POLARIS.Managers
         //scans all elements right away
         public void CallScan()
         {
-            if (running == null && Testing == false)
+            if (running == null)
             {
                 Debug.Log("Running Building Scan...");
                 running = Scan(null);
@@ -156,6 +156,7 @@ namespace POLARIS.Managers
 
                 var buildings = jsonResponse["locations"]!.ToObject<List<LocationData>>();
                 dataList = buildings;
+                if(Testing) dataList.Add(new LocationData(-81.1669147606456f, 28.60541026634402f, 0, "MyHouse"));
 
                 // foreach (EventData UCFEvent in dataList)
                 // {
@@ -175,10 +176,10 @@ namespace POLARIS.Managers
         {
             string Token = TestingToken;
             string RefreshToken = TestingRefreshToken;
-            if (Testing)
+            if (UserManager.isNotNull() && !userAccess.Testing)
             {
-                Token = userAccess.data.Token;
-                RefreshToken = userAccess.data.RefreshToken;
+                if (Token != "") Token = userAccess.data.Token;
+                if (RefreshToken != "") RefreshToken = userAccess.data.RefreshToken;
             }
 
             JObject payload =
@@ -468,6 +469,14 @@ namespace POLARIS.Managers
         public LocationData()
         {
             //LoadPlayerPrefs();
+        }
+
+        public LocationData(float bLong, float bLat, float alt, string name)
+        {
+            buildingLong = bLong;
+            buildingLat = bLat;
+            buildingAltitude = alt;
+            buildingName = name;
         }
     }
 

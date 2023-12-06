@@ -42,17 +42,42 @@ namespace POLARIS.GeospatialScene
 
         private EventManager _eventManager;
         private UserManager _userManager;
+        private DebugManager debug;
         private DisplayPanel _display;
+        string Named;
+        FaceCamera face;
 
         private void Start()
         {
             _eventManager = EventManager.getInstance();
             _userManager = UserManager.getInstance();
+            debug = DebugManager.GetInstance();
+        }
+
+        private void Update()
+        {
+            if(_anchor != null)
+            {
+                string rot = " rotation: " + _anchor.pose.rotation.eulerAngles.ToString();
+                string pos = "position: " + _anchor.pose.position.ToString();
+                debug.AddToMessage(Named, pos + rot);
+            }
+
+            if(face != null)
+            {
+                face.SetValues(_anchor.pose.position, _anchor.pose.rotation);
+                if (Named != "") face.SetName(Named);
+            }
+            else
+            {
+                if(CurrentPrefab != null) face = CurrentPrefab.GetComponent<FaceCamera>();
+            }
         }
 
         public void Instantiate(GeospatialAnchorContent content, DisplayPanel display, TextPanel[] alternates)
         {
             Content = content;
+            Named = Content.Location.BuildingName;
             _display = display;
             _alternatePanels = alternates;
             PanelPrefab = Resources.Load("Polaris/PanelParent") as GameObject;
@@ -338,6 +363,11 @@ namespace POLARIS.GeospatialScene
         private static string GenerateTime(DateTime dt)
         {
             return $"{dt:h:mm tt - dddd, MMMM dd}";
+        }
+
+        public ARGeospatialAnchor GetAnchor()
+        {
+            return _anchor;
         }
         
         // private static IEnumerator SetImage(EventData e, Graphic img)

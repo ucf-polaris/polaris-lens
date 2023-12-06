@@ -22,7 +22,8 @@ namespace POLARIS.GeospatialScene
         public PanelManager PanelManager;
         public GeospatialController GeospatialController;
         public DoAnimation DoAnimation;
-        
+        private LineRenderer _lineRenderer;
+
         private readonly List<GameObject> _pathAnchorObjects = new();
         private readonly List<GameObject> _pathObjects = new();
         private ArrowPoint _arrow;
@@ -40,6 +41,16 @@ namespace POLARIS.GeospatialScene
 
         private void Start()
         {
+            _lineRenderer = gameObject.AddComponent<LineRenderer>();
+            _lineRenderer.enabled = false;
+            _lineRenderer.material = new Material(Shader.Find("Sprites/Default"));
+            _lineRenderer.widthMultiplier = 0.2f;
+            _lineRenderer.startColor = Color.blue;
+            _lineRenderer.endColor = Color.cyan;
+            _lineRenderer.positionCount = 0;
+            _lineRenderer.numCapVertices = 6;
+            _lineRenderer.numCornerVertices = 6;
+
             PathPrefab = Resources.Load("Polaris/RaisedArrow") as GameObject;
 
             var goList = new List<GameObject>();
@@ -72,6 +83,7 @@ namespace POLARIS.GeospatialScene
             if (!PersistData.Routing || _pathObjects.Count < 2) return;
 
             var closest = 0;
+            
             if (PersistData.UsingCurrent)
             {
                 var percentage = UcfRouteManager.PointPercentage(
@@ -84,8 +96,10 @@ namespace POLARIS.GeospatialScene
                 for (var i = 0; i < _pathObjects.Count; i++)
                 {
                     _pathObjects[i].gameObject.SetActive(i >= closest);
-                }
+                } 
             }
+
+            
 
             // Set arrows
             for (var i = closest; i < _pathObjects.Count - 1; i++)
@@ -95,7 +109,10 @@ namespace POLARIS.GeospatialScene
                 
                 _pathObjects[i].transform.rotation = Quaternion.Euler(lookRot.eulerAngles.x, lookRot.eulerAngles.y, lookRot.eulerAngles.z);
             }
-            
+
+            _lineRenderer.positionCount = _pathAnchorObjects.Count - closest;
+            _lineRenderer.SetPositions(_pathObjects.Skip(closest).Select(anchor => anchor.transform.position).ToArray());
+
             // Spin destination marker
             if (_endObject)
             {
@@ -110,7 +127,9 @@ namespace POLARIS.GeospatialScene
                 Destroy(obj);
             }
             _pathObjects.Clear();
-            
+            _lineRenderer.positionCount = 0;
+            _lineRenderer.enabled = false;
+
             foreach (var anchor in _pathAnchorObjects)
             {
                 GeospatialController.GetAnchorObjects().Remove(anchor);
