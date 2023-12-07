@@ -275,6 +275,11 @@ PrefabInstance:
       propertyPath: m_Name
       value: Panel
       objectReference: {fileID: 0}
+    - target: {fileID: 5144013906393277996, guid: ea828524b1dc263428a2fa4c822e40a6,
+        type: 3}
+      propertyPath: m_Layer
+      value: 5
+      objectReference: {fileID: 0}
     - target: {fileID: 5144013906393278000, guid: ea828524b1dc263428a2fa4c822e40a6,
         type: 3}
       propertyPath: m_LocalPosition.y

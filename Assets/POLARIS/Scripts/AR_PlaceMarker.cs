@@ -76,6 +76,20 @@ public class AR_PlaceMarker : MonoBehaviour
         }
     }
 
+    public void UseLastKnown()
+    {
+        SpinBase();
+        if (lastKnownPos == Vector3.positiveInfinity)
+        {
+            groundBase.transform.localScale = new Vector3(0f, 0f, 0f);
+        }
+        else
+        {
+            groundBase.transform.position = new Vector3(lastKnownPos.x, lastKnownPos.y, lastKnownPos.z);
+            groundBase.transform.localScale = new Vector3(40f, 40f, 20f);
+        }
+    }
+
     private void SpinBase()
     {
         debug.AddToMessage(Named + " BASE ROT", groundBase.transform.rotation.eulerAngles.ToString());

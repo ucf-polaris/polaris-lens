@@ -116,12 +116,16 @@ namespace POLARIS.GeospatialScene
                 {
                     zoomPos = (Vector3.forward * _forwardAmount) + (Vector3.up * (_forwardAmount / 3));
                 }
-                
+
+                groundScript.UseLastKnown();
+                groundScript.AddMessage(Named);
+
                 objTransform.SetLocalPositionAndRotation(
                     Vector3.Slerp(objTransform.localPosition, zoomPos, Speed * 4 * Time.deltaTime),
                     Quaternion.Slerp(objTransform.localRotation, Quaternion.Euler(0, 180, 0), Speed * 4 * Time.deltaTime));
-                //debug.AddToMessage(Named + " transform pos", objTransform.position.ToString());
-                //debug.AddToMessage(Named + " transform rot", objTransform.rotation.ToString());
+                debug.AddToMessage(Named + " transform pos", objTransform.position.ToString());
+                debug.AddToMessage(Named + " transform rot", objTransform.rotation.ToString());
+
                 return;
             }
             
