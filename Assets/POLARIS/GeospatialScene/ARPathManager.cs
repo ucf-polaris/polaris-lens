@@ -23,6 +23,7 @@ namespace POLARIS.GeospatialScene
         public GeospatialController GeospatialController;
         public DoAnimation DoAnimation;
         private LineRenderer _lineRenderer;
+        private DebugManager debug;
 
         private readonly List<GameObject> _pathAnchorObjects = new();
         private readonly List<GameObject> _pathObjects = new();
@@ -30,6 +31,7 @@ namespace POLARIS.GeospatialScene
         private GameObject _endObject;
 
         private float _closeTime = 0;
+        private float lineHeight = 0;
         private bool _lastRouting = false;
         private bool _closed = false;
         private Label _routingSrcLabel;
@@ -41,12 +43,17 @@ namespace POLARIS.GeospatialScene
 
         private void Start()
         {
+            debug = DebugManager.GetInstance();
+            debug.AddToMessage("line height", lineHeight.ToString());
+            debug.AddToButton("ADD HEIGHT", AddHeight);
+            debug.AddToButton("SUB HEIGHT", SubHeight);
+
             _lineRenderer = gameObject.AddComponent<LineRenderer>();
             _lineRenderer.enabled = false;
             _lineRenderer.material = new Material(Shader.Find("Sprites/Default"));
             _lineRenderer.widthMultiplier = 0.2f;
-            _lineRenderer.startColor = Color.blue;
-            _lineRenderer.endColor = Color.cyan;
+            _lineRenderer.startColor = new Color(1, 1, 0, 0.5f);
+            _lineRenderer.endColor = new Color(1, 1, 0, 0.5f);
             _lineRenderer.positionCount = 0;
             _lineRenderer.numCapVertices = 6;
             _lineRenderer.numCornerVertices = 6;
@@ -99,8 +106,6 @@ namespace POLARIS.GeospatialScene
                 } 
             }
 
-            
-
             // Set arrows
             for (var i = closest; i < _pathObjects.Count - 1; i++)
             {
@@ -111,13 +116,25 @@ namespace POLARIS.GeospatialScene
             }
 
             _lineRenderer.positionCount = _pathAnchorObjects.Count - closest;
-            _lineRenderer.SetPositions(_pathObjects.Skip(closest).Select(anchor => anchor.transform.position).ToArray());
+            _lineRenderer.SetPositions(_pathObjects.Skip(closest).Select(anchor => new Vector3(anchor.transform.position.x, lineHeight, anchor.transform.position.z)).ToArray());
 
             // Spin destination marker
             if (_endObject)
             {
                 _endObject.transform.Rotate(Vector3.right, 10);
             }
+        }
+
+        public void AddHeight()
+        {
+            lineHeight += 0.5f;
+            debug.AddToMessage("line height", lineHeight.ToString());
+        }
+
+        public void SubHeight()
+        {
+            lineHeight -= 0.5f;
+            debug.AddToMessage("line height", lineHeight.ToString());
         }
 
         public void ClearPath()
@@ -171,6 +188,7 @@ namespace POLARIS.GeospatialScene
                 true);
 
             _arrow.SetEnabled(true);
+            _lineRenderer.enabled = true;
             
             _routingSrcLabel.text = PersistData.SrcName;
             _routingDestLabel.text = PersistData.DestName;

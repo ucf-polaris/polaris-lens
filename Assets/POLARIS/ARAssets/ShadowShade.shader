@@ -1,99 +1,80 @@
-Shader "URP AR Shadow Receiver"
+// Made with Amplify Shader Editor
+// Available at the Unity Asset Store - http://u3d.as/y3X 
+Shader "TransparentWithShadows"
 {
-    Properties
-    {
-        _ShadowColor ("Shadow Color", Color) = (0.35,0.4,0.45,1.0)
-    }
- 
-    SubShader
-    {
-        Tags
-        {
-            "RenderPipeline"="UniversalPipeline"
-            "RenderType"="Transparent"
-            "Queue"="Transparent-1"
-        }
- 
-        Pass
-        {
-            Name "ForwardLit"
-            Tags { "LightMode" = "UniversalForward" }
- 
-            Blend DstColor Zero, Zero One
-            Cull Back
-            ZTest LEqual
-            ZWrite Off
-   
-            HLSLPROGRAM
-            #pragma vertex vert
-            #pragma fragment frag
- 
-            #pragma prefer_hlslcc gles
-            #pragma exclude_renderers d3d11_9x
-            #pragma target 2.0
- 
-            #pragma multi_compile _ _MAIN_LIGHT_SHADOWS
-            #pragma multi_compile _ _MAIN_LIGHT_SHADOWS_CASCADE
-            #pragma multi_compile _ _SHADOWS_SOFT
-            #pragma multi_compile_fog
- 
-            #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Lighting.hlsl"
- 
-            CBUFFER_START(UnityPerMaterial)
-            float4 _ShadowColor;
-            CBUFFER_END
- 
-            struct Attributes
-            {
-                float4 positionOS : POSITION;
-                UNITY_VERTEX_INPUT_INSTANCE_ID
-            };
- 
-            struct Varyings
-            {
-                float4 positionCS               : SV_POSITION;
-                float3 positionWS               : TEXCOORD0;
-                float fogCoord                  : TEXCOORD1;
-                UNITY_VERTEX_INPUT_INSTANCE_ID
-                UNITY_VERTEX_OUTPUT_STEREO
-            };
- 
-            Varyings vert (Attributes input)
-            {
-                Varyings output = (Varyings)0;
- 
-                UNITY_SETUP_INSTANCE_ID(input);
-                UNITY_TRANSFER_INSTANCE_ID(input, output);
-                UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(output);
- 
-                VertexPositionInputs vertexInput = GetVertexPositionInputs(input.positionOS.xyz);
-                output.positionCS = vertexInput.positionCS;
-                output.positionWS = vertexInput.positionWS;
-                output.fogCoord = ComputeFogFactor(vertexInput.positionCS.z);
- 
-                return output;
-            }
- 
-            half4 frag (Varyings input) : SV_Target
-            {
-                UNITY_SETUP_INSTANCE_ID(input);
-                UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(input);
- 
-                half4 color = half4(1,1,1,1);
- 
-            #ifdef _MAIN_LIGHT_SHADOWS
-                VertexPositionInputs vertexInput = (VertexPositionInputs)0;
-                vertexInput.positionWS = input.positionWS;
- 
-                float4 shadowCoord = GetShadowCoord(vertexInput);
-                half shadowAttenutation = MainLightRealtimeShadow(shadowCoord);
-                color = lerp(half4(1,1,1,1), _ShadowColor, (1.0 - shadowAttenutation) * _ShadowColor.a);
-                color.rgb = MixFogColor(color.rgb, half3(1,1,1), input.fogCoord);
-            #endif
-                return color;
-            }
- 
-            ENDHLSL
-        }
-    }
+Properties
+{
+_Texture0("Texture 0", 2D) = "black" {}
+[HideInInspector] _texcoord( "", 2D ) = "white" {}
+[HideInInspector] __dirty( "", Int ) = 1
+}
+
+SubShader
+{
+Tags{ "RenderType" = "Transparent" "Queue" = "Geometry+0" "IgnoreProjector" = "True" }
+Cull Back
+ZWrite Off
+Blend SrcAlpha OneMinusSrcAlpha
+BlendOp Add
+CGPROGRAM
+#include "UnityPBSLighting.cginc"
+#include "UnityShaderVariables.cginc"
+#pragma target 3.0
+#pragma surface surf StandardCustomLighting keepalpha 
+struct Input
+{
+float2 uv_texcoord;
+};
+
+struct SurfaceOutputCustomLightingCustom
+{
+fixed3 Albedo;
+fixed3 Normal;
+half3 Emission;
+half Metallic;
+half Smoothness;
+half Occlusion;
+fixed Alpha;
+Input SurfInput;
+UnityGIInput GIData;
+};
+
+uniform sampler2D _Texture0;
+uniform float4 _Texture0_ST;
+
+inline half4 LightingStandardCustomLighting( inout SurfaceOutputCustomLightingCustom s, half3 viewDir, UnityGI gi )
+{
+UnityGIInput data = s.GIData;
+Input i = s.SurfInput;
+half4 c = 0;
+#if DIRECTIONAL
+float ase_lightAtten = data.atten;
+if( _LightColor0.a == 0)
+ase_lightAtten = 0;
+#else
+float3 ase_lightAttenRGB = gi.light.color / ( ( _LightColor0.rgb ) + 0.000001 );
+float ase_lightAtten = max( max( ase_lightAttenRGB.r, ase_lightAttenRGB.g ), ase_lightAttenRGB.b );
+#endif
+float2 uv_Texture0 = i.uv_texcoord * _Texture0_ST.xy + _Texture0_ST.zw;
+float4 tex2DNode1 = tex2D( _Texture0, uv_Texture0 );
+float4 appendResult8 = (float4(tex2DNode1.r , tex2DNode1.g , tex2DNode1.b , 1.0));
+c.rgb = ( ( ase_lightAtten * _LightColor0 ) * appendResult8 ).rgb;
+c.a = max( tex2DNode1.a , ( 1.0 - ase_lightAtten ) );
+return c;
+}
+
+inline void LightingStandardCustomLighting_GI( inout SurfaceOutputCustomLightingCustom s, UnityGIInput data, inout UnityGI gi )
+{
+s.GIData = data;
+}
+
+void surf( Input i , inout SurfaceOutputCustomLightingCustom o )
+{
+o.SurfInput = i;
+}
+
+ENDCG
+}
+Fallback "Diffuse"
+CustomEditor "ASEMaterialInspector"
 }

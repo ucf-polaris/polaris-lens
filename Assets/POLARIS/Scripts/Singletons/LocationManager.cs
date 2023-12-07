@@ -156,7 +156,10 @@ namespace POLARIS.Managers
 
                 var buildings = jsonResponse["locations"]!.ToObject<List<LocationData>>();
                 dataList = buildings;
-                if(Testing) dataList.Add(new LocationData(-81.1669147606456f, 28.60541026634402f, 0, "MyHouse"));
+                if (Testing) {
+                    dataList.Add(new LocationData(-81.16693588559099f, 28.605441438287777f, 0, "MyHouse"));
+                    dataList.Add(new LocationData(-81.166811006672f, 28.605586973810276f, 0, "OutsideMyHouse"));
+                }
 
                 // foreach (EventData UCFEvent in dataList)
                 // {
