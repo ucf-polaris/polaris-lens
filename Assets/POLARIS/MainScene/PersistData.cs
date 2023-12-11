@@ -21,6 +21,9 @@ namespace POLARIS.MainScene
         public static float TravelMinutes = 0f;
         public static float TravelMiles = 0f;
 
+        public static int CurrentRequests = 0;
+        public static int MAX_REQUESTS = 20;
+
         public static void ClearStops()
         {
             Routing = false;

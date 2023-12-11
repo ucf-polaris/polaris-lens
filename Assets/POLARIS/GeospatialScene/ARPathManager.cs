@@ -205,19 +205,20 @@ namespace POLARIS.GeospatialScene
                                                 bool finish)
         {
             Debug.Log("ZZ Placing routing anchor at " + point.x + ", " + point.y);
-            
-            var promise =
-                anchorManager.ResolveAnchorOnTerrainAsync(
-                    point[0], point[1], 0, Quaternion.Euler(90, 0, 90));
 
-            StartCoroutine(CheckTerrainPromise(promise, anchorObjects, finish));
+            StartCoroutine(CheckTerrainPromise(point, anchorManager, anchorObjects, finish));
             return null;
         }
         
-        private IEnumerator CheckTerrainPromise(ResolveAnchorOnTerrainPromise promise,
-                                                ICollection<GameObject> anchorObjects, bool finish)
+        private IEnumerator CheckTerrainPromise(double2 point, ARAnchorManager anchorManager, ICollection<GameObject> anchorObjects, bool finish)
         {
+            yield return new WaitUntil(() => PersistData.CurrentRequests < PersistData.MAX_REQUESTS);
+            PersistData.CurrentRequests += 1;
+
+            var promise = anchorManager.ResolveAnchorOnTerrainAsync(point[0], point[1], 0, Quaternion.Euler(90, 0, 90));
+
             yield return promise;
+            PersistData.CurrentRequests = PersistData.CurrentRequests - 1 > 0 ? PersistData.CurrentRequests - 1 : 0;
 
             var result = promise.Result;
             

@@ -11,6 +11,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.XR.ARFoundation;
 using POLARIS.Managers;
+using POLARIS.MainScene;
 
 namespace POLARIS.GeospatialScene
 {
@@ -72,6 +73,7 @@ namespace POLARIS.GeospatialScene
             {
                 if(CurrentPrefab != null) face = CurrentPrefab.GetComponent<FaceCamera>();
             }
+            debug.AddToMessage("REQUEST QUEUE #", PersistData.CurrentRequests.ToString());
         }
 
         public void Instantiate(GeospatialAnchorContent content, DisplayPanel display, TextPanel[] alternates)
@@ -129,6 +131,16 @@ namespace POLARIS.GeospatialScene
                 Debug.LogError("Panel prefab is null!");
             }
             
+            
+
+            StartCoroutine(CheckTerrainPromise(anchorManager, anchorObjects));
+            return null;
+        }
+
+        private IEnumerator CheckTerrainPromise(ARAnchorManager anchorManager, ICollection<GameObject> anchorObjects)
+        {
+            yield return new WaitUntil(() => PersistData.CurrentRequests < PersistData.MAX_REQUESTS);
+            PersistData.CurrentRequests += 1;
             var promise =
                 anchorManager.ResolveAnchorOnTerrainAsync(
                     Content.History.Latitude,
@@ -136,14 +148,8 @@ namespace POLARIS.GeospatialScene
                     Content.History.Altitude,
                     Content.History.EunRotation);
 
-            StartCoroutine(CheckTerrainPromise(promise, anchorObjects));
-            return null;
-        }
-
-        private IEnumerator CheckTerrainPromise(ResolveAnchorOnTerrainPromise promise,
-                                                ICollection<GameObject> anchorObjects)
-        {
             yield return promise;
+            PersistData.CurrentRequests = PersistData.CurrentRequests - 1 > 0 ? PersistData.CurrentRequests - 1 : 0;
 
             var result = promise.Result;
 
