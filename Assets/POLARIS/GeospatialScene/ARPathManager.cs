@@ -22,13 +22,16 @@ namespace POLARIS.GeospatialScene
         public PanelManager PanelManager;
         public GeospatialController GeospatialController;
         public DoAnimation DoAnimation;
-        
+        private LineRenderer _lineRenderer;
+        private DebugManager debug;
+
         private readonly List<GameObject> _pathAnchorObjects = new();
         private readonly List<GameObject> _pathObjects = new();
         private ArrowPoint _arrow;
         private GameObject _endObject;
 
         private float _closeTime = 0;
+        private float lineHeight = 0;
         private bool _lastRouting = false;
         private bool _closed = false;
         private Label _routingSrcLabel;
@@ -40,6 +43,21 @@ namespace POLARIS.GeospatialScene
 
         private void Start()
         {
+            debug = DebugManager.GetInstance();
+            debug.AddToMessage("line height", lineHeight.ToString());
+            debug.AddToButton("ADD HEIGHT", AddHeight);
+            debug.AddToButton("SUB HEIGHT", SubHeight);
+
+            _lineRenderer = gameObject.AddComponent<LineRenderer>();
+            _lineRenderer.enabled = false;
+            _lineRenderer.material = new Material(Shader.Find("Sprites/Default"));
+            _lineRenderer.widthMultiplier = 0.2f;
+            _lineRenderer.startColor = new Color(1, 1, 0, 0.5f);
+            _lineRenderer.endColor = new Color(1, 1, 0, 0.5f);
+            _lineRenderer.positionCount = 0;
+            _lineRenderer.numCapVertices = 6;
+            _lineRenderer.numCornerVertices = 6;
+
             PathPrefab = Resources.Load("Polaris/RaisedArrow") as GameObject;
 
             var goList = new List<GameObject>();
@@ -72,6 +90,7 @@ namespace POLARIS.GeospatialScene
             if (!PersistData.Routing || _pathObjects.Count < 2) return;
 
             var closest = 0;
+            
             if (PersistData.UsingCurrent)
             {
                 var percentage = UcfRouteManager.PointPercentage(
@@ -84,7 +103,7 @@ namespace POLARIS.GeospatialScene
                 for (var i = 0; i < _pathObjects.Count; i++)
                 {
                     _pathObjects[i].gameObject.SetActive(i >= closest);
-                }
+                } 
             }
 
             // Set arrows
@@ -95,12 +114,27 @@ namespace POLARIS.GeospatialScene
                 
                 _pathObjects[i].transform.rotation = Quaternion.Euler(lookRot.eulerAngles.x, lookRot.eulerAngles.y, lookRot.eulerAngles.z);
             }
-            
+
+            _lineRenderer.positionCount = _pathAnchorObjects.Count - closest;
+            _lineRenderer.SetPositions(_pathObjects.Skip(closest).Select(anchor => new Vector3(anchor.transform.position.x, lineHeight, anchor.transform.position.z)).ToArray());
+
             // Spin destination marker
             if (_endObject)
             {
                 _endObject.transform.Rotate(Vector3.right, 10);
             }
+        }
+
+        public void AddHeight()
+        {
+            lineHeight += 0.5f;
+            debug.AddToMessage("line height", lineHeight.ToString());
+        }
+
+        public void SubHeight()
+        {
+            lineHeight -= 0.5f;
+            debug.AddToMessage("line height", lineHeight.ToString());
         }
 
         public void ClearPath()
@@ -110,7 +144,9 @@ namespace POLARIS.GeospatialScene
                 Destroy(obj);
             }
             _pathObjects.Clear();
-            
+            _lineRenderer.positionCount = 0;
+            _lineRenderer.enabled = false;
+
             foreach (var anchor in _pathAnchorObjects)
             {
                 GeospatialController.GetAnchorObjects().Remove(anchor);
@@ -152,6 +188,7 @@ namespace POLARIS.GeospatialScene
                 true);
 
             _arrow.SetEnabled(true);
+            _lineRenderer.enabled = true;
             
             _routingSrcLabel.text = PersistData.SrcName;
             _routingDestLabel.text = PersistData.DestName;
@@ -168,19 +205,20 @@ namespace POLARIS.GeospatialScene
                                                 bool finish)
         {
             Debug.Log("ZZ Placing routing anchor at " + point.x + ", " + point.y);
-            
-            var promise =
-                anchorManager.ResolveAnchorOnTerrainAsync(
-                    point[0], point[1], 0, Quaternion.Euler(90, 0, 90));
 
-            StartCoroutine(CheckTerrainPromise(promise, anchorObjects, finish));
+            StartCoroutine(CheckTerrainPromise(point, anchorManager, anchorObjects, finish));
             return null;
         }
         
-        private IEnumerator CheckTerrainPromise(ResolveAnchorOnTerrainPromise promise,
-                                                ICollection<GameObject> anchorObjects, bool finish)
+        private IEnumerator CheckTerrainPromise(double2 point, ARAnchorManager anchorManager, ICollection<GameObject> anchorObjects, bool finish)
         {
+            yield return new WaitUntil(() => PersistData.CurrentRequests < PersistData.MAX_REQUESTS);
+            PersistData.CurrentRequests += 1;
+
+            var promise = anchorManager.ResolveAnchorOnTerrainAsync(point[0], point[1], 0, Quaternion.Euler(90, 0, 90));
+
             yield return promise;
+            PersistData.CurrentRequests = PersistData.CurrentRequests - 1 > 0 ? PersistData.CurrentRequests - 1 : 0;
 
             var result = promise.Result;
             

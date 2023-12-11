@@ -242,6 +242,7 @@ namespace Google.XR.ARCoreExtensions.Samples.Geospatial
         private readonly List<GameObject> _anchorObjects = new();
         private IEnumerator _startLocationService = null;
         private IEnumerator _asyncCheck = null;
+        DebugManager debug;
         
         private bool _lastRouting = false;
 
@@ -288,6 +289,7 @@ namespace Google.XR.ARCoreExtensions.Samples.Geospatial
         private void Start()
         {
             locationManager = LocationManager.getInstance();
+            debug = DebugManager.GetInstance();
         }
         
         /// <summary>
@@ -402,6 +404,8 @@ namespace Google.XR.ARCoreExtensions.Samples.Geospatial
         /// </summary>
         public void Update()
         {
+            debug.AddToMessage("Tracking Status", Session.subsystem.trackingState.ToString());
+            debug.AddToMessage("NotTracking", Session.subsystem.notTrackingReason.ToString());
             if (!_isInARView)
             {
                 return;
@@ -486,6 +490,18 @@ namespace Google.XR.ARCoreExtensions.Samples.Geospatial
             var earthTrackingState = EarthManager.EarthTrackingState;
             var pose = earthTrackingState == TrackingState.Tracking ?
                 EarthManager.CameraGeospatialPose : new GeospatialPose();
+
+            if(debug != null && earthTrackingState == TrackingState.Tracking)
+            {
+                debug.AddToMessage("yaw_acc_real", pose.OrientationYawAccuracy.ToString());
+                debug.AddToMessage("acc_real", pose.HorizontalAccuracy.ToString());
+                debug.AddToMessage("pose_long", pose.Longitude.ToString());
+                debug.AddToMessage("pose_lat", pose.Latitude.ToString());
+                debug.AddToMessage("vert_acc", pose.VerticalAccuracy.ToString());
+                debug.AddToMessage("rotation", pose.EunRotation.eulerAngles.ToString());
+            }
+            
+
             if (!isSessionReady || earthTrackingState != TrackingState.Tracking ||
                 pose.OrientationYawAccuracy > OrientationYawAccuracyThreshold ||
                 pose.HorizontalAccuracy > HorizontalAccuracyThreshold)
@@ -596,6 +612,13 @@ namespace Google.XR.ARCoreExtensions.Samples.Geospatial
                     _                                 => "Waiting"
                 };
 
+                if(debug != null)
+                {
+                    debug.AddToMessage("accuracy", acc);
+                    debug.AddToMessage("yaw_acc", yawAcc);
+                }
+                
+
                 InfoText.text = string.Format(
                 "Positioning: {8}{0}View: {9}",
                 Environment.NewLine, pose.Latitude, pose.Longitude, 
@@ -605,6 +628,12 @@ namespace Google.XR.ARCoreExtensions.Samples.Geospatial
             else
             {
                 InfoText.text = "Not tracking :(";
+                if(debug != null)
+                {
+                    debug.AddToMessage("accuracy", "N/A");
+                    debug.AddToMessage("yaw_acc", "N/A");
+                }
+                
             }
         }
 
@@ -928,6 +957,7 @@ namespace Google.XR.ARCoreExtensions.Samples.Geospatial
             SnackBarText.text = reason;
             _isReturning = true;
             // Invoke(nameof(QuitApplication), ErrorDisplaySeconds);
+
             StartCoroutine(SwitchToMain.LoadScene("MainScene"));
         }
 

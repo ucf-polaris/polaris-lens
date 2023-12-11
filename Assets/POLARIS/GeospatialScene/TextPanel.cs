@@ -11,6 +11,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.XR.ARFoundation;
 using POLARIS.Managers;
+using POLARIS.MainScene;
 
 namespace POLARIS.GeospatialScene
 {
@@ -42,17 +43,43 @@ namespace POLARIS.GeospatialScene
 
         private EventManager _eventManager;
         private UserManager _userManager;
+        private DebugManager debug;
         private DisplayPanel _display;
+        string Named;
+        FaceCamera face;
 
         private void Start()
         {
             _eventManager = EventManager.getInstance();
             _userManager = UserManager.getInstance();
+            debug = DebugManager.GetInstance();
+        }
+
+        private void Update()
+        {
+            if(_anchor != null)
+            {
+                string rot = " rotation: " + _anchor.pose.rotation.eulerAngles.ToString();
+                string pos = "position: " + _anchor.pose.position.ToString();
+                debug.AddToMessage(Named, pos + rot);
+            }
+
+            if(face != null)
+            {
+                face.SetValues(_anchor.pose.position, _anchor.pose.rotation);
+                if (Named != "") face.SetName(Named);
+            }
+            else
+            {
+                if(CurrentPrefab != null) face = CurrentPrefab.GetComponent<FaceCamera>();
+            }
+            debug.AddToMessage("REQUEST QUEUE #", PersistData.CurrentRequests.ToString());
         }
 
         public void Instantiate(GeospatialAnchorContent content, DisplayPanel display, TextPanel[] alternates)
         {
             Content = content;
+            Named = Content.Location.BuildingName;
             _display = display;
             _alternatePanels = alternates;
             PanelPrefab = Resources.Load("Polaris/PanelParent") as GameObject;
@@ -104,6 +131,16 @@ namespace POLARIS.GeospatialScene
                 Debug.LogError("Panel prefab is null!");
             }
             
+            
+
+            StartCoroutine(CheckTerrainPromise(anchorManager, anchorObjects));
+            return null;
+        }
+
+        private IEnumerator CheckTerrainPromise(ARAnchorManager anchorManager, ICollection<GameObject> anchorObjects)
+        {
+            yield return new WaitUntil(() => PersistData.CurrentRequests < PersistData.MAX_REQUESTS);
+            PersistData.CurrentRequests += 1;
             var promise =
                 anchorManager.ResolveAnchorOnTerrainAsync(
                     Content.History.Latitude,
@@ -111,14 +148,8 @@ namespace POLARIS.GeospatialScene
                     Content.History.Altitude,
                     Content.History.EunRotation);
 
-            StartCoroutine(CheckTerrainPromise(promise, anchorObjects));
-            return null;
-        }
-
-        private IEnumerator CheckTerrainPromise(ResolveAnchorOnTerrainPromise promise,
-                                                ICollection<GameObject> anchorObjects)
-        {
             yield return promise;
+            PersistData.CurrentRequests = PersistData.CurrentRequests - 1 > 0 ? PersistData.CurrentRequests - 1 : 0;
 
             var result = promise.Result;
 
@@ -338,6 +369,11 @@ namespace POLARIS.GeospatialScene
         private static string GenerateTime(DateTime dt)
         {
             return $"{dt:h:mm tt - dddd, MMMM dd}";
+        }
+
+        public ARGeospatialAnchor GetAnchor()
+        {
+            return _anchor;
         }
         
         // private static IEnumerator SetImage(EventData e, Graphic img)

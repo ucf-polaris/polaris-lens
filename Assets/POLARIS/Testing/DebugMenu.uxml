@@ -1,9 +1,14 @@
 <ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" xsi="http://www.w3.org/2001/XMLSchema-instance" engine="UnityEngine.UIElements" editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
     <Style src="project://database/Assets/POLARIS/Testing/DebugMenuUSS.uss?fileID=7433441132597879392&amp;guid=1288b17a57f26cc4d90c6390cdacebb8&amp;type=3#DebugMenuUSS" />
-    <ui:VisualElement name="Container" style="flex-grow: 0; width: 43%; flex-direction: row; left: -33%; top: 30%; transition-duration: 0.3s;">
-        <ui:VisualElement name="TextContainer" style="flex-grow: 0; width: 80%; height: auto; flex-shrink: 0; top: auto; background-color: rgba(113, 113, 113, 0.55);" />
-        <ui:VisualElement name="PopOut" style="flex-grow: 0; background-color: rgba(113, 113, 113, 0.55); width: 100px; height: 100px; left: auto; top: auto; position: relative;">
-            <ui:VisualElement style="flex-grow: 0; background-image: url(&apos;project://database/Assets/POLARIS/arrow.png?fileID=2800000&amp;guid=d01daccc5e8044ce09b187ecdcf84c3d&amp;type=3#arrow&apos;); rotate: 90deg; width: 70%; height: 56%; position: absolute; top: 22px; left: 13px;" />
+    <ui:VisualElement name="Container" picking-mode="Ignore" style="flex-grow: 0; width: auto; flex-direction: row; left: auto; top: 3%; transition-duration: 0.3s; right: auto; translate: 0 0; transform-origin: center;">
+        <ui:ScrollView horizontal-scroller-visibility="Hidden" vertical-scroller-visibility="Auto" name="Scroll" style="max-height: 97%; min-height: auto; min-width: auto;">
+            <ui:VisualElement name="TextContainer" picking-mode="Ignore" style="flex-grow: 0; width: auto; height: auto; flex-shrink: 1; top: auto; background-color: rgba(113, 113, 113, 0.78); min-width: auto; min-height: auto; flex-direction: column; transition-property: scale; transition-duration: 1s; transition-timing-function: ease-out-back; transform-origin: left; translate: 0 0; display: flex; border-bottom-right-radius: 20px; visibility: visible;">
+                <ui:Label tabindex="-1" parse-escape-sequences="true" display-tooltip-when-elided="true" name="DebugInformation" picking-mode="Ignore" style="font-size: 45px; color: rgb(255, 255, 255); white-space: normal; translate: 0 0; margin-left: 20px; margin-right: 30px;" />
+                <ui:VisualElement name="ButtonContainer" style="flex-grow: 0;" />
+            </ui:VisualElement>
+        </ui:ScrollView>
+        <ui:VisualElement name="PopOut" style="flex-grow: 0; background-color: rgba(113, 113, 113, 0.78); width: 100px; height: 100px; left: auto; top: auto; position: relative; border-top-right-radius: 20px; border-bottom-right-radius: 20px;">
+            <ui:VisualElement name="VisualElement" style="flex-grow: 0; background-image: url(&apos;project://database/Assets/POLARIS/arrow.png?fileID=2800000&amp;guid=d01daccc5e8044ce09b187ecdcf84c3d&amp;type=3#arrow&apos;); rotate: 90deg; width: 70%; height: 56%; position: absolute; top: 22px; left: 13px;" />
         </ui:VisualElement>
     </ui:VisualElement>
 </ui:UXML>

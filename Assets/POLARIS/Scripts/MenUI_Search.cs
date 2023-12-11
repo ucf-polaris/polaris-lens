@@ -26,7 +26,6 @@ namespace POLARIS.MainScene
 
         //UI Toolkit elements
         private TextField _searchField;
-        private Label header;
         private Label resultsHeader;
         private Label SearchPlaceholder;
 
@@ -49,7 +48,6 @@ namespace POLARIS.MainScene
             //ui document information
             var uiDoc = GetComponent<UIDocument>();
             var rootVisual = uiDoc.rootVisualElement;
-            header = rootVisual.Q<Label>("Identifier");
             resultsHeader = rootVisual.Q<Label>("ResultsLabel");
             SearchPlaceholder = rootVisual.Q<Label>("SearchPlaceholder");
 

@@ -3,3 +3,11 @@
     white-space: normal;
     color: rgb(255, 255, 255);
 }
+
+.PlayButton {
+    width: auto;
+    height: 64px;
+    font-size: 30px;
+    max-width: 100%;
+    flex-wrap: wrap;
+}
